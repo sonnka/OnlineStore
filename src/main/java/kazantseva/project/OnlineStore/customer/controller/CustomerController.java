@@ -2,6 +2,7 @@ package kazantseva.project.OnlineStore.customer.controller;
 
 import jakarta.validation.Valid;
 import kazantseva.project.OnlineStore.customer.model.request.CreateCustomer;
+import kazantseva.project.OnlineStore.customer.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.customer.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.customer.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.customer.service.CustomerService;
@@ -36,5 +37,18 @@ public class CustomerController {
     public CustomerDTO getCustomer(Authentication auth,
                                    @PathVariable("customer-id") long customerId) {
         return customerService.getCustomer(auth.getName(), customerId);
+    }
+
+    @PatchMapping("/customers/{customer-id}")
+    public CustomerDTO updateCustomer(Authentication auth,
+                                      @PathVariable("customer-id") long customerId,
+                                      @RequestBody RequestCustomer customer) {
+        return customerService.updateCustomer(auth.getName(), customerId, customer);
+    }
+
+    @DeleteMapping("/customers/{customer-id}")
+    public void deleteCustomer(Authentication auth,
+                               @PathVariable("customer-id") long customerId) {
+        customerService.deleteCustomer(auth.getName(), customerId);
     }
 }
