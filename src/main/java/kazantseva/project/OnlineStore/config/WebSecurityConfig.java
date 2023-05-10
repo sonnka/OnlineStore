@@ -26,7 +26,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/home").permitAll()
                         .requestMatchers("/register").permitAll()
                         .requestMatchers("/login").permitAll()
-                        .requestMatchers("/customers/{customer-id}").authenticated()
+                        .requestMatchers("/customers/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .httpBasic();
