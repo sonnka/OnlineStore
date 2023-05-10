@@ -11,6 +11,9 @@ import kazantseva.project.OnlineStore.order.service.OrderService;
 import kazantseva.project.OnlineStore.product.model.entity.Product;
 import kazantseva.project.OnlineStore.product.repository.ProductRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,7 +32,7 @@ public class OrderServiceImpl implements OrderService {
     private CustomerRepository customerRepository;
     private ProductRepository productRepository;
     @Override
-    public ListOrders getOrders(String email, long customerId) {
+    public ListOrders getOrders(String email, long customerId, int page, int size, String sort, String direction) {
         var customer = customerRepository.findById(customerId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Customer with ID " + customerId + " not found!"));
@@ -38,9 +41,14 @@ public class OrderServiceImpl implements OrderService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        List<Order> orders = orderRepository.findByCustomerId(customerId);
+        Pageable pageable = direction.equals("desc") ?
+                PageRequest.of(page, size, Sort.Direction.DESC, sort) :
+                PageRequest.of(page, size, Sort.Direction.ASC, sort);
+
+        List<Order> orders = orderRepository.findByCustomerId(customerId, pageable).stream().toList();
 
         return ListOrders.builder()
+                .totalAmount(orderRepository.findAllByCustomerId(customerId).size())
                 .amount(orders.size())
                 .orders(orders.stream()
                         .map(ShortOrderDTO::new)

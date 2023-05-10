@@ -24,6 +24,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((request) -> request
                         .requestMatchers(toH2Console()).permitAll()
                         .requestMatchers("/home").permitAll()
+                        .requestMatchers("/products").permitAll()
                         .requestMatchers("/register").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/customers/**").authenticated()

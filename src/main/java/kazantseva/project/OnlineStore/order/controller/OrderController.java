@@ -16,8 +16,12 @@ public class OrderController {
 
     @GetMapping("/customers/{customer-id}/orders")
     public ListOrders getOrders(Authentication auth,
-                                @PathVariable("customer-id") long customerId) {
-        return orderService.getOrders(auth.getName(), customerId);
+                                @PathVariable("customer-id") long customerId,
+                                @RequestParam(required = false, defaultValue = "0") int page,
+                                @RequestParam(required = false, defaultValue = "5") int size,
+                                @RequestParam(required = false, defaultValue = "date") String sort,
+                                @RequestParam(required = false, defaultValue = "asc") String direction) {
+        return orderService.getOrders(auth.getName(), customerId, page, size, sort, direction);
     }
 
     @GetMapping("/customers/{customer-id}/orders/{order-id}")

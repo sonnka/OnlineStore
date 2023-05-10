@@ -5,6 +5,11 @@ INSERT INTO products (name, price) VALUES ('milk', 37.8);
 INSERT INTO products (name, price) VALUES ('water', 18.9);
 INSERT INTO products (name, price) VALUES ('banana', 78);
 INSERT INTO products (name, price) VALUES ('cake', 289);
+INSERT INTO products (name, price) VALUES ('orange', 69.2);
+INSERT INTO products (name, price) VALUES ('juice', 81.2);
+INSERT INTO products (name, price) VALUES ('potatoes', 9);
+INSERT INTO products (name, price) VALUES ('chicken', 108.2);
+INSERT INTO products (name, price) VALUES ('pizza', 206);
 
 INSERT INTO customers(name, surname, email, password)
 VALUES ('John', 'Doe', 'doe@gmail.com', '$2a$10$L2.WiHEAoVNZG40vz969pOk7twW2tvxNsps0OrtWUzFsx8IoHP4W.');
@@ -18,4 +23,4 @@ INSERT INTO customers(name, surname, email, password)
 VALUES ('Lili', 'Boston', 'lili@gmail.com', '$2a$10$tS0b4872siOly9CosUc4Eet5qbkySotq/tK0NvO3uEvPB4Y7O64YG');
 
 INSERT INTO orders (creation_date, customer_id, delivery_address, description, price)
-VALUES ('2014-04-28T16:00:49.455', 1,'Street 56', '', 520);
+VALUES ('2014-04-28T16:00:49.455', 2,'Street 56', '', 520);

@@ -5,7 +5,7 @@ import kazantseva.project.OnlineStore.order.model.response.ListOrders;
 import kazantseva.project.OnlineStore.order.model.response.OrderDTO;
 
 public interface OrderService {
-    ListOrders getOrders(String email, long customerId);
+    ListOrders getOrders(String email, long customerId, int page, int size, String sort, String direction);
 
     OrderDTO getFullOrder(String email, long customerId, long orderId);
 
