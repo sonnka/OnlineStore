@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.order.controller;
 
+import kazantseva.project.OnlineStore.order.model.request.CreateOrder;
 import kazantseva.project.OnlineStore.order.model.response.ListOrders;
 import kazantseva.project.OnlineStore.order.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.order.service.OrderService;
@@ -24,6 +25,13 @@ public class OrderController {
                                  @PathVariable("customer-id") long customerId,
                                  @PathVariable("order-id") long orderId) {
         return orderService.getFullOrder(auth.getName(), customerId, orderId);
+    }
+
+    @PostMapping("/customers/{customer-id}/orders")
+    public void createOrder(Authentication auth,
+                                   @PathVariable("customer-id") long customerId,
+                                   @RequestBody CreateOrder order) {
+        orderService.createOrder(auth.getName(), customerId, order);
     }
 
 }

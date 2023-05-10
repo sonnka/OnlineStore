@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.order.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import kazantseva.project.OnlineStore.customer.model.entity.Customer;
 import kazantseva.project.OnlineStore.product.model.entity.Product;
@@ -38,6 +39,7 @@ public class Order {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
+    @JsonIgnore
     private List<Product> products;
 
     @Column(name = "delivery_address")
@@ -45,5 +47,5 @@ public class Order {
 
     private String description;
 
-    private int price;
+    private double price;
 }

@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.product.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import kazantseva.project.OnlineStore.order.model.entity.Order;
 import lombok.*;
@@ -29,5 +30,6 @@ public class Product {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "order_id")
     )
+    @JsonIgnore
     private List<Order> orders;
 }

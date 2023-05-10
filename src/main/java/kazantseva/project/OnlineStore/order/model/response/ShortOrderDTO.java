@@ -8,7 +8,7 @@ public record ShortOrderDTO (
         long id,
         String date,
         String status,
-        int price
+        double price
 ){
     public ShortOrderDTO(Order order){
         this(order.getId(), String.valueOf(order.getDate()),

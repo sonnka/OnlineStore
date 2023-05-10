@@ -11,15 +11,14 @@ public record OrderDTO (
         long id,
         String date,
         String status,
-
         List<Product> products,
         String deliveryAddress,
         String description,
-        int price
+        double price
 ){
     public OrderDTO(Order order){
         this(order.getId(), String.valueOf(order.getDate()),
                 String.valueOf(order.getStatus()), order.getProducts(),
-                order.getDeliveryAddress(), order.getDescription()  ,order.getPrice());
+                order.getDeliveryAddress(), order.getDescription() , order.getPrice());
     }
 }
