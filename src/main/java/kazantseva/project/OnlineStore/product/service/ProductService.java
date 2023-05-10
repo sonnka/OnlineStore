@@ -1,9 +1,7 @@
 package kazantseva.project.OnlineStore.product.service;
 
-import kazantseva.project.OnlineStore.product.model.entity.Product;
-
-import java.util.List;
+import kazantseva.project.OnlineStore.product.model.response.ListProducts;
 
 public interface ProductService {
-    List<Product> getProducts(int page, int size, String sort, String direction);
+    ListProducts getProducts(int page, int size, String sort, String direction);
 }
