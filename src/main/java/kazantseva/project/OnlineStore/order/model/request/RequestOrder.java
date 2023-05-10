@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Getter@Setter
-public class CreateOrder {
+public class RequestOrder {
 
     @NotNull
     private String status;
