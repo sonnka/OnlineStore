@@ -7,6 +7,7 @@ import kazantseva.project.OnlineStore.customer.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.customer.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.customer.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.customer.service.CustomerService;
+import kazantseva.project.OnlineStore.order.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -14,15 +15,18 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class CustomerServiceImpl implements CustomerService {
 
     private CustomerRepository customerRepository;
+    private OrderRepository orderRepository;
     final PasswordEncoder passwordEncoder;
     @Override
     public LoginResponse login(Authentication auth) {
@@ -62,6 +66,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void deleteCustomer(String email, long customerId) {
         var customer = findByIdAndCheckByEmail(customerId, email);
+        orderRepository.deleteByCustomer(customer);
         customerRepository.delete(customer);
     }
 

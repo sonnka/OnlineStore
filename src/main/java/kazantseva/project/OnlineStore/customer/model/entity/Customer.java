@@ -26,8 +26,8 @@ public class Customer {
 
     private String password;
 
-    @OneToMany(fetch = FetchType.LAZY,
-    cascade = CascadeType.ALL,
-    mappedBy = "customer")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+            CascadeType.REFRESH, CascadeType.DETACH},
+            mappedBy = "customer")
     private List<Order> orders;
 }

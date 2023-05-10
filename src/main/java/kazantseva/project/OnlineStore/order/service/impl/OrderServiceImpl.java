@@ -2,7 +2,6 @@ package kazantseva.project.OnlineStore.order.service.impl;
 
 import kazantseva.project.OnlineStore.customer.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.order.model.entity.Order;
-import kazantseva.project.OnlineStore.order.model.entity.Status;
 import kazantseva.project.OnlineStore.order.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.order.model.response.ListOrders;
 import kazantseva.project.OnlineStore.order.model.response.OrderDTO;
@@ -83,7 +82,10 @@ public class OrderServiceImpl implements OrderService {
 
         LocalDateTime date = LocalDateTime.now(ZoneOffset.UTC);
 
-        Status status = checkStatus(order.getStatus());
+        String status = order.getStatus();
+        if(!status.equals("UNPAID") && !status.equals("PAID")){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status must be UNPAID or PAID");
+        }
 
         List<Product> allProducts = productRepository.findAll();
 
@@ -130,19 +132,34 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    private Status checkStatus(String status){
-        if(status.equals("UNPAID")){
-            return Status.UNPAID;
-        } else if(status.equals("PAID")){
-            return Status.PAID;
-        }else{
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status must be UNPAID or PAID");
+    @Override
+    public void deleteOrder(String email, long customerId, long orderId) {
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with ID " + customerId + " not found!"));
+
+        if(!customer.getEmail().equals(email)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+
+        var order = orderRepository.findById(orderId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with ID " + orderId + " not found!"));
+
+        if(customerId != order.getCustomer().getId()){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        orderRepository.delete(order);
     }
 
     private OrderDTO updateOrder(Order oldOrder, RequestOrder newOrder){
         if(Optional.ofNullable(newOrder.getStatus()).isPresent()){
-            oldOrder.setStatus(checkStatus(newOrder.getStatus()));
+            String status = newOrder.getStatus();
+            if(!status.equals("UNPAID") && !status.equals("PAID")){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status must be UNPAID or PAID");
+            }
+            oldOrder.setStatus(status);
         }
 
         if(Optional.ofNullable(newOrder.getProducts()).isPresent()){

@@ -41,4 +41,11 @@ public class OrderController {
                                 @RequestBody RequestOrder order) {
         return orderService.updateOrder(auth.getName(), customerId, orderId, order);
     }
+
+    @DeleteMapping("/customers/{customer-id}/orders/{order-id}")
+    public void deleteOrder(Authentication auth,
+                            @PathVariable("customer-id") long customerId,
+                            @PathVariable("order-id") long orderId) {
+        orderService.deleteOrder(auth.getName(), customerId, orderId);
+    }
 }

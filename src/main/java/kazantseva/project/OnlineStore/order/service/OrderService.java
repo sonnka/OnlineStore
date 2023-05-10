@@ -12,4 +12,6 @@ public interface OrderService {
     void createOrder(String email, long customerId, RequestOrder order);
 
     OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder);
+
+    void deleteOrder(String email, long customerId, long orderId);
 }
