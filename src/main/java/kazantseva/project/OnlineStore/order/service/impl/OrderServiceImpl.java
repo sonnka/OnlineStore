@@ -2,6 +2,7 @@ package kazantseva.project.OnlineStore.order.service.impl;
 
 import kazantseva.project.OnlineStore.customer.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.order.model.entity.Order;
+import kazantseva.project.OnlineStore.order.model.entity.Status;
 import kazantseva.project.OnlineStore.order.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.order.model.response.ListOrders;
 import kazantseva.project.OnlineStore.order.model.response.OrderDTO;
@@ -91,8 +92,8 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime date = LocalDateTime.now(ZoneOffset.UTC);
 
         String status = order.getStatus();
-        if(!status.equals("UNPAID") && !status.equals("PAID")){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status must be UNPAID or PAID");
+        if(!Status.UNPAID.name().equals(status) && !Status.PAID.name().equals(status)){
+            status = Status.UNPAID.name() ;
         }
 
         List<Product> allProducts = productRepository.findAll();

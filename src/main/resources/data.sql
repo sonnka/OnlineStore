@@ -22,5 +22,8 @@ VALUES ('Harry', 'Potter', 'potter@gmail.com', '$2a$10$ih3idxU6PAzmxbX4aFMeUea4/
 INSERT INTO customers(name, surname, email, password)
 VALUES ('Lili', 'Boston', 'lili@gmail.com', '$2a$10$tS0b4872siOly9CosUc4Eet5qbkySotq/tK0NvO3uEvPB4Y7O64YG');
 
-INSERT INTO orders (creation_date, customer_id, delivery_address, description, price)
-VALUES ('2014-04-28T16:00:49.455', 2,'Street 56', '', 520);
+INSERT INTO orders (creation_date, status, customer_id, delivery_address, description, price)
+VALUES ('2014-04-28T16:00:49.455', 'UNPAID', 1, 'Street 56', 'My first order', 62);
+
+INSERT INTO order_product (product_id, order_id) VALUES (3,1);
+INSERT INTO order_product (product_id, order_id) VALUES (10,1);
