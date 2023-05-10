@@ -102,7 +102,23 @@ public class OrderServiceImpl implements OrderService {
                 .filter(product -> order.getProducts().contains(product.getName()))
                 .toList();
 
-        double price = products.stream().mapToDouble(Product::getPrice).sum();
+        double price = products.stream()
+                .mapToDouble(Product::getPrice)
+                .sum();
+
+
+//        List<ProductDTO> products =  new ArrayList<>();
+//        for(int i=0; i < order.getProducts().size();i++){
+//            Product product = productRepository.findByName(order.getProducts().get(i).name());
+//            if(product != null){
+//                products.add(new ProductDTO(product, order.getProducts().get(i).count()));
+//            }
+//        }
+
+//
+//        double price = products.stream()
+//                .mapToDouble(product -> product.getProduct().getPrice() * product.getCount())
+//                .sum();
 
         if(price != 0.0) {
             orderRepository.save(Order.builder()
@@ -179,12 +195,34 @@ public class OrderServiceImpl implements OrderService {
                     .toList();
 
             oldOrder.setProducts(new ArrayList<>(products));
+
+
+//            List<ProductDTO> products =  new ArrayList<>();
+//            for(int i=0; i < newOrder.getProducts().size();i++){
+//                Product product = productRepository.findByName(newOrder.getProducts().get(i).name());
+//                if(product != null){
+//                    products.add(new ProductDTO(product, newOrder.getProducts().get(i).count()));
+//                }
+//            }
+//
+//            oldOrder.setProducts(new ArrayList<>(products));
         }
+
+
+
+
+
 
         Optional.ofNullable(newOrder.getDeliveryAddress()).ifPresent(oldOrder::setDeliveryAddress);
         Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
 
-        double price = oldOrder.getProducts().stream().mapToDouble(Product::getPrice).sum();
+//        double price = oldOrder.getProducts().stream()
+//                .mapToDouble(product -> product.getProduct().getPrice() * product.getCount())
+//                .sum();
+
+        double price = oldOrder.getProducts().stream()
+                .mapToDouble(Product::getPrice)
+                .sum();
 
         oldOrder.setPrice(price);
 

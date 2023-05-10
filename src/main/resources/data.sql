@@ -11,6 +11,7 @@ INSERT INTO products (name, price) VALUES ('potatoes', 9);
 INSERT INTO products (name, price) VALUES ('chicken', 108.2);
 INSERT INTO products (name, price) VALUES ('pizza', 206);
 
+
 INSERT INTO customers(name, surname, email, password)
 VALUES ('John', 'Doe', 'doe@gmail.com', '$2a$10$L2.WiHEAoVNZG40vz969pOk7twW2tvxNsps0OrtWUzFsx8IoHP4W.');
 INSERT INTO customers(name, surname, email, password)
@@ -23,7 +24,8 @@ INSERT INTO customers(name, surname, email, password)
 VALUES ('Lili', 'Boston', 'lili@gmail.com', '$2a$10$tS0b4872siOly9CosUc4Eet5qbkySotq/tK0NvO3uEvPB4Y7O64YG');
 
 INSERT INTO orders (creation_date, status, customer_id, delivery_address, description, price)
-VALUES ('2014-04-28T16:00:49.455', 'UNPAID', 1, 'Street 56', 'My first order', 62);
+VALUES ('2014-04-28T16:00:49.455', 'UNPAID', 1, 'Street 56', 'My first order', 74);
 
+INSERT INTO order_product (product_id, order_id) VALUES (1,1);
 INSERT INTO order_product (product_id, order_id) VALUES (3,1);
 INSERT INTO order_product (product_id, order_id) VALUES (10,1);
