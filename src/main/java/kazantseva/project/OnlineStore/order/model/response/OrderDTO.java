@@ -1,7 +1,7 @@
 package kazantseva.project.OnlineStore.order.model.response;
 
 import kazantseva.project.OnlineStore.order.model.entity.Order;
-import kazantseva.project.OnlineStore.product.model.entity.Product;
+import kazantseva.project.OnlineStore.product.model.entity.OrderProduct;
 import lombok.Builder;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public record OrderDTO (
         long id,
         String date,
         String status,
-        List<Product> products,
+        List<OrderProduct> products,
         String deliveryAddress,
         String description,
         double price

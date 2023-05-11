@@ -9,7 +9,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProductDTO {
 
-    Product product;
+    private Long id;
 
-    int count;
+    private String name;
+
+    private double price;
+
+    public ProductDTO(Product product){
+        this.id = product.getId();
+        this.name = product.getName();
+        this.price = product.getPrice();
+    }
 }

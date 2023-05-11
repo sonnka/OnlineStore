@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.order.service.impl;
 
+import kazantseva.project.OnlineStore.customer.model.entity.Customer;
 import kazantseva.project.OnlineStore.customer.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.order.model.entity.Order;
 import kazantseva.project.OnlineStore.order.model.entity.Status;
@@ -9,7 +10,10 @@ import kazantseva.project.OnlineStore.order.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.order.model.response.ShortOrderDTO;
 import kazantseva.project.OnlineStore.order.repository.OrderRepository;
 import kazantseva.project.OnlineStore.order.service.OrderService;
+import kazantseva.project.OnlineStore.product.model.entity.OrderProduct;
 import kazantseva.project.OnlineStore.product.model.entity.Product;
+import kazantseva.project.OnlineStore.product.model.request.RequestProduct;
+import kazantseva.project.OnlineStore.product.repository.OrderProductRepository;
 import kazantseva.project.OnlineStore.product.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -31,16 +35,11 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderRepository orderRepository;
     private CustomerRepository customerRepository;
+    private OrderProductRepository orderProductRepository;
     private ProductRepository productRepository;
     @Override
     public ListOrders getOrders(String email, long customerId, int page, int size, String sort, String direction) {
-        var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Customer with ID " + customerId + " not found!"));
-
-        if(!customer.getEmail().equals(email)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
+        checkCustomer(customerId,email);
 
         Pageable pageable = direction.equals("desc") ?
                 PageRequest.of(page, size, Sort.Direction.DESC, sort) :
@@ -60,68 +59,39 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDTO getFullOrder(String email, long customerId, long orderId) {
-        var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
+        checkCustomer(customerId,email);
 
-        if(!customer.getEmail().equals(email)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-        var order = orderRepository.findById(orderId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Order with ID " + orderId + " not found!"));
-
-        if(customerId != order.getCustomer().getId()){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
+        var order = checkOrder(orderId, customerId);
 
         return new OrderDTO(order);
     }
 
     @Override
     public void createOrder(String email, long customerId, RequestOrder order) {
-        var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
-
-        if(!customer.getEmail().equals(email)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
+        var customer = checkCustomer(customerId,email);
 
         LocalDateTime date = LocalDateTime.now(ZoneOffset.UTC);
 
-        String status = order.getStatus();
-        if(!Status.UNPAID.name().equals(status) && !Status.PAID.name().equals(status)){
-            status = Status.UNPAID.name() ;
+        Status status = checkStatus(order.getStatus());
+
+        List<OrderProduct> products = new ArrayList<>();
+        List<RequestProduct> inputProducts = order.getProducts();
+
+        for (RequestProduct current : inputProducts) {
+            Product product = productRepository.findByName(current.name());
+
+            if (product != null && current.count() >= 0) {
+                products.add(new OrderProduct(new Order(), product, current.count()));
+            }
         }
 
-        List<Product> allProducts = productRepository.findAll();
-
-        List<Product> products = allProducts.stream()
-                .filter(product -> order.getProducts().contains(product.getName()))
-                .toList();
-
         double price = products.stream()
-                .mapToDouble(Product::getPrice)
+                .mapToDouble(product -> product.getAmount() * product.getProduct().getPrice())
                 .sum();
 
-
-//        List<ProductDTO> products =  new ArrayList<>();
-//        for(int i=0; i < order.getProducts().size();i++){
-//            Product product = productRepository.findByName(order.getProducts().get(i).name());
-//            if(product != null){
-//                products.add(new ProductDTO(product, order.getProducts().get(i).count()));
-//            }
-//        }
-
-//
-//        double price = products.stream()
-//                .mapToDouble(product -> product.getProduct().getPrice() * product.getCount())
-//                .sum();
-
         if(price != 0.0) {
-            orderRepository.save(Order.builder()
+
+            var createdOrder = orderRepository.save(Order.builder()
                     .date(date)
                     .status(status)
                     .customer(customer)
@@ -131,34 +101,39 @@ public class OrderServiceImpl implements OrderService {
                     .price(price)
                     .build()
             );
-        }else throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+
+//            for (OrderProduct product : products) {
+//                product.setOrder(createdOrder);
+//                orderProductRepository.save(product);
+//            }
+//
+//            createdOrder.setProducts(products);
+//
+//            orderRepository.save(createdOrder);
+
+        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Must be at least one product");
     }
 
     @Override
     public OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
-        var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
+        checkCustomer(customerId,email);
 
-        if(!customer.getEmail().equals(email)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-        var order = orderRepository.findById(orderId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Order with ID " + orderId + " not found!"));
-
-        if(customerId != order.getCustomer().getId()){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
+        var order = checkOrder(orderId, customerId);
 
         return updateOrder(order, newOrder);
-
     }
 
     @Override
     public void deleteOrder(String email, long customerId, long orderId) {
+        checkCustomer(customerId,email);
+
+        var order = checkOrder(orderId, customerId);
+
+        orderRepository.delete(order);
+    }
+
+    private Customer checkCustomer(long customerId, String email){
         var customer = customerRepository.findById(customerId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Customer with ID " + customerId + " not found!"));
@@ -167,6 +142,10 @@ public class OrderServiceImpl implements OrderService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
+        return customer;
+    }
+
+    private Order checkOrder(long orderId, long customerId){
         var order = orderRepository.findById(orderId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Order with ID " + orderId + " not found!"));
@@ -175,60 +154,58 @@ public class OrderServiceImpl implements OrderService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        orderRepository.delete(order);
+        return order;
+    }
+
+    private Status checkStatus(String status) {
+        if(Status.UNPAID.name().equals(status)) {
+            return Status.UNPAID;
+        } else if(Status.PAID.name().equals(status)) {
+            return Status.PAID;
+        } else {
+            return Status.UNPAID;
+        }
     }
 
     private OrderDTO updateOrder(Order oldOrder, RequestOrder newOrder){
         if(Optional.ofNullable(newOrder.getStatus()).isPresent()){
-            String status = newOrder.getStatus();
-            if(!status.equals("UNPAID") && !status.equals("PAID")){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status must be UNPAID or PAID");
-            }
+
+            Status status = checkStatus(newOrder.getStatus());
+
             oldOrder.setStatus(status);
         }
 
         if(Optional.ofNullable(newOrder.getProducts()).isPresent()){
-            List<Product> allProducts = productRepository.findAll();
 
-            List<Product> products = allProducts.stream()
-                    .filter(product -> newOrder.getProducts().contains(product.getName()))
-                    .toList();
+            List<OrderProduct> products = new ArrayList<>();
+            List<RequestProduct> inputProducts = newOrder.getProducts();
 
-            oldOrder.setProducts(new ArrayList<>(products));
+            for (RequestProduct current : inputProducts) {
+                Product product = productRepository.findByName(current.name());
 
+                if (product != null && current.count() >= 0) {
+                    products.add(new OrderProduct(oldOrder, product, current.count()));
+                }
+            }
 
-//            List<ProductDTO> products =  new ArrayList<>();
-//            for(int i=0; i < newOrder.getProducts().size();i++){
-//                Product product = productRepository.findByName(newOrder.getProducts().get(i).name());
-//                if(product != null){
-//                    products.add(new ProductDTO(product, newOrder.getProducts().get(i).count()));
-//                }
-//            }
-//
-//            oldOrder.setProducts(new ArrayList<>(products));
+            oldOrder.setProducts(products);
         }
-
-
-
-
-
 
         Optional.ofNullable(newOrder.getDeliveryAddress()).ifPresent(oldOrder::setDeliveryAddress);
         Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
 
-//        double price = oldOrder.getProducts().stream()
-//                .mapToDouble(product -> product.getProduct().getPrice() * product.getCount())
-//                .sum();
-
         double price = oldOrder.getProducts().stream()
-                .mapToDouble(Product::getPrice)
+                .mapToDouble(product -> product.getAmount() * product.getProduct().getPrice())
                 .sum();
 
         oldOrder.setPrice(price);
 
         if(price != 0.0) {
             orderRepository.save(oldOrder);
+
             return new OrderDTO(oldOrder);
-        }else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+
+        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Must be at least one product");
     }
 }
