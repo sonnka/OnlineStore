@@ -15,6 +15,7 @@ import lombok.*;
 public class OrderProduct {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 

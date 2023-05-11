@@ -33,7 +33,7 @@ public class Order {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "product")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order")
     private List<OrderProduct> products;
 
     @Column(name = "delivery_address")
