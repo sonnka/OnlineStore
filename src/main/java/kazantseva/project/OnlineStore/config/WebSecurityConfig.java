@@ -40,17 +40,6 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-//    @Bean
-//    public InMemoryUserDetailsManager userDetailsService(){
-//        UserDetails user1 = User.builder()
-//                .username("admin@gmail.com")
-//                .password(passwordEncoder().encode("1234"))
-//                .roles("ADMIN")
-//                .build();
-//        return new InMemoryUserDetailsManager(user1);
-//    }
-
     @Bean
     public UserDetailsService userDetailsService(
             CustomerRepository customerRepository,
