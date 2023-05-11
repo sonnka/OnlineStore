@@ -13,7 +13,6 @@ import kazantseva.project.OnlineStore.order.service.OrderService;
 import kazantseva.project.OnlineStore.product.model.entity.OrderProduct;
 import kazantseva.project.OnlineStore.product.model.entity.Product;
 import kazantseva.project.OnlineStore.product.model.request.RequestProduct;
-import kazantseva.project.OnlineStore.product.repository.OrderProductRepository;
 import kazantseva.project.OnlineStore.product.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +34,6 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderRepository orderRepository;
     private CustomerRepository customerRepository;
-    private OrderProductRepository orderProductRepository;
     private ProductRepository productRepository;
     @Override
     public ListOrders getOrders(String email, long customerId, int page, int size, String sort, String direction) {
@@ -80,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
         for (RequestProduct current : inputProducts) {
             Product product = productRepository.findByName(current.name());
 
-            if (product != null && current.count() >= 0) {
+            if (product != null && current.count() > 0) {
                 products.add(new OrderProduct(new Order(), product, current.count()));
             }
         }
@@ -95,21 +93,19 @@ public class OrderServiceImpl implements OrderService {
                     .date(date)
                     .status(status)
                     .customer(customer)
-                    .products(products)
                     .deliveryAddress(order.getDeliveryAddress())
                     .description(order.getDescription())
                     .price(price)
                     .build()
             );
 
-//            for (OrderProduct product : products) {
-//                product.setOrder(createdOrder);
-//                orderProductRepository.save(product);
-//            }
-//
-//            createdOrder.setProducts(products);
-//
-//            orderRepository.save(createdOrder);
+            for (OrderProduct product : products) {
+                product.setOrder(createdOrder);
+            }
+
+            createdOrder.setProducts(products);
+
+            orderRepository.save(createdOrder);
 
         } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Must be at least one product");

@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.order.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import kazantseva.project.OnlineStore.customer.model.entity.Customer;
 import kazantseva.project.OnlineStore.product.model.entity.OrderProduct;
@@ -34,6 +35,7 @@ public class Order {
     private Customer customer;
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order")
+    @JsonIgnore
     private List<OrderProduct> products;
 
     @Column(name = "delivery_address")
