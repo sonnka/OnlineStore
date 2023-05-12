@@ -18,18 +18,18 @@ public class CustomerController {
     private CustomerService customerService;
 
     @GetMapping("/home")
-    public String hello(){
+    public String hello() {
         return "Hello";
     }
 
     @PostMapping("/login")
-    public LoginResponse login(Authentication auth){
+    public LoginResponse login(Authentication auth) {
         return customerService.login(auth);
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void register(@RequestBody @Valid CreateCustomer customer){
+    public void register(@RequestBody @Valid CreateCustomer customer) {
         customerService.register(customer);
     }
 

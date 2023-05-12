@@ -8,6 +8,5 @@ public record CustomerDTO(
         String name,
         String surname,
         String email
-
 ) {
 }

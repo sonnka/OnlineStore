@@ -9,7 +9,6 @@ services:
       - "3306:3306"
     restart: always
 
-
   onlinestore:
     image: online-store
     container_name: online-store-app

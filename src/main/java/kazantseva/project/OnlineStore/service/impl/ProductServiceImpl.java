@@ -5,9 +5,7 @@ import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.ProductService;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,12 +15,12 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private ProductRepository productRepository;
+
     @Override
-    public ListProducts getProducts(int page, int size, String sort, String direction) {
-        Pageable pageable = direction.equals("desc") ?
-                PageRequest.of(page, size, Sort.Direction.DESC, sort) :
-                PageRequest.of(page, size, Sort.Direction.ASC, sort);
-        List<ShortProductDTO> products = productRepository.findAll(pageable).stream().map(ShortProductDTO::new).toList();
+    public ListProducts getProducts(Pageable pageable) {
+        List<ShortProductDTO> products = productRepository.findAll(pageable).stream()
+                .map(ShortProductDTO::new).toList();
+
         return ListProducts.builder()
                 .totalAmount(productRepository.findAll().size())
                 .amount(products.size())

@@ -18,18 +18,13 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.headers().frameOptions().disable();
-        http
-                .csrf().disable()
-                .authorizeHttpRequests((request) -> request
-//                        .requestMatchers(toH2Console()).permitAll()
-                        .requestMatchers("/home").permitAll()
-                        .requestMatchers("/products").permitAll()
-                        .requestMatchers("/register").permitAll()
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers("/customers/**").authenticated()
-                        .anyRequest().authenticated()
-                )
-                .httpBasic();
+        http.csrf().disable().authorizeHttpRequests((request) -> request
+                .requestMatchers("/home").permitAll()
+                .requestMatchers("/products").permitAll()
+                .requestMatchers("/register").permitAll()
+                .requestMatchers("/login").permitAll()
+                .requestMatchers("/customers/**").authenticated()
+                .anyRequest().authenticated()).httpBasic();
 
         return http.build();
     }
@@ -40,12 +35,8 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(
-            CustomerRepository customerRepository,
-            CustomerService mapper
-    ) {
+    public UserDetailsService userDetailsService(CustomerRepository customerRepository, CustomerService mapper) {
         return email -> customerRepository.findByEmailIgnoreCase(email)
-                .map(mapper::toUserDetails)
-                .orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
+                .map(mapper::toUserDetails).orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
     }
 }

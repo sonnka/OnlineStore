@@ -6,8 +6,8 @@ import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
-import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
+import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -24,33 +24,27 @@ import java.util.Optional;
 @AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
+    final PasswordEncoder passwordEncoder;
     private CustomerRepository customerRepository;
     private OrderRepository orderRepository;
-    final PasswordEncoder passwordEncoder;
+
     @Override
     public LoginResponse login(Authentication auth) {
-        var user = customerRepository.findByEmailIgnoreCase(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Wrong authentication data!"));
-        return LoginResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .build();
+        var user = customerRepository.findByEmailIgnoreCase(auth.getName()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong authentication data!"));
+        return LoginResponse.builder().id(user.getId()).email(user.getEmail()).build();
     }
 
     public void register(CreateCustomer customer) {
-        if(customerRepository.existsByEmailIgnoreCase(customer.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    customer.getEmail() + " is already occupied!"
-            );
+        if (customerRepository.existsByEmailIgnoreCase(customer.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, customer.getEmail() + " is already occupied!");
         }
-        customerRepository.save(
-                Customer.builder()
-                        .email(customer.getEmail())
-                        .password(passwordEncoder.encode(customer.getPassword()))
-                        .name(customer.getName())
-                        .surname(customer.getSurname())
-                        .build()
-        );
+        customerRepository.save(Customer.builder()
+                .email(customer.getEmail())
+                .password(passwordEncoder.encode(customer.getPassword()))
+                .name(customer.getName())
+                .surname(customer.getSurname())
+                .build());
     }
 
     @Override
@@ -72,10 +66,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public UserDetails toUserDetails(Customer customer) {
-        return User.withUsername(customer.getEmail())
-                .password(customer.getPassword())
-                .roles("")
-                .build();
+        return User.withUsername(customer.getEmail()).password(customer.getPassword()).roles("").build();
     }
 
     @Override
@@ -84,17 +75,17 @@ public class CustomerServiceImpl implements CustomerService {
         return toCustomerDTO(customer);
     }
 
-    private Customer findByIdAndCheckByEmail(Long customerId, String email){
-        var customer = customerRepository.findById(customerId)
-                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND,
+    private Customer findByIdAndCheckByEmail(Long customerId, String email) {
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Customer with ID " + customerId + " not found!"));
-        if(!customer.getEmail().equals(email)){
+        if (!customer.getEmail().equals(email)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
         return customer;
     }
 
-    private CustomerDTO toCustomerDTO(Customer customer){
+    private CustomerDTO toCustomerDTO(Customer customer) {
         return CustomerDTO.builder()
                 .id(customer.getId())
                 .name(customer.getName())

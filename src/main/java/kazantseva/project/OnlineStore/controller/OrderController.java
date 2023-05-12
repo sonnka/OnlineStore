@@ -5,6 +5,7 @@ import kazantseva.project.OnlineStore.model.response.ListOrders;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +18,8 @@ public class OrderController {
     @GetMapping("/customers/{customer-id}/orders")
     public ListOrders getOrders(Authentication auth,
                                 @PathVariable("customer-id") long customerId,
-                                @RequestParam(required = false, defaultValue = "0") int page,
-                                @RequestParam(required = false, defaultValue = "5") int size,
-                                @RequestParam(required = false, defaultValue = "date") String sort,
-                                @RequestParam(required = false, defaultValue = "asc") String direction) {
-        return orderService.getOrders(auth.getName(), customerId, page, size, sort, direction);
+                                Pageable pageable) {
+        return orderService.getOrders(auth.getName(), customerId, pageable);
     }
 
     @GetMapping("/customers/{customer-id}/orders/{order-id}")
@@ -33,8 +31,8 @@ public class OrderController {
 
     @PostMapping("/customers/{customer-id}/orders")
     public void createOrder(Authentication auth,
-                                   @PathVariable("customer-id") long customerId,
-                                   @RequestBody RequestOrder order) {
+                            @PathVariable("customer-id") long customerId,
+                            @RequestBody RequestOrder order) {
         orderService.createOrder(auth.getName(), customerId, order);
     }
 

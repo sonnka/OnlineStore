@@ -18,14 +18,18 @@ import java.util.List;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long id;
 
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "price")
     private BigDecimal price;
 
-    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.DETACH,
-            CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "product")
+    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH},
+            mappedBy = "product")
     @JsonIgnore
+    @Column(name = "orders")
     private List<OrderProduct> orders;
 }

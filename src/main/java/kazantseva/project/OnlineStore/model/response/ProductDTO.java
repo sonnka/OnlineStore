@@ -7,7 +7,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@Getter@Setter
+@Getter
+@Setter
 @AllArgsConstructor
 public class ProductDTO {
 
@@ -19,7 +20,7 @@ public class ProductDTO {
 
     private int count;
 
-    public ProductDTO(OrderProduct product){
+    public ProductDTO(OrderProduct product) {
         this.id = product.getProduct().getId();
         this.name = product.getProduct().getName();
         this.price = product.getProduct().getPrice();

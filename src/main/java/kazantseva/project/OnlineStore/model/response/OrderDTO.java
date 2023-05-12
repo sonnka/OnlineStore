@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Builder
-public record OrderDTO (
+public record OrderDTO(
         long id,
         String date,
         String status,
@@ -15,14 +15,14 @@ public record OrderDTO (
         String deliveryAddress,
         String description,
         BigDecimal price
-){
-    public OrderDTO(Order order){
+) {
+    public OrderDTO(Order order) {
         this(order.getId(),
                 String.valueOf(order.getDate()),
                 String.valueOf(order.getStatus()),
                 order.getProducts().stream().map(ProductDTO::new).toList(),
                 order.getDeliveryAddress(),
-                order.getDescription() ,
+                order.getDescription(),
                 order.getPrice());
     }
 }

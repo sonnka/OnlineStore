@@ -19,6 +19,7 @@ import java.util.List;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
     private Long id;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -26,21 +27,24 @@ public class Order {
     private LocalDateTime date;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private Status status;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE,
-            CascadeType.REFRESH, CascadeType.DETACH})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order")
     @JsonIgnore
+    @Column(name = "products")
     private List<OrderProduct> products;
 
     @Column(name = "delivery_address")
     private String deliveryAddress;
 
+    @Column(name = "description")
     private String description;
 
+    @Column(name = "price")
     private BigDecimal price;
 }

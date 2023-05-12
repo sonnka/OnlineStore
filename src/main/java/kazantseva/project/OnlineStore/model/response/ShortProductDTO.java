@@ -17,7 +17,8 @@ public class ShortProductDTO {
     private String name;
 
     private BigDecimal price;
-    public ShortProductDTO(Product product){
+
+    public ShortProductDTO(Product product) {
         this.id = product.getId();
         this.name = product.getName();
         this.price = product.getPrice();
