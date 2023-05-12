@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: author
+      changes:
+        - createTable:
+            tableName: products
+            columns:
+              - column:
+                  name: product_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: double
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 2
+      author: author
+      changes:
+        - insert:
+            tableName: products
+            columns:
+              - column:
+                  name: name
+                  value: "apple"
+              - column:
+                  name: price
+                  value: 25.0
+        - insert:
+            tableName: products
+            columns:
+              - column:
+                  name: name
+                  value: "water"
+              - column:
+                  name: price
+                  value: 12.5
+    rollback:
+      - delete:
+          tableName: products
+          where: name in ('apple', 'water')
