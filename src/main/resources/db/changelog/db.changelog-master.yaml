@@ -45,7 +45,3 @@ databaseChangeLog:
               - column:
                   name: price
                   value: 12.5
-#    rollback:
-#      - delete:
-#          tableName: products
-#          where: name in ('apple', 'water')
