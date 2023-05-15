@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 1
+      id: 15999665
       author: author
       changes:
         - createTable:
@@ -24,7 +24,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
   - changeSet:
-      id: 2
+      id: 27856566999
       author: author
       changes:
         - insert:
@@ -45,7 +45,7 @@ databaseChangeLog:
               - column:
                   name: price
                   value: 12.5
-    rollback:
-      - delete:
-          tableName: products
-          where: name in ('apple', 'water')
+#    rollback:
+#      - delete:
+#          tableName: products
+#          where: name in ('apple', 'water')
