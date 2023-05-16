@@ -1,6 +1,6 @@
 package kazantseva.project.OnlineStore.product.model.response;
 
-import kazantseva.project.OnlineStore.product.model.entity.Product;
+import kazantseva.project.OnlineStore.model.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
