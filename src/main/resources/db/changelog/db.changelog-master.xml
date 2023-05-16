@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="621" author="admin">
+        <dropTable tableName="order_product"/>
+        <dropTable tableName="orders"/>
+        <dropTable tableName="customers"/>
+        <dropTable tableName="products"/>
+    </changeSet>
+
+    <changeSet id="622" author="admin">
+        <createTable tableName="products">
+            <column name="product_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="decimal">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="623" author="admin">
+        <createTable tableName="customers">
+            <column name="customer_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="surname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="624" author="admin">
+        <createTable tableName="orders">
+            <column name="order_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="creation_date" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_customers_orders_customer_id" references="customers(customer_id)"/>
+            </column>
+            <column name="delivery_address" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="decimal">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="625" author="admin">
+        <createTable tableName="order_product">
+            <column name="order_product_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_orders_order_customer_order_id" references="orders(order_id)"/>
+            </column>
+            <column name="product_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_products_order_customer_product_id" references="products(product_id)"/>
+            </column>
+            <column name="amount" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="626" author="admin">
+        <insert tableName="products">
+            <column name="name" value="apple"/>
+            <column name="price" value="12.0"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="milk"/>
+            <column name="price" value="38.9"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="cake"/>
+            <column name="price" value="203.58"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="chicken"/>
+            <column name="price" value="189.0"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="juice"/>
+            <column name="price" value="87.1"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="eggs"/>
+            <column name="price" value="49.0"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
