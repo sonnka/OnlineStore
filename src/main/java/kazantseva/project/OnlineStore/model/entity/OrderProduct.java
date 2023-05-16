@@ -19,7 +19,7 @@ public class OrderProduct {
     @Column(name = "order_product_id")
     private Long id;
 
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @ManyToOne
     @JoinColumn(name = "order_id")
     @JsonIgnore
     private Order order;

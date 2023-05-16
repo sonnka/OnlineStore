@@ -11,6 +11,7 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private OrderRepository orderRepository;
@@ -166,28 +168,31 @@ public class OrderServiceImpl implements OrderService {
             for (RequestProduct current : inputProducts) {
                 Product product = productRepository.findByName(current.name());
 
-                if (product != null && current.count() >= 0) {
+                if (product != null && current.count() > 0) {
                     products.add(new OrderProduct(oldOrder, product, current.count()));
                 }
             }
+            if (products.size() > 0) {
+                oldOrder.getProducts().clear();
 
-            oldOrder.setProducts(products);
+                oldOrder.getProducts().addAll(new ArrayList<>());
+
+                orderRepository.save(oldOrder);
+
+                oldOrder.getProducts().addAll(products);
+
+                BigDecimal price = oldOrder.getProducts().stream()
+                        .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                oldOrder.setPrice(price);
+            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
         }
 
         Optional.ofNullable(newOrder.getDeliveryAddress()).ifPresent(oldOrder::setDeliveryAddress);
         Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
 
-        BigDecimal price = oldOrder.getProducts().stream()
-                .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return new OrderDTO(orderRepository.save(oldOrder));
 
-        oldOrder.setPrice(price);
-
-        if (!price.equals(BigDecimal.ZERO)) {
-            orderRepository.save(oldOrder);
-
-            return new OrderDTO(oldOrder);
-
-        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
     }
 }

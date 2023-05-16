@@ -5,14 +5,14 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="621" author="admin">
+    <changeSet id="641" author="admin">
         <dropTable tableName="order_product"/>
         <dropTable tableName="orders"/>
         <dropTable tableName="customers"/>
         <dropTable tableName="products"/>
     </changeSet>
 
-    <changeSet id="622" author="admin">
+    <changeSet id="642" author="admin">
         <createTable tableName="products">
             <column name="product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -20,13 +20,13 @@
             <column name="name" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="price" type="decimal">
+            <column name="price" type="decimal(10,2)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="623" author="admin">
+    <changeSet id="643" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -46,7 +46,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="624" author="admin">
+    <changeSet id="644" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -67,13 +67,13 @@
             <column name="description" type="varchar(200)">
                 <constraints nullable="false"/>
             </column>
-            <column name="price" type="decimal">
+            <column name="price" type="decimal(10,2)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="625" author="admin">
+    <changeSet id="645" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -92,7 +92,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="626" author="admin">
+    <changeSet id="646" author="admin">
         <insert tableName="products">
             <column name="name" value="apple"/>
             <column name="price" value="12.0"/>
