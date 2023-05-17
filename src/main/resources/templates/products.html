@@ -1,21 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <title>Title</title>-->
-<!--</head>-->
-<!--<body>-->
-<!--<header class="header">-->
-<!--    <a class="logo" href="#">Online Store</a>-->
-<!--    <nav class="nav-items">-->
-<!--        <a href="index.html"><b>Home</b></a>-->
-<!--        <a href="products.html"><b>Products</b></a>-->
-<!--        <a href="login.html"><b>Register/Login</b></a>-->
-<!--    </nav>-->
-<!--</header>-->
-<!--<h2>products</h2>-->
-<!--</body>-->
-<!--</html>-->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -26,59 +8,65 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
           rel="stylesheet">
-
+    <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
+    <link href="/static/css/main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
+<header class="header">
+    <a class="logo" href="#">Online Store</a>
+    <nav class="nav-items">
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/v1/products}">Products</a>
+        <a href="login.html">Register/Login</a>
+    </nav>
+</header>
+<main>
+    <div class="container my-2">
+        <h1>Product List</h1>
 
-<div class="container my-2">
-    <h1>Product List</h1>
+        <table border="1" class="table table-striped table-responsive-md">
+            <thead>
+            <tr>
+                <th>
+                    <a th:href="@{'/v1/products?page=1&size=' + ${size} + '&sort=name&direction=' + ${reverseDirection}}">
+                        Product</a>
+                </th>
+                <th>
+                    <a th:href="@{'/v1/products?page=1&size=' + ${size} + '&sort=price&direction=' + ${reverseDirection}}">
+                        Price</a>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.getName()}"></td>
+                <td th:text="${product.getPrice()}"></td>
+            </tr>
+            </tbody>
+        </table>
 
-    <table border="1" class="table table-striped table-responsive-md">
-        <thead>
-        <tr>
-            <th>
-                <a th:href="@{'/products?page=' + ${page} + '&size=' + ${size} + '&sort=name&direction=' + ${direction}}">
-                    Product</a>
-            </th>
-            <th>
-                <a th:href="@{'/products?page=' + ${page} + '&size=' + ${size} + '&sort=price&direction=' + ${direction}}">
-                    Price</a>
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="product : ${products}">
-            <td th:text="${product.getName()}"></td>
-            <td th:text="${product.getPrice()}"></td>
-        </tr>
-        </tbody>
-    </table>
-
-    <!--    <div th:if="${totalAmount > 1}">-->
-    <!--        <div class="row col-sm-10">-->
-    <!--            <div class="col-sm-2">-->
-    <!--                Total Rows: [[${totalItems}]]-->
-    <!--            </div>-->
-    <!--            <div class="col-sm-1">-->
-    <!--     <span th:each="i: ${#numbers.sequence(1, totalAmount)}">-->
-    <!--      <a th:href="@{'/page/' + ${i}+ '?sort=' + ${sort} + '&direction=' + ${direction}}"-->
-    <!--         th:if="${page != i}">[[${i}]]</a>-->
-    <!--      <span th:unless="${page != i}">[[${i}]]</span>  &nbsp; &nbsp;-->
-    <!--     </span>-->
-    <!--            </div>-->
-    <!--            <div class="col-sm-1">-->
-    <!--                <a th:href="@{'/page/' + ${page + 1}+ '?sort=' + ${sort} + '&direction=' + ${direction}}"-->
-    <!--                   th:if="${page < totalAmount}">Next</a>-->
-    <!--                <span th:unless="${page < totalAmount}">Next</span>-->
-    <!--            </div>-->
-
-    <!--            <div class="col-sm-1">-->
-    <!--                <a th:href="@{'/page/' + ${totalAmount}+ '?sort=' + ${sort} + '&direction=' + ${direction}}"-->
-    <!--                   th:if="${page < totalAmount}">Last</a>-->
-    <!--                <span th:unless="${page < totalAmount}">Last</span>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-</div>
+        <div th:if="${totalPages > 1}">
+            <div class="row col-sm-10">
+                <div class="col-sm-4">
+         <span th:each="i: ${#numbers.sequence(1, totalPages)}">
+          <a th:href="@{'/v1/products?page=' + ${i} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+             th:if="${currentPage != i}">[[${i}]]</a>
+          <span th:unless="${currentPage != i}">[[${i}]]</span>  &nbsp; &nbsp;
+         </span>
+                </div>
+                <div class="col-sm-1">
+                    <a th:href="@{'/v1/products?page=' + ${currentPage + 1} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+                       th:if="${currentPage < totalPages}">Next</a>
+                    <span th:unless="${currentPage < totalPages}">Next</span>
+                </div>
+                <div class="col-sm-1">
+                    <a th:href="@{'/v1/products?page=' + ${totalPages} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+                       th:if="${currentPage < totalPages}">Last</a>
+                    <span th:unless="${currentPage < totalPages}">Last</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
 </body>
 </html>

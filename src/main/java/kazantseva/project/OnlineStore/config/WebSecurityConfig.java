@@ -20,19 +20,20 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.formLogin()
-                .loginPage("/login")
+                .loginPage("/v1/login")
                 .permitAll()
                 .and()
                 .logout()
-                .logoutUrl("/logout");
+                .logoutUrl("/v1/logout");
 
         http.headers().frameOptions().disable();
         http.csrf().disable().authorizeHttpRequests((request) -> request
                 .requestMatchers("/").permitAll()
+                .requestMatchers("/v1/**").permitAll()
                 .requestMatchers("/home").permitAll()
                 .requestMatchers("/products").permitAll()
-//                .requestMatchers("/register").permitAll()
-//                .requestMatchers("/login").permitAll()
+                .requestMatchers("/register").permitAll()
+                .requestMatchers("/login").permitAll()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/customers/**").authenticated()
                 .anyRequest().authenticated()).httpBasic();
