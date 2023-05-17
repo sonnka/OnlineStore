@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Online Store</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
+    <link href="/static/css/main.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<header class="header">
+    <a class="logo" href="#">Online Store</a>
+    <nav class="nav-items">
+        <a th:href="@{/}"><b>Home</b></a>
+        <a href="products.html"><b>Products</b></a>
+        <a href="login.html"><b>Register/Login</b></a>
+    </nav>
+</header>
+<main>
+    <div class="intro">
+        <h1>Online Store</h1>
+        <p>Buy everything you need in one click.</p>
+        <button>Go shopping</button>
+    </div>
+    <div class="achievements">
+        <div class="work">
+            <i class="fas fa-atom"></i>
+            <p class="work-heading">Convenient</p>
+            <p class="work-text">You can buy all the products you need without leaving your home, even lying in bed.</p>
+        </div>
+        <div class="work">
+            <i class="fas fa-skiing"></i>
+            <p class="work-heading">Fast</p>
+            <p class="work-text">Making a couple of clicks will not take much of your time compared to going to the
+                store.</p>
+        </div>
+        <div class="work">
+            <i class="fas fa-ethernet"></i>
+            <p class="work-heading">Reliable</p>
+            <p class="work-text">We guarantee the quality and freshness of all products in our online store.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>
