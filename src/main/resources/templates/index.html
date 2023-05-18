@@ -6,12 +6,10 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Online Store</title>
     <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
-    <link href="/static/css/main.css" rel="stylesheet" type="text/css">
-
 </head>
 <body>
 <header class="header">
-    <a class="logo" href="#">Online Store</a>
+    <a class="logo" th:href="@{/}">Online Store</a>
     <nav class="nav-items">
         <a th:href="@{/}">Home</a>
         <a th:href="@{/v1/products}">Products</a>
@@ -22,7 +20,7 @@
     <div class="intro">
         <h1>Online Store</h1>
         <p>Buy everything you need in one click.</p>
-        <button>Go shopping</button>
+        <a th:href="@{/v1/login}"><button>Go shopping</button></a>
     </div>
     <div class="achievements">
         <div class="work">

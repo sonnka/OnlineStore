@@ -12,11 +12,10 @@
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
           rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
-    <link href="/static/css/main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 <header class="header">
-    <a class="logo" href="#">Online Store</a>
+    <a class="logo" th:href="@{/}">Online Store</a>
     <nav class="nav-items">
         <a th:href="@{/}">Home</a>
         <a th:href="@{/v1/products}">Products</a>
