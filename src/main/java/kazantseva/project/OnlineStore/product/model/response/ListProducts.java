@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class ListProducts {
+
     private int totalAmount;
 
     private int amount;
