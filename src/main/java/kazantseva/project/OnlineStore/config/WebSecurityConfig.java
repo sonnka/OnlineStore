@@ -21,6 +21,8 @@ public class WebSecurityConfig {
 
         http.formLogin()
                 .loginPage("/v1/login")
+                .usernameParameter("email")
+                .defaultSuccessUrl("/")
                 .permitAll()
                 .and()
                 .logout()

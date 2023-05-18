@@ -18,6 +18,11 @@ public class CustomerController {
 
     private CustomerService customerService;
 
+    @GetMapping("/")
+    public String home() {
+        return "index";
+    }
+
     @GetMapping("/v1/register")
     public String showRegistrationForm(Model model) {
         RequestCustomerDTO customer = new RequestCustomerDTO();
@@ -43,5 +48,10 @@ public class CustomerController {
 
         customerService.saveCustomer(customerDTO);
         return "redirect:/v1/register?success";
+    }
+
+    @GetMapping("/v1/login")
+    public String login() {
+        return "login";
     }
 }
