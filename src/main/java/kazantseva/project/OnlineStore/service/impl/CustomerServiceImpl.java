@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.service.impl;
 import kazantseva.project.OnlineStore.model.entity.Customer;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
+import kazantseva.project.OnlineStore.model.request.RequestCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
@@ -62,6 +63,23 @@ public class CustomerServiceImpl implements CustomerService {
         var customer = findByIdAndCheckByEmail(customerId, email);
         orderRepository.deleteByCustomer(customer);
         customerRepository.delete(customer);
+    }
+
+    @Override
+    public Customer findCustomerByEmail(String email) {
+        var customer = customerRepository.findByEmailIgnoreCase(email);
+        return customer.orElse(null);
+    }
+
+    @Override
+    public void saveCustomer(RequestCustomerDTO customerDTO) {
+        customerRepository.save(Customer.builder()
+                .id(customerDTO.getId())
+                .name(customerDTO.getName())
+                .surname(customerDTO.getSurname())
+                .email(customerDTO.getEmail())
+                .password(passwordEncoder.encode(customerDTO.getPassword()))
+                .build());
     }
 
     @Override
