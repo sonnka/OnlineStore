@@ -24,7 +24,7 @@ public class WebSecurityConfig {
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .defaultSuccessUrl("/", true)
-                .failureUrl("/v1/login")
+                .failureUrl("/v1/login?error")
                 .permitAll()
                 .and()
                 .logout()

@@ -16,6 +16,9 @@
         <a th:href="@{/}">Home</a>
         <a th:href="@{/v1/products}">Products</a>
         <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/v1/profile}">My profile</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
             <a th:href="@{/v1/logout}">Logout</a>
         </div>
         <div sec:authorize="isAnonymous()">

@@ -20,6 +20,9 @@
         <a th:href="@{/}">Home</a>
         <a th:href="@{/v1/products}">Products</a>
         <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/v1/profile}">My profile</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
             <a th:href="@{/v1/logout}">Logout</a>
         </div>
         <div sec:authorize="isAnonymous()">
@@ -56,6 +59,7 @@
                     >
                         <div class="form-group mb-3">
                             <label class="control-label"> Email</label>
+                            <br>
                             <input
                                     class="form-control"
                                     id="email"
@@ -67,6 +71,7 @@
 
                         <div class="form-group mb-3">
                             <label class="control-label"> Password</label>
+                            <br>
                             <input
                                     class="form-control"
                                     id="password"
@@ -77,8 +82,8 @@
                         </div>
                         <div class="form-group mb-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <span> Not registered ?
-                                <a th:href="@{/v1/register}">Register/Signup here</a>
+                            <span>      Not registered ?
+                                <a th:href="@{/v1/register}">   Register/Signup here</a>
                             </span>
                         </div>
                     </form>

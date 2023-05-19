@@ -20,6 +20,9 @@
         <a th:href="@{/}">Home</a>
         <a th:href="@{/v1/products}">Products</a>
         <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/v1/profile}">My profile</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
             <a th:href="@{/v1/logout}">Logout</a>
         </div>
         <div sec:authorize="isAnonymous()">
@@ -33,6 +36,9 @@
         <div class="card">
             <div class="card-header">
                 <h2 class="text-center">Registration</h2>
+            </div>
+            <div th:if="${param.error}">
+                <div class="alert alert-danger">Invalid Data</div>
             </div>
             <div th:if="${param.success}">
                 <div class="alert alert-info">
@@ -103,7 +109,7 @@
                     </div>
                     <div class="form-group">
                         <button class="btn btn-primary" type="submit">Register</button>
-                        <span>Already registered? <a th:href="@{/v1/login}">Login here</a></span>
+                        <span>  Already registered? <a th:href="@{/v1/login}">Login here</a></span>
                     </div>
                 </form>
             </div>

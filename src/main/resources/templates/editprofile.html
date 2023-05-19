@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta content="IE=edge" http-equiv="X-UA-Compatible">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Online Store</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+<header class="header">
+  <a class="logo" th:href="@{/}">Online Store</a>
+  <nav class="nav-items">
+    <a th:href="@{/}">Home</a>
+    <a th:href="@{/v1/products}">Products</a>
+    <div sec:authorize="isAuthenticated()">
+      <a th:href="@{/v1/customers/}">My profile</a>
+    </div>
+    <div sec:authorize="isAuthenticated()">
+      <a th:href="@{/v1/logout}">Logout</a>
+    </div>
+    <div sec:authorize="isAnonymous()">
+      <a th:href="@{/v1/login}">Register/Login</a>
+    </div>
+  </nav>
+</header>
+<main>
+  <div class="container emp-profile">
+    <form
+            method="post"
+            role="form"
+            th:action="@{/v1/profile/edit/save}"
+            th:object="${customer}"
+    >
+      <div th:if="${param.error}">
+        <div class="alert alert-danger">Invalid Data</div>
+      </div>
+      <div class="row">
+        <div class="col-md-10">
+          <div class="profile-head">
+            <h5 th:text="${customer.getName().concat(' ') + customer.getSurname()}"></h5>
+            <h6 th:text="${email}"></h6>
+            <p class="proile-rating">Amount of orders : <span th:text="${totalAmountOfOrders}"></span></p>
+            <ul class="nav nav-tabs" id="myTab" role="tablist"></ul>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <input type="submit" class="profile-save-btn" name="btnAddMore" value="Save"/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="tab-content profile-tab" id="myTabContent">
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+
+              <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-2">
+                  <label>Name</label>
+                </div>
+                <div class="col-md-3">
+                  <input
+                          class="form-control"
+                          id="name"
+                          name="name"
+                          placeholder="Enter first name"
+                          th:field="*{name}"
+                          type="text"
+                  />
+                </div>
+                <div class="col-md-4">
+                </div>
+              </div>
+              <br><br><br><br><br>
+              <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-2">
+                  <label>Surname</label>
+                </div>
+                <div class="col-md-3">
+                  <input
+                          class="form-control"
+                          id="surname"
+                          name="surname"
+                          placeholder="Enter last name"
+                          th:field="*{surname}"
+                          type="text"
+                  />
+                </div>
+                <div class="col-md-4">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</main>
+</body>
+</html>

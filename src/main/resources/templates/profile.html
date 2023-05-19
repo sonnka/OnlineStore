@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Online Store</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" id="bootstrap-css" rel="stylesheet">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+<header class="header">
+    <a class="logo" th:href="@{/}">Online Store</a>
+    <nav class="nav-items">
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/v1/products}">Products</a>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/v1/customers/}">My profile</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/v1/logout}">Logout</a>
+        </div>
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/v1/login}">Register/Login</a>
+        </div>
+    </nav>
+</header>
+<main>
+    <div class="container emp-profile">
+        <div class="row">
+            <div class="col-md-10">
+                <div class="profile-head">
+                    <h5 th:text="${customer.getName().concat(' ') + customer.getSurname()}"></h5>
+                    <h6 th:text="${customer.getEmail()}"></h6>
+                    <p class="proile-rating">Amount of orders : <span
+                            th:text="${customer.getTotalAmountOfOrders()}"></span></p>
+                    <ul class="nav nav-tabs" id="myTab" role="tablist"></ul>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <a th:href="@{/v1/profile/edit}"><input class="profile-edit-btn" name="btnAddMore" type="submit"
+                                                        value="Edit Profile"/></a>
+                <br><br>
+                <a th:href="@{/v1/profile/delete}"><input class="profile-delete-btn" name="btnAddMore" type="submit"
+                                                          value="Delete Profile"/></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="tab-content profile-tab" id="myTabContent">
+                    <div aria-labelledby="home-tab" class="tab-pane fade show active" id="home" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-2">
+                                <label>First name</label>
+                            </div>
+                            <div class="col-md-3">
+                                <p th:text="${customer.getName()}"></p>
+                            </div>
+                            <div class="col-md-4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Last name</label>
+                            </div>
+                            <div class="col-md-3">
+                                <p th:text="${customer.getSurname()}"></p>
+                            </div>
+                            <div class="col-md-4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Email</label>
+                            </div>
+                            <div class="col-md-3">
+                                <p th:text="${customer.getEmail()}"></p>
+                            </div>
+                            <div class="col-md-4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Total amount of orders</label>
+                            </div>
+                            <div class="col-md-3">
+                                <p th:text="${customer.getTotalAmountOfOrders()}"></p>
+                            </div>
+                            <div class="col-md-4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Amount of unpaid orders</label>
+                            </div>
+                            <div class="col-md-3">
+                                <p th:text="${customer.getAmountUnpaidOrders()}"></p>
+                            </div>
+                            <div class="col-md-4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Amount of paid orders</label>
+                            </div>
+                            <div class="col-md-3">
+                                <p th:text="${customer.getAmountPaidOrders()}"></p>
+                            </div>
+                            <div class="col-md-4">
+                            </div>
+                        </div>
+                        <br><br>
+                        <div class="col-md-9">
+                            <div class="intro2">
+                                <a th:href="@{/v1/login}">
+                                    <button>My orders</button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
