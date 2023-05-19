@@ -40,11 +40,13 @@
             <thead>
             <tr>
                 <th>
-                    <a th:href="@{'/v1/products?page=1&size=' + ${size} + '&sort=name&direction=' + ${reverseDirection}}">
+                    <a th:href="@{'/v1/products?page=1&size=' + ${size} + '&sort=name&direction='
+                    + ${reverseDirection}}">
                         Product</a>
                 </th>
                 <th>
-                    <a th:href="@{'/v1/products?page=1&size=' + ${size} + '&sort=price&direction=' + ${reverseDirection}}">
+                    <a th:href="@{'/v1/products?page=1&size=' + ${size} + '&sort=price&direction='
+                    + ${reverseDirection}}">
                         Price</a>
                 </th>
             </tr>
@@ -61,18 +63,21 @@
             <div class="row col-sm-10">
                 <div class="col-sm-4">
          <span th:each="i: ${#numbers.sequence(1, totalPages)}">
-          <a th:href="@{'/v1/products?page=' + ${i} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+          <a th:href="@{'/v1/products?page=' + ${i} + '&size=' + ${size} + '&sort=' + ${sort}
+          + '&direction=' + ${direction}}"
              th:if="${currentPage != i}">[[${i}]]</a>
           <span th:unless="${currentPage != i}">[[${i}]]</span>  &nbsp; &nbsp;
          </span>
                 </div>
                 <div class="col-sm-1">
-                    <a th:href="@{'/v1/products?page=' + ${currentPage + 1} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+                    <a th:href="@{'/v1/products?page=' + ${currentPage + 1} + '&size=' + ${size}
+                    + '&sort=' + ${sort} + '&direction=' + ${direction}}"
                        th:if="${currentPage < totalPages}">Next</a>
                     <span th:unless="${currentPage < totalPages}">Next</span>
                 </div>
                 <div class="col-sm-1">
-                    <a th:href="@{'/v1/products?page=' + ${totalPages} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+                    <a th:href="@{'/v1/products?page=' + ${totalPages} + '&size=' + ${size}
+                    + '&sort=' + ${sort} + '&direction=' + ${direction}}"
                        th:if="${currentPage < totalPages}">Last</a>
                     <span th:unless="${currentPage < totalPages}">Last</span>
                 </div>

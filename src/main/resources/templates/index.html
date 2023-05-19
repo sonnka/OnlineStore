@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta content="IE=edge" http-equiv="X-UA-Compatible">
@@ -31,10 +31,14 @@
         <h1>Online Store</h1>
         <p>Buy everything you need in one click.</p>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/v1/products}"><button>Go shopping</button></a>
+            <a th:href="@{/v1/products}">
+                <button>Go shopping</button>
+            </a>
         </div>
         <div sec:authorize="isAnonymous()">
-            <a th:href="@{/v1/login}"><button>Go shopping</button></a>
+            <a th:href="@{/v1/login}">
+                <button>Go shopping</button>
+            </a>
         </div>
     </div>
     <div class="achievements">

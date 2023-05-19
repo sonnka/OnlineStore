@@ -36,21 +36,24 @@
     <div class="container my-2">
         <h1>Order List</h1>
         <br><br>
-        <a class="btn btn-primary" th:href="@{/v1/profile/myorders/create}"> Create order </a>
+        <a class="btn btn-primary" th:href="@{/v1/profile/orders/create}"> Create order </a>
         <br><br>
         <table border="1" class="table table-striped table-responsive-md">
             <thead>
             <tr>
                 <th>
-                    <a th:href="@{'/v1/profile/myorders?page=1&size=' + ${size} + '&sort=date&direction=' + ${reverseDirection}}">
+                    <a th:href="@{'/v1/profile/orders?page=1&size=' + ${size}
+                    + '&sort=date&direction=' + ${reverseDirection}}">
                         Creation date</a>
                 </th>
                 <th>
-                    <a th:href="@{'/v1/profile/myorders?page=1&size=' + ${size} + '&sort=status&direction=' + ${reverseDirection}}">
+                    <a th:href="@{'/v1/profile/orders?page=1&size=' + ${size}
+                    + '&sort=status&direction=' + ${reverseDirection}}">
                         Status</a>
                 </th>
                 <th>
-                    <a th:href="@{'/v1/profile/myorders?page=1&size=' + ${size} + '&sort=price&direction=' + ${reverseDirection}}">
+                    <a th:href="@{'/v1/profile/orders?page=1&size=' + ${size}
+                    + '&sort=price&direction=' + ${reverseDirection}}">
                         Price</a>
                 </th>
                 <th> Actions</th>
@@ -61,7 +64,7 @@
                 <td th:text="${order.getDate()}"></td>
                 <td th:text="${order.getStatus()}"></td>
                 <td th:text="${order.getPrice()}"></td>
-                <td><a class="btn btn-primary" th:href="@{/v1/profile/myorders/order}">Open</a>
+                <td><a class="btn btn-primary" th:href="@{/v1/profile/orders/order}">Open</a>
                 </td>
             </tr>
             </tbody>
@@ -71,18 +74,21 @@
             <div class="row col-sm-10">
                 <div class="col-sm-4">
          <span th:each="i: ${#numbers.sequence(1, totalPages)}">
-          <a th:href="@{'/v1/profile/myorders?page=' + ${i} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+          <a th:href="@{'/v1/profile/orders?page=' + ${i} + '&size=' + ${size} + '&sort='
+          + ${sort} + '&direction=' + ${direction}}"
              th:if="${currentPage != i}">[[${i}]]</a>
           <span th:unless="${currentPage != i}">[[${i}]]</span>  &nbsp; &nbsp;
          </span>
                 </div>
                 <div class="col-sm-1">
-                    <a th:href="@{'/v1/profile/myorders?page=' + ${currentPage + 1} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+                    <a th:href="@{'/v1/profile/orders?page=' + ${currentPage + 1} + '&size='
+                    + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
                        th:if="${currentPage < totalPages}">Next</a>
                     <span th:unless="${currentPage < totalPages}">Next</span>
                 </div>
                 <div class="col-sm-1">
-                    <a th:href="@{'//v1/profile/myorders?page=' + ${totalPages} + '&size=' + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
+                    <a th:href="@{'//v1/profile/orders?page=' + ${totalPages} + '&size='
+                    + ${size} + '&sort=' + ${sort} + '&direction=' + ${direction}}"
                        th:if="${currentPage < totalPages}">Last</a>
                     <span th:unless="${currentPage < totalPages}">Last</span>
                 </div>

@@ -19,7 +19,7 @@ public class OrderController {
 
     OrderService orderService;
 
-    @GetMapping("/v1/profile/myorders")
+    @GetMapping("/v1/profile/orders")
     public String getOrders(@RequestParam(required = false, defaultValue = "1") int page,
                             @RequestParam(required = false, defaultValue = "3") int size,
                             @RequestParam(required = false, defaultValue = "price") String sort,
@@ -37,6 +37,6 @@ public class OrderController {
         model.addAttribute("direction", direction);
         model.addAttribute("reverseDirection", direction.equals("asc") ? "desc" : "asc");
         model.addAttribute("orders", list.getOrders());
-        return "myorders";
+        return "orders";
     }
 }

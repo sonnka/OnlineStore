@@ -19,7 +19,7 @@ public class ProductController {
 
     @GetMapping("/v1/products")
     public String getProducts(@RequestParam(required = false, defaultValue = "1") int page,
-                              @RequestParam(required = false, defaultValue = "3") int size,
+                              @RequestParam(required = false, defaultValue = "10") int size,
                               @RequestParam(required = false, defaultValue = "price") String sort,
                               @RequestParam(required = false, defaultValue = "asc") String direction,
                               Model model) {
@@ -35,6 +35,6 @@ public class ProductController {
         model.addAttribute("direction", direction);
         model.addAttribute("reverseDirection", direction.equals("asc") ? "desc" : "asc");
         model.addAttribute("products", list.getProducts());
-        return "products.html";
+        return "products";
     }
 }

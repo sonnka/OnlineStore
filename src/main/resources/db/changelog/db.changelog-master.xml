@@ -119,4 +119,139 @@
         </insert>
     </changeSet>
 
+    <changeSet id="647" author="admin">
+        <insert tableName="products">
+            <column name="name" value="pineapple"/>
+            <column name="price" value="97.4"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="potatoes"/>
+            <column name="price" value="15.0"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="lobster"/>
+            <column name="price" value="1052.9"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="banana"/>
+            <column name="price" value="67.0"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="pizza"/>
+            <column name="price" value="196.15"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="sushi"/>
+            <column name="price" value="956.0"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="648" author="admin">
+        <insert tableName="products">
+            <column name="name" value="butter"/>
+            <column name="price" value="58.0"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="bread"/>
+            <column name="price" value="31.75"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="black tea"/>
+            <column name="price" value="70.1"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="green tea"/>
+            <column name="price" value="39.6"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="salt"/>
+            <column name="price" value="20.5"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="sugar"/>
+            <column name="price" value="28.23"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="649" author="admin">
+        <insert tableName="products">
+            <column name="name" value="ketchup"/>
+            <column name="price" value="50.4"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="flour"/>
+            <column name="price" value="19.46"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="fish"/>
+            <column name="price" value="74.8"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="onion"/>
+            <column name="price" value="47.21"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="cucumber"/>
+            <column name="price" value="58.32"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="tomato"/>
+            <column name="price" value="72.37"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="650" author="admin">
+        <insert tableName="products">
+            <column name="name" value="paprika"/>
+            <column name="price" value="28.4"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="candy"/>
+            <column name="price" value="19.10"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="cookies"/>
+            <column name="price" value="144.8"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="cheese"/>
+            <column name="price" value="87.0"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="olive oil"/>
+            <column name="price" value="164.4"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="ice cream"/>
+            <column name="price" value="23.79"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="651" author="admin">
+        <insert tableName="products">
+            <column name="name" value="pasta"/>
+            <column name="price" value="62.3"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="rice"/>
+            <column name="price" value="60.10"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="chocolate"/>
+            <column name="price" value="38.0"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="crab"/>
+            <column name="price" value="501.87"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="yogurt"/>
+            <column name="price" value="36.0"/>
+        </insert>
+        <insert tableName="products">
+            <column name="name" value="lemon"/>
+            <column name="price" value="49.26"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
