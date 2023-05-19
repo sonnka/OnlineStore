@@ -5,12 +5,14 @@ import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.request.RequestProduct;
 import kazantseva.project.OnlineStore.model.response.ListOrders;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
+import kazantseva.project.OnlineStore.model.response.PageListOrders;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -114,6 +116,22 @@ public class OrderServiceImpl implements OrderService {
         var order = checkOrder(orderId, customerId);
 
         orderRepository.delete(order);
+    }
+
+    @Override
+    public PageListOrders getPageOfProducts(String email, Pageable pageable) {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with email " + email + " not found!"));
+        Page<Order> allOrders = orderRepository.findByCustomerId(customer.getId(), pageable);
+        List<ShortOrderDTO> orders = allOrders.stream().map(ShortOrderDTO::new).toList();
+
+        return PageListOrders.builder()
+                .totalPages(allOrders.getTotalPages())
+                .totalAmount(orderRepository.findAllByCustomerId(customer.getId()).size())
+                .amount(orders.size())
+                .orders(orders)
+                .build();
     }
 
     private Customer checkCustomer(long customerId, String email) {

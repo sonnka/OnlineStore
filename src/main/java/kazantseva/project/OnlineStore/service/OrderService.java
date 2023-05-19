@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.service;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.response.ListOrders;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
+import kazantseva.project.OnlineStore.model.response.PageListOrders;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
@@ -15,4 +16,6 @@ public interface OrderService {
     OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder);
 
     void deleteOrder(String email, long customerId, long orderId);
+
+    PageListOrders getPageOfProducts(String email, Pageable pageable);
 }
