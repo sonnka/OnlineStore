@@ -25,7 +25,7 @@ public class OrderController {
 
     @GetMapping("/v1/profile/orders")
     public String getOrders(@RequestParam(required = false, defaultValue = "1") int page,
-                            @RequestParam(required = false, defaultValue = "3") int size,
+                            @RequestParam(required = false, defaultValue = "5") int size,
                             @RequestParam(required = false, defaultValue = "price") String sort,
                             @RequestParam(required = false, defaultValue = "asc") String direction,
                             Model model, Principal principal) {
@@ -62,4 +62,34 @@ public class OrderController {
         return "order";
     }
 
+    @GetMapping("/v1/profile/orders/{order-id}/edit")
+    public String test(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+        String email = principal.getName();
+        var customer = customerService.findCustomerByEmail(email);
+        var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
+        model.addAttribute("order", order);
+        model.addAttribute("customer", customer);
+        return "editorder";
+    }
+
+//    @PostMapping("/v1/profile/orders/create/save")
+//    public String saveOrder(Principal principal) {
+//
+//        return "redirect:/v1/profile/orders";
+//    }
+
+//    @GetMapping("/v1/profile/orders/{order-id}/edit")
+//    public String updateOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+//        return "order";
+//    }
+//
+//    @GetMapping("/v1/profile/orders/{order-id}//edit/save")
+//    public String saveOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+//        return "myorder";
+//    }
+//
+//    @GetMapping("/v1/profile/orders/{order-id}/delete")
+//    public String deleteOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+//        return "index";
+//    }
 }

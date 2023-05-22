@@ -64,7 +64,9 @@
                 <td th:text="${order.getDate()}"></td>
                 <td th:text="${order.getStatus()}"></td>
                 <td th:text="${order.getPrice()}"></td>
-                <td><a class="btn btn-primary" th:href="@{/v1/profile/orders/{order-id}(order-id=${order.getId()})}">Open</a>
+                <!--                <td><a class="btn btn-primary" th:href="@{/v1/profile/orders/{order-id}(order-id=${order.getId()})}">Open</a>-->
+                <td><a class="btn btn-primary"
+                       th:href="@{/v1/profile/orders/{order-id}/edit(order-id=${order.getId()})}">Open</a>
                 </td>
             </tr>
             </tbody>

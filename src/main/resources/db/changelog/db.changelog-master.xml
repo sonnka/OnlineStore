@@ -5,14 +5,14 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="641" author="admin">
+    <changeSet id="660" author="admin">
         <dropTable tableName="order_product"/>
         <dropTable tableName="orders"/>
         <dropTable tableName="customers"/>
         <dropTable tableName="products"/>
     </changeSet>
 
-    <changeSet id="642" author="admin">
+    <changeSet id="661" author="admin">
         <createTable tableName="products">
             <column name="product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -26,7 +26,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="643" author="admin">
+    <changeSet id="662" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -46,7 +46,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="644" author="admin">
+    <changeSet id="663" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -73,7 +73,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="645" author="admin">
+    <changeSet id="664" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -92,164 +92,164 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="646" author="admin">
+    <changeSet id="665" author="admin">
         <insert tableName="products">
-            <column name="name" value="apple"/>
+            <column name="name" value="Apple"/>
             <column name="price" value="12.0"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="milk"/>
+            <column name="name" value="Milk"/>
             <column name="price" value="38.9"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="cake"/>
+            <column name="name" value="Cake"/>
             <column name="price" value="203.58"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="chicken"/>
+            <column name="name" value="Chicken"/>
             <column name="price" value="189.0"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="juice"/>
+            <column name="name" value="Juice"/>
             <column name="price" value="87.1"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="eggs"/>
+            <column name="name" value="Eggs"/>
             <column name="price" value="49.0"/>
         </insert>
     </changeSet>
 
-    <changeSet id="647" author="admin">
+    <changeSet id="666" author="admin">
         <insert tableName="products">
-            <column name="name" value="pineapple"/>
+            <column name="name" value="Pineapple"/>
             <column name="price" value="97.4"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="potatoes"/>
+            <column name="name" value="Potatoes"/>
             <column name="price" value="15.0"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="lobster"/>
+            <column name="name" value="Lobster"/>
             <column name="price" value="1052.9"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="banana"/>
+            <column name="name" value="Banana"/>
             <column name="price" value="67.0"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="pizza"/>
+            <column name="name" value="Pizza"/>
             <column name="price" value="196.15"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="sushi"/>
+            <column name="name" value="Sushi"/>
             <column name="price" value="956.0"/>
         </insert>
     </changeSet>
 
-    <changeSet id="648" author="admin">
+    <changeSet id="667" author="admin">
         <insert tableName="products">
-            <column name="name" value="butter"/>
+            <column name="name" value="Butter"/>
             <column name="price" value="58.0"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="bread"/>
+            <column name="name" value="Bread"/>
             <column name="price" value="31.75"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="black tea"/>
+            <column name="name" value="Black tea"/>
             <column name="price" value="70.1"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="green tea"/>
+            <column name="name" value="Green tea"/>
             <column name="price" value="39.6"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="salt"/>
+            <column name="name" value="Salt"/>
             <column name="price" value="20.5"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="sugar"/>
+            <column name="name" value="Sugar"/>
             <column name="price" value="28.23"/>
         </insert>
     </changeSet>
 
-    <changeSet id="649" author="admin">
+    <changeSet id="668" author="admin">
         <insert tableName="products">
-            <column name="name" value="ketchup"/>
+            <column name="name" value="Ketchup"/>
             <column name="price" value="50.4"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="flour"/>
+            <column name="name" value="Flour"/>
             <column name="price" value="19.46"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="fish"/>
+            <column name="name" value="Fish"/>
             <column name="price" value="74.8"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="onion"/>
+            <column name="name" value="Onion"/>
             <column name="price" value="47.21"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="cucumber"/>
+            <column name="name" value="Cucumber"/>
             <column name="price" value="58.32"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="tomato"/>
+            <column name="name" value="Tomato"/>
             <column name="price" value="72.37"/>
         </insert>
     </changeSet>
 
-    <changeSet id="650" author="admin">
+    <changeSet id="669" author="admin">
         <insert tableName="products">
-            <column name="name" value="paprika"/>
+            <column name="name" value="Paprika"/>
             <column name="price" value="28.4"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="candy"/>
+            <column name="name" value="Candy"/>
             <column name="price" value="19.10"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="cookies"/>
+            <column name="name" value="Cookies"/>
             <column name="price" value="144.8"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="cheese"/>
+            <column name="name" value="Cheese"/>
             <column name="price" value="87.0"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="olive oil"/>
+            <column name="name" value="Olive oil"/>
             <column name="price" value="164.4"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="ice cream"/>
+            <column name="name" value="Ice cream"/>
             <column name="price" value="23.79"/>
         </insert>
     </changeSet>
 
-    <changeSet id="651" author="admin">
+    <changeSet id="670" author="admin">
         <insert tableName="products">
-            <column name="name" value="pasta"/>
+            <column name="name" value="Pasta"/>
             <column name="price" value="62.3"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="rice"/>
+            <column name="name" value="Rice"/>
             <column name="price" value="60.10"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="chocolate"/>
+            <column name="name" value="Chocolate"/>
             <column name="price" value="38.0"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="crab"/>
+            <column name="name" value="Crab"/>
             <column name="price" value="501.87"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="yogurt"/>
+            <column name="name" value="Yogurt"/>
             <column name="price" value="36.0"/>
         </insert>
         <insert tableName="products">
-            <column name="name" value="lemon"/>
+            <column name="name" value="Lemon"/>
             <column name="price" value="49.26"/>
         </insert>
     </changeSet>
