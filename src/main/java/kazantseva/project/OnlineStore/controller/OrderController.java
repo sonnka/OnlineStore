@@ -1,6 +1,8 @@
 package kazantseva.project.OnlineStore.controller;
 
+import kazantseva.project.OnlineStore.model.entity.Order;
 import kazantseva.project.OnlineStore.model.response.PageListOrders;
+import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
@@ -17,7 +20,8 @@ import java.security.Principal;
 @AllArgsConstructor
 public class OrderController {
 
-    OrderService orderService;
+    private OrderService orderService;
+    private CustomerService customerService;
 
     @GetMapping("/v1/profile/orders")
     public String getOrders(@RequestParam(required = false, defaultValue = "1") int page,
@@ -39,4 +43,23 @@ public class OrderController {
         model.addAttribute("orders", list.getOrders());
         return "orders";
     }
+
+    @GetMapping("/v1/profile/orders/create")
+    public String createOrder(Principal principal, Model model) {
+        String email = principal.getName();
+        model.addAttribute("customer", customerService.customerProfile(email));
+        model.addAttribute("order", new Order());
+        return "createorder";
+    }
+
+    @GetMapping("/v1/profile/orders/{order-id}")
+    public String getOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+        String email = principal.getName();
+        var customer = customerService.findCustomerByEmail(email);
+        var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
+        model.addAttribute("order", order);
+        model.addAttribute("customer", customer);
+        return "order";
+    }
+
 }

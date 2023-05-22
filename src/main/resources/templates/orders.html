@@ -64,7 +64,7 @@
                 <td th:text="${order.getDate()}"></td>
                 <td th:text="${order.getStatus()}"></td>
                 <td th:text="${order.getPrice()}"></td>
-                <td><a class="btn btn-primary" th:href="@{/v1/profile/orders/order}">Open</a>
+                <td><a class="btn btn-primary" th:href="@{/v1/profile/orders/{order-id}(order-id=${order.getId()})}">Open</a>
                 </td>
             </tr>
             </tbody>
@@ -77,7 +77,7 @@
           <a th:href="@{'/v1/profile/orders?page=' + ${i} + '&size=' + ${size} + '&sort='
           + ${sort} + '&direction=' + ${direction}}"
              th:if="${currentPage != i}">[[${i}]]</a>
-          <span th:unless="${currentPage != i}">[[${i}]]</span>  &nbsp; &nbsp;
+          <span th:unless="${currentPage != i}">[[${i}]]</span>
          </span>
                 </div>
                 <div class="col-sm-1">
