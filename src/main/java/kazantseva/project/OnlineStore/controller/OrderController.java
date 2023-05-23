@@ -70,26 +70,16 @@ public class OrderController {
         var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
         model.addAttribute("order", order);
         model.addAttribute("customer", customer);
-        return "editorder";
-    }
-
-    @GetMapping("/v1/profile/orders/{order-id}/test")
-    public String test(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
-        String email = principal.getName();
-        var customer = customerService.findCustomerByEmail(email);
-        var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
-        model.addAttribute("order", order);
-        model.addAttribute("customer", customer);
         model.addAttribute("allTypes", new String[]{Status.PAID.name(), Status.UNPAID.name()});
         model.addAttribute("list", orderService.getOtherProduct(orderId));
         model.addAttribute("form", new FormDTO());
-        return "test";
+        return "editorder";
     }
 
     @PostMapping("/v1/profile/orders/{order-id}/list")
-    public String nottest(@PathVariable(value = "order-id") String orderId,
-                          @ModelAttribute("form") FormDTO form,
-                          Principal principal, Model model) {
+    public String addProduct(@PathVariable(value = "order-id") String orderId,
+                             @ModelAttribute("form") FormDTO form,
+                             Principal principal, Model model) {
         String email = principal.getName();
         var customer = customerService.findCustomerByEmail(email);
         var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
