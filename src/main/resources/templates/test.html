@@ -110,11 +110,13 @@
                                 <span><b>Status</b></span>
                             </div>
                             <div class="col-md-3">
+
                                 <p th:each="ty : ${allTypes}">
                                     <input th:field="*{status}" th:value="${ty}" type="radio"/>
                                     <label th:for="${#ids.prev('status')}"
                                            th:text="${ty}"></label>
                                 </p>
+
                             </div>
                         </div>
                         <br><br>
@@ -168,39 +170,6 @@
                         </div>
                     </div>
                 </div>
-                <div aria-hidden="true" aria-labelledby="exampleModalLabel"
-                     class="modal fade" id="exampleModal1"
-                     role="dialog"
-                     tabindex="-1">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title"
-                                    id="exampleModalLabel">
-                                    Products
-                                </h5>
-                            </div>
-                            <div class="modal-body">
-                                <table class="table table-condensed table-responsive">
-                                    <tbody>
-                                    <tr th:each="product : ${order.getProducts()}">
-                                        <input id="scales" name="scales" type="checkbox">
-                                        <label for="scales"
-                                               th:text="${'&emsp;' + product.getName().concat('&emsp;') + product.getPrice().toString().concat(' ₴')}"></label>
-                                        <br>
-                                    </tr>
-
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-secondary" data-dismiss="modal" type="button">
-                                    Add
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div class="row mt-4 d-flex align-items-center">
                     <div class="col-sm-6 order-md-2 text-right">
                         <input class="btn btn-primary mb-4 btn-lg pl-5 pr-5" type="submit" value="Save">
@@ -208,6 +177,44 @@
                 </div>
             </div>
         </form>
+        <div aria-hidden="true" aria-labelledby="exampleModalLabel"
+             class="modal fade" id="exampleModal1"
+             role="dialog"
+             tabindex="-1">
+            <div class="modal-dialog" role="document">
+                <form method="post"
+                      role="form"
+                      th:action="@{/v1/profile/orders/{order-id}/list(order-id=${order.getId()})}"
+                      th:object="${form}">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">
+                                Products
+                            </h5>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-condensed table-responsive">
+                                <tbody>
+                                <tr th:each="item : ${list}">
+                                    <td>
+                                        <input th:attr="id='scales_' + ${item.id}" th:name="${'selectedItems'}"
+                                               th:value="${item.id}" type="checkbox">
+                                        <label th:for="${'scales_' + item.id}" th:text="${item.name}"></label>
+                                    </td>
+                                    <td>
+                                        <label th:text="${'&emsp;' + item.price}"></label>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" type="submit">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </section>
 </main>
 </body>

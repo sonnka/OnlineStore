@@ -3,10 +3,7 @@ package kazantseva.project.OnlineStore.service.impl;
 import kazantseva.project.OnlineStore.model.entity.*;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.request.RequestProduct;
-import kazantseva.project.OnlineStore.model.response.ListOrders;
-import kazantseva.project.OnlineStore.model.response.OrderDTO;
-import kazantseva.project.OnlineStore.model.response.PageListOrders;
-import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
+import kazantseva.project.OnlineStore.model.response.*;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
@@ -110,6 +107,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderDTO updateOrder(String email, long customerId, Long orderId, List<Long> list) {
+        checkCustomer(customerId, email);
+
+        var order = checkOrder(orderId, customerId);
+
+        return updateOrder(order, list);
+    }
+
+    @Override
     public void deleteOrder(String email, long customerId, long orderId) {
         checkCustomer(customerId, email);
 
@@ -132,6 +138,16 @@ public class OrderServiceImpl implements OrderService {
                 .amount(orders.size())
                 .orders(orders)
                 .build();
+    }
+
+    @Override
+    public List<ShortProductDTO> getOtherProduct(String orderId) {
+        List<Long> products = productRepository.findByOrderId(orderId);
+        List<ShortProductDTO> list = new ArrayList<>();
+        for (Long id : products) {
+            productRepository.findById(id).ifPresent(product -> list.add(new ShortProductDTO(product)));
+        }
+        return list;
     }
 
     private Customer checkCustomer(long customerId, String email) {
@@ -210,5 +226,40 @@ public class OrderServiceImpl implements OrderService {
 
         return new OrderDTO(orderRepository.save(oldOrder));
 
+    }
+
+    private OrderDTO updateOrder(Order oldOrder, List<Long> list) {
+        if (!list.isEmpty()) {
+            List<OrderProduct> newProducts = new ArrayList<>();
+            for (Long id : list) {
+                Optional<Product> product = productRepository.findById(id);
+                product.ifPresent(elem -> newProducts.add(new OrderProduct(oldOrder, elem, 1)));
+            }
+
+            if (newProducts.size() > 0) {
+
+                List<OrderProduct> oldProducts = oldOrder.getProducts();
+
+                for (OrderProduct oldProduct : oldProducts) {
+                    newProducts.add(oldProduct);
+                }
+
+                oldOrder.getProducts().clear();
+
+                oldOrder.getProducts().addAll(new ArrayList<>());
+
+                orderRepository.save(oldOrder);
+
+                oldOrder.getProducts().addAll(newProducts);
+
+                BigDecimal price = oldOrder.getProducts().stream()
+                        .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                oldOrder.setPrice(price);
+                return new OrderDTO(orderRepository.save(oldOrder));
+            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+        }
+        return new OrderDTO(oldOrder);
     }
 }

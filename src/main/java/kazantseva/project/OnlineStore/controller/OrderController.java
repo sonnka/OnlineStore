@@ -1,6 +1,8 @@
 package kazantseva.project.OnlineStore.controller;
 
+import kazantseva.project.OnlineStore.model.entity.Status;
 import kazantseva.project.OnlineStore.model.request.RequestOrderDTO;
+import kazantseva.project.OnlineStore.model.response.FormDTO;
 import kazantseva.project.OnlineStore.model.response.PageListOrders;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.OrderService;
@@ -10,11 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 @AllArgsConstructor
@@ -72,24 +73,33 @@ public class OrderController {
         return "editorder";
     }
 
-//    @PostMapping("/v1/profile/orders/create/save")
-//    public String saveOrder(Principal principal) {
-//
-//        return "redirect:/v1/profile/orders";
-//    }
+    @GetMapping("/v1/profile/orders/{order-id}/test")
+    public String test(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+        String email = principal.getName();
+        var customer = customerService.findCustomerByEmail(email);
+        var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
+        model.addAttribute("order", order);
+        model.addAttribute("customer", customer);
+        model.addAttribute("allTypes", new String[]{Status.PAID.name(), Status.UNPAID.name()});
+        model.addAttribute("list", orderService.getOtherProduct(orderId));
+        model.addAttribute("form", new FormDTO());
+        return "test";
+    }
 
-//    @GetMapping("/v1/profile/orders/{order-id}/edit")
-//    public String updateOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
-//        return "order";
-//    }
-//
-//    @GetMapping("/v1/profile/orders/{order-id}//edit/save")
-//    public String saveOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
-//        return "myorder";
-//    }
-//
-//    @GetMapping("/v1/profile/orders/{order-id}/delete")
-//    public String deleteOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
-//        return "index";
-//    }
+    @PostMapping("/v1/profile/orders/{order-id}/list")
+    public String nottest(@PathVariable(value = "order-id") String orderId,
+                          @ModelAttribute("form") FormDTO form,
+                          Principal principal, Model model) {
+        String email = principal.getName();
+        var customer = customerService.findCustomerByEmail(email);
+        var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
+        List<Long> list = form.getSelectedItems();
+        var newOrder = orderService.updateOrder(email, customer.getId(), order.getId(), list);
+        model.addAttribute("order", newOrder);
+        model.addAttribute("customer", customer);
+        model.addAttribute("allTypes", new String[]{Status.PAID.name(), Status.UNPAID.name()});
+        model.addAttribute("list", orderService.getOtherProduct(orderId));
+        return "redirect:/v1/profile/orders/" + orderId;
+    }
+
 }
