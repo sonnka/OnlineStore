@@ -28,6 +28,7 @@ public interface CustomerService {
     void saveCustomer(RequestCustomerDTO customerDTO);
 
     FullCustomerDTO customerProfile(String email);
+
     void updateCustomerProfile(String email, RequestCustomer newCustomer);
 
     void deleteProfile(String email);

@@ -1,6 +1,6 @@
 package kazantseva.project.OnlineStore.controller;
 
-import kazantseva.project.OnlineStore.model.entity.Order;
+import kazantseva.project.OnlineStore.model.request.RequestOrderDTO;
 import kazantseva.project.OnlineStore.model.response.PageListOrders;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.OrderService;
@@ -48,7 +48,7 @@ public class OrderController {
     public String createOrder(Principal principal, Model model) {
         String email = principal.getName();
         model.addAttribute("customer", customerService.customerProfile(email));
-        model.addAttribute("order", new Order());
+        model.addAttribute("order", new RequestOrderDTO());
         return "createorder";
     }
 
@@ -63,7 +63,7 @@ public class OrderController {
     }
 
     @GetMapping("/v1/profile/orders/{order-id}/edit")
-    public String test(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+    public String editOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
         String email = principal.getName();
         var customer = customerService.findCustomerByEmail(email);
         var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
