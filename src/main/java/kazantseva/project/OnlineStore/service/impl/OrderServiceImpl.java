@@ -150,6 +150,37 @@ public class OrderServiceImpl implements OrderService {
         return list;
     }
 
+    @Override
+    public OrderDTO removeProduct(String email, Long customerId, Long orderId, Long productId) {
+        checkCustomer(customerId, email);
+
+        var order = checkOrder(orderId, customerId);
+
+        var product = productRepository.findById(productId);
+
+        if (product.isPresent() && order.getProducts().size() > 1) {
+
+            List<OrderProduct> newProducts = order.getProducts().stream()
+                    .filter(item -> !item.getProduct().getId().equals(product.get().getId())).toList();
+
+            order.getProducts().clear();
+
+            order.getProducts().addAll(new ArrayList<>());
+
+            orderRepository.save(order);
+
+            order.getProducts().addAll(newProducts);
+
+            BigDecimal price = order.getProducts().stream()
+                    .map(prod -> BigDecimal.valueOf(prod.getAmount()).multiply(prod.getProduct().getPrice()))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            order.setPrice(price);
+            return new OrderDTO(orderRepository.save(order));
+        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+
+    }
+
     private Customer checkCustomer(long customerId, String email) {
         var customer = customerRepository.findById(customerId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,

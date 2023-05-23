@@ -149,8 +149,7 @@
                                 <td class="actions" data-th="">
                                     <div class="text-right valueAlign">
                                         <a class="delete" data-toggle="tooltip"
-                                           th:href="@{/v1/profile/orders/{order-id}
-                                           /products/{product-id}/delete(order-id=${order.getId()})(product-id=${product.getId()})}"
+                                           th:href="@{/v1/profile/orders/{order-id}/products/{product-id}/delete(order-id=${order.getId()},product-id=${product.getId()})}"
                                            title="Delete">
                                             <i class="material-icons">&#xE872;</i></a>
                                     </div>

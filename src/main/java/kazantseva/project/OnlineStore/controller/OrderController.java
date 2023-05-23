@@ -92,4 +92,20 @@ public class OrderController {
         return "redirect:/v1/profile/orders/" + orderId;
     }
 
+    @GetMapping("/v1/profile/orders/{order-id}/products/{product-id}/delete")
+    public String deleteProduct(@PathVariable(value = "order-id") String orderId,
+                                @PathVariable(value = "product-id") String productId,
+                                Principal principal, Model model) {
+        String email = principal.getName();
+        var customer = customerService.findCustomerByEmail(email);
+        var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
+        var newOrder = orderService.removeProduct(email, customer.getId(), order.getId(), Long.parseLong(productId));
+        model.addAttribute("order", newOrder);
+        model.addAttribute("customer", customer);
+        model.addAttribute("allTypes", new String[]{Status.PAID.name(), Status.UNPAID.name()});
+        model.addAttribute("list", orderService.getOtherProduct(orderId));
+        return "redirect:/v1/profile/orders/" + orderId;
+    }
+
+
 }

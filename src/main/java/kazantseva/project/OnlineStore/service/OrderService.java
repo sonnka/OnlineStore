@@ -25,4 +25,6 @@ public interface OrderService {
     PageListOrders getPageOfProducts(String email, Pageable pageable);
 
     List<ShortProductDTO> getOtherProduct(String orderId);
+
+    OrderDTO removeProduct(String email, Long customerId, Long orderId, Long productId);
 }
