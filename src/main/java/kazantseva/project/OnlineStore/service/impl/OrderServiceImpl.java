@@ -101,6 +101,36 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderDTO createOrder(String email, long customerId, OrderDTO order, List<Long> list) {
+        var customer = checkCustomer(customerId, email);
+
+        var newOrder = new Order(null, LocalDateTime.now(ZoneOffset.UTC), Status.UNPAID, customer, new ArrayList<>(), "", "", BigDecimal.ZERO);
+
+        newOrder = orderRepository.save(newOrder);
+
+        if (order == null) {
+            order = new OrderDTO();
+        }
+
+        order.setId(newOrder.getId());
+
+        List<ProductDTO> newList = new ArrayList<>();
+
+        for (Long id : list) {
+            Optional<Product> product = productRepository.findById(id);
+            product.ifPresent(value -> newList.add(new ProductDTO(
+                    value.getId(),
+                    value.getName(),
+                    value.getPrice(),
+                    1)));
+        }
+
+        order.setProducts(newList);
+
+        return updateOrder(email, customerId, newOrder.getId(), order);
+    }
+
+    @Override
     public OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
         checkCustomer(customerId, email);
 
@@ -156,7 +186,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<ShortProductDTO> getOtherProduct(String orderId) {
-        List<Long> products = productRepository.findByOrderId(orderId);
+        List<Long> products = productRepository.findByOrderId(Long.parseLong(orderId));
         List<ShortProductDTO> list = new ArrayList<>();
         for (Long id : products) {
             productRepository.findById(id).ifPresent(product -> list.add(new ShortProductDTO(product)));

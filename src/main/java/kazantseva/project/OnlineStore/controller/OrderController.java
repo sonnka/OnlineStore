@@ -1,7 +1,6 @@
 package kazantseva.project.OnlineStore.controller;
 
 import kazantseva.project.OnlineStore.model.entity.Status;
-import kazantseva.project.OnlineStore.model.request.RequestOrderDTO;
 import kazantseva.project.OnlineStore.model.response.FormDTO;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.PageListOrders;
@@ -49,9 +48,25 @@ public class OrderController {
     @GetMapping("/v1/profile/orders/create")
     public String createOrderForm(Principal principal, Model model) {
         String email = principal.getName();
-        model.addAttribute("customer", customerService.customerProfile(email));
-        model.addAttribute("order", new RequestOrderDTO());
+        var customer = customerService.findCustomerByEmail(email);
+        model.addAttribute("order", new OrderDTO());
+        model.addAttribute("customer", customer);
+        model.addAttribute("allTypes", new String[]{Status.PAID.name(), Status.UNPAID.name()});
+        model.addAttribute("list", orderService.getOtherProduct("-1"));
+        model.addAttribute("form", new FormDTO());
         return "createorder";
+    }
+
+    @PostMapping("/v1/profile/orders/create")
+    public String createOrder(@ModelAttribute("form") FormDTO form,
+                              @ModelAttribute("order") OrderDTO order,
+                              Principal principal) {
+        String email = principal.getName();
+        List<Long> list = form.getSelectedItems();
+        var customer = customerService.findCustomerByEmail(email);
+        var newOrder = orderService.createOrder(email, customer.getId(), order, list);
+
+        return "redirect:/v1/profile/orders/%s/edit".formatted(newOrder.getId());
     }
 
     @GetMapping("/v1/profile/orders/{order-id}")

@@ -14,5 +14,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             " WHERE product_id NOT IN  ( SELECT product_id FROM order_product " +
             "WHERE order_id = :orderId ) GROUP BY product_id",
             nativeQuery = true)
-    List<Long> findByOrderId(@Param("orderId") String orderId);
+    List<Long> findByOrderId(@Param("orderId") Long orderId);
 }
