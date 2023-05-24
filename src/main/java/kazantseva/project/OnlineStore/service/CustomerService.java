@@ -11,13 +11,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface CustomerService {
-    LoginResponse login(Authentication auth);
-
     UserDetails toUserDetails(Customer customer);
 
-    CustomerDTO getCustomer(String email, Long customerId);
-
     void register(CreateCustomer customer);
+
+    LoginResponse login(Authentication auth);
+
+    CustomerDTO getCustomer(String email, Long customerId);
 
     CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer);
 

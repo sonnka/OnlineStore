@@ -65,21 +65,27 @@ public class CustomerController {
     @GetMapping("/v1/profile")
     public String getProfile(Model model, Principal principal) {
         String email = principal.getName();
+
         model.addAttribute("customer", customerService.customerProfile(email));
+
         return "profile";
     }
 
     @GetMapping("/v1/profile/edit")
     public String editProfile(Model model, Principal principal) {
         String email = principal.getName();
+
         FullCustomerDTO fullCustomer = customerService.customerProfile(email);
+
         RequestCustomer customer = RequestCustomer.builder()
                 .name(fullCustomer.getName())
                 .surname(fullCustomer.getSurname())
                 .build();
+
         model.addAttribute("customer", customer);
         model.addAttribute("email", fullCustomer.getEmail());
         model.addAttribute("totalAmountOfOrders", fullCustomer.getTotalAmountOfOrders());
+
         return "editprofile";
     }
 
@@ -101,15 +107,18 @@ public class CustomerController {
             model.addAttribute("totalAmountOfOrders", fullCustomer.getTotalAmountOfOrders());
             return "redirect:/v1/profile/edit?error";
         }
+
         customerService.updateCustomerProfile(email, newCustomer);
+
         model.addAttribute("customer", customerService.customerProfile(email));
+
         return "profile";
     }
 
     @GetMapping("/v1/profile/delete")
     public String deleteProfile(Principal principal) {
-        String email = principal.getName();
-        customerService.deleteProfile(email);
+        customerService.deleteProfile(principal.getName());
+
         return "redirect:/v1/logout";
     }
 }

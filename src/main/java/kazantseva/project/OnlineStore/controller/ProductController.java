@@ -26,7 +26,9 @@ public class ProductController {
         Pageable pageable = direction.equals("desc") ?
                 PageRequest.of(page - 1, size, Sort.Direction.DESC, sort) :
                 PageRequest.of(page - 1, size, Sort.Direction.ASC, sort);
+
         PageListProducts list = productService.getPageOfProducts(pageable);
+
         model.addAttribute("totalPages", list.getTotalPages());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalAmount", list.getTotalAmount());
@@ -35,6 +37,7 @@ public class ProductController {
         model.addAttribute("direction", direction);
         model.addAttribute("reverseDirection", direction.equals("asc") ? "desc" : "asc");
         model.addAttribute("products", list.getProducts());
+
         return "products";
     }
 }

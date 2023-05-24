@@ -110,8 +110,6 @@ public class OrderServiceImpl implements OrderService {
             order = new OrderDTO();
         }
 
-        order.setId(newOrder.getId());
-
         List<ProductDTO> newList = new ArrayList<>();
 
         if (list != null) {
@@ -126,6 +124,8 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.setProducts(newList);
+
+        order.setId(newOrder.getId());
 
         return updateOrder(email, customerId, newOrder.getId(), order);
     }
@@ -223,40 +223,6 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    private Customer checkCustomer(long customerId, String email) {
-        var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
-
-        if (!customer.getEmail().equals(email)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-        return customer;
-    }
-
-    private Order checkOrder(long orderId, long customerId) {
-        var order = orderRepository.findById(orderId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Order with ID " + orderId + " not found!"));
-
-        if (customerId != order.getCustomer().getId()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-
-        return order;
-    }
-
-    private Status checkStatus(String status) {
-        if (Status.UNPAID.name().equals(status)) {
-            return Status.UNPAID;
-        } else if (Status.PAID.name().equals(status)) {
-            return Status.PAID;
-        } else {
-            return Status.UNPAID;
-        }
-    }
-
     private OrderDTO updateOrder(Order oldOrder, RequestOrder newOrder) {
         if (Optional.ofNullable(newOrder.getStatus()).isPresent()) {
 
@@ -325,7 +291,6 @@ public class OrderServiceImpl implements OrderService {
         Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
 
         return toOrderDTO(orderRepository.save(oldOrder));
-
     }
 
     private OrderDTO updateProductList(Order oldOrder, List<Long> list) {
@@ -350,6 +315,40 @@ public class OrderServiceImpl implements OrderService {
             } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
         }
         return toOrderDTO(oldOrder);
+    }
+
+    private Customer checkCustomer(long customerId, String email) {
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with ID " + customerId + " not found!"));
+
+        if (!customer.getEmail().equals(email)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        return customer;
+    }
+
+    private Order checkOrder(long orderId, long customerId) {
+        var order = orderRepository.findById(orderId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with ID " + orderId + " not found!"));
+
+        if (customerId != order.getCustomer().getId()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        return order;
+    }
+
+    private Status checkStatus(String status) {
+        if (Status.UNPAID.name().equals(status)) {
+            return Status.UNPAID;
+        } else if (Status.PAID.name().equals(status)) {
+            return Status.PAID;
+        } else {
+            return Status.UNPAID;
+        }
     }
 
     private void setNewProductList(Order order, List<OrderProduct> products) {

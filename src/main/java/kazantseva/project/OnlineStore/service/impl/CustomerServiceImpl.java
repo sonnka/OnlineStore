@@ -35,6 +35,7 @@ public class CustomerServiceImpl implements CustomerService {
     public LoginResponse login(Authentication auth) {
         var user = customerRepository.findByEmailIgnoreCase(auth.getName()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong authentication data!"));
+
         return LoginResponse.builder().id(user.getId()).email(user.getEmail()).build();
     }
 
@@ -42,6 +43,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (customerRepository.existsByEmailIgnoreCase(customer.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, customer.getEmail() + " is already occupied!");
         }
+
         customerRepository.save(Customer.builder()
                 .email(customer.getEmail())
                 .password(passwordEncoder.encode(customer.getPassword()))
@@ -53,9 +55,12 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer) {
         var oldCustomer = findByIdAndCheckByEmail(customerId, email);
+
         Optional.ofNullable(customer.getName()).ifPresent(oldCustomer::setName);
         Optional.ofNullable(customer.getSurname()).ifPresent(oldCustomer::setSurname);
+
         customerRepository.save(oldCustomer);
+
         return toCustomerDTO(oldCustomer);
     }
 
@@ -63,6 +68,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional
     public void deleteCustomer(String email, long customerId) {
         var customer = findByIdAndCheckByEmail(customerId, email);
+
         orderRepository.deleteByCustomer(customer);
         customerRepository.delete(customer);
     }
@@ -70,6 +76,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer findCustomerByEmail(String email) {
         var customer = customerRepository.findByEmailIgnoreCase(email);
+
         return customer.orElse(null);
     }
 
@@ -87,6 +94,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public FullCustomerDTO customerProfile(String email) {
         var customer = findCustomerByEmail(email);
+
         return FullCustomerDTO.builder()
                 .id(customer.getId())
                 .name(customer.getName())
@@ -109,14 +117,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void updateCustomerProfile(String email, RequestCustomer newCustomer) {
         Customer customer = findCustomerByEmail(email);
+
         customer.setName(newCustomer.getName());
         customer.setSurname(newCustomer.getSurname());
+
         customerRepository.save(customer);
     }
 
     @Override
     public void deleteProfile(String email) {
         var customer = findCustomerByEmail(email);
+
         orderRepository.deleteByCustomer(customer);
         customerRepository.delete(customer);
     }
@@ -129,6 +140,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerDTO getCustomer(String email, Long customerId) {
         var customer = findByIdAndCheckByEmail(customerId, email);
+
         return toCustomerDTO(customer);
     }
 
@@ -136,9 +148,11 @@ public class CustomerServiceImpl implements CustomerService {
         var customer = customerRepository.findById(customerId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Customer with ID " + customerId + " not found!"));
+
         if (!customer.getEmail().equals(email)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+
         return customer;
     }
 
