@@ -62,127 +62,69 @@
 </header>
 <main>
     <section class="pt-5 pb-5">
-        <form
-                method="post"
-                role="form"
-                th:action="@{/v1/profile/orders/create}"
-                th:object="${order}"
-        >
-            <div th:if="${param.error}">
-                <div class="alert alert-danger">Invalid Data</div>
-            </div>
-            <div class="container">
-                <div class="row w-100">
-                    <div class="col-lg-12 col-md-12 col-12">
-                        <h3 class="display-5 mb-2 text-center">Your order</h3>
-                        <br><br>
-                        <br><br>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <label><b>Delivery Address</b></label>
-                            </div>
-                            <div class="col-md-3">
-                                <input
-                                        class="form-control"
-                                        id="deliveryAddress"
-                                        name="deliveryAddress"
-                                        placeholder="Enter delivery address"
-                                        th:field="*{deliveryAddress}"
-                                        type="text"
-                                />
-                            </div>
-                        </div>
-                        <br><br>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <label><b>Description</b></label>
-                            </div>
-                            <div class="col-md-3">
-                                <input
-                                        class="form-control"
-                                        id="description"
-                                        name="description"
-                                        placeholder="Enter description"
-                                        th:field="*{description}"
-                                        type="text"
-                                />
-                            </div>
-                        </div>
-                        <br><br>
-                        <div class="row">
-                            <div class="col-md-2">
-                                <span><b>Status</b></span>
-                            </div>
-                            <div class="col-md-3">
-
-                                <p th:each="ty : ${allTypes}">
-                                    <input th:field="*{status}" th:value="${ty}" type="radio"/>
-                                    <label th:for="${#ids.prev('status')}"
-                                           th:text="${ty}"></label>
-                                </p>
-
-                            </div>
-                        </div>
-                        <br><br>
-                        <table class="table table-condensed table-responsive" id="shoppingCart">
-                            <thead>
-                            <tr>
-                                <th style="width:60%">Product</th>
-                                <th style="width:12%">Price</th>
-                                <th style="width:10%">Quantity</th>
-                                <th style="width:16%"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="product, productStat : *{products}">
-                                <td data-th="Product">
-                                    <div class="row">
-                                        <div class="col-md-9 text-left mt-sm-2">
-                                            <h6 th:text="${product.name}"></h6>
-                                            <input th:field="*{products[__${productStat.index}__].id}" type="hidden"/>
-                                        </div>
+        <div th:if="${param.error}">
+            <div class="alert alert-danger">Invalid Data</div>
+        </div>
+        <div class="container">
+            <div class="row w-100">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <h3 class="display-5 mb-2 text-center">New order</h3>
+                    <br><br>
+                    <br><br>
+                    <table class="table table-condensed table-responsive" id="shoppingCart">
+                        <thead>
+                        <tr>
+                            <th style="width:60%">Product</th>
+                            <th style="width:12%">Price</th>
+                            <th style="width:10%">Quantity</th>
+                            <th style="width:16%"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product, productStat : *{order.getProducts()}">
+                            <td data-th="Product">
+                                <div class="row">
+                                    <div class="col-md-9 text-left mt-sm-2">
+                                        <h6 th:text="${product.name}"></h6>
+                                        <input th:field="*{products[__${productStat.index}__].id}" type="hidden"/>
                                     </div>
-                                </td>
-                                <td class="valueAlign" data-th="Price" th:text="${'₴' + product.price}"></td>
-                                <td data-th="Quantity">
-                                    <input class="form-control form-control-lg text-center input_count" min="1"
-                                           style="height: 25px"
-                                           th:name="|products[${productStat.index}].count|" th:value="${product.count}"
-                                           type="number"/>
-                                </td>
-                                <td class="actions" data-th="">
-                                    <div class="text-right valueAlign">
-                                        <a class="delete" data-toggle="tooltip"
-                                           th:href="@{/v1/profile/orders/{order-id}/products/{product-id}/delete(order-id=${order.id},product-id=${product.id})}"
-                                           title="Delete">
-                                            <i class="material-icons">&#xE872;</i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <br>
-                        <div class="col-md-2">
-                            <input class="profile-save-btn" data-target="#exampleModal1" data-toggle="modal"
-                                   data-whatever="product"
-                                   name="btnAddMore"
-                                   value="Add"/>
-                        </div>
-                        <br>
-                        <div class="float-right text-right">
-                            <h5>Subtotal:</h5>
-                            <h4 th:text="${'₴' + order.getPrice()}"></h4>
-                        </div>
+                                </div>
+                            </td>
+                            <td class="valueAlign" data-th="Price" th:text="${'₴' + product.price}"></td>
+                            <td data-th="Quantity">
+                                <input class="form-control form-control-lg text-center input_count" min="1"
+                                       style="height: 25px"
+                                       th:name="|products[${productStat.index}].count|" th:value="${product.count}"
+                                       type="number"/>
+                            </td>
+                            <td class="actions" data-th="">
+                                <div class="text-right valueAlign">
+                                    <a class="delete" data-toggle="tooltip"
+                                       th:href="@{/v1/profile/orders/{order-id}/products/{product-id}/delete(order-id=${order.id},product-id=${product.id})}"
+                                       title="Delete">
+                                        <i class="material-icons">&#xE872;</i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <br>
+                    <div class="col-md-2">
+                        <input class="profile-save-btn" data-target="#exampleModal1" data-toggle="modal"
+                               data-whatever="product"
+                               name="btnAddMore"
+                               value="Add"/>
                     </div>
-                </div>
-                <div class="row mt-4 d-flex align-items-center">
-                    <div class="col-sm-6 order-md-2 text-right">
-                        <input class="btn btn-primary mb-4 btn-lg pl-5 pr-5" type="submit" value="Save">
+                    <br>
+                    <div class="float-right text-right">
+                        <h5>Subtotal:</h5>
+                        <h4 th:text="${'₴' + order.getPrice()}"></h4>
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
+
         <div aria-hidden="true" aria-labelledby="exampleModalLabel"
              class="modal fade" id="exampleModal1"
              role="dialog"

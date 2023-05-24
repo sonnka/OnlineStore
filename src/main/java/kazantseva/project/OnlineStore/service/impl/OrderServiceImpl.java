@@ -9,7 +9,6 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -26,7 +25,6 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private OrderRepository orderRepository;
@@ -116,13 +114,15 @@ public class OrderServiceImpl implements OrderService {
 
         List<ProductDTO> newList = new ArrayList<>();
 
-        for (Long id : list) {
-            Optional<Product> product = productRepository.findById(id);
-            product.ifPresent(value -> newList.add(new ProductDTO(
-                    value.getId(),
-                    value.getName(),
-                    value.getPrice(),
-                    1)));
+        if (list != null) {
+            for (Long id : list) {
+                Optional<Product> product = productRepository.findById(id);
+                product.ifPresent(value -> newList.add(new ProductDTO(
+                        value.getId(),
+                        value.getName(),
+                        value.getPrice(),
+                        1)));
+            }
         }
 
         order.setProducts(newList);
@@ -144,8 +144,6 @@ public class OrderServiceImpl implements OrderService {
         checkCustomer(customerId, email);
 
         var order = checkOrder(orderId, customerId);
-
-        log.info("-----------------" + newOrder.getProducts().size());
 
         return updateOrder(order, newOrder);
     }
@@ -280,19 +278,11 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
             if (products.size() > 0) {
-                oldOrder.getProducts().clear();
 
-                oldOrder.getProducts().addAll(new ArrayList<>());
+                setNewProductList(oldOrder, products);
 
-                orderRepository.save(oldOrder);
+                oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
 
-                oldOrder.getProducts().addAll(products);
-
-                BigDecimal price = oldOrder.getProducts().stream()
-                        .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                oldOrder.setPrice(price);
             } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
         }
 
@@ -323,19 +313,11 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
             if (products.size() > 0) {
-                oldOrder.getProducts().clear();
 
-                oldOrder.getProducts().addAll(new ArrayList<>());
+                setNewProductList(oldOrder, products);
 
-                orderRepository.save(oldOrder);
+                oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
 
-                oldOrder.getProducts().addAll(products);
-
-                BigDecimal price = oldOrder.getProducts().stream()
-                        .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                oldOrder.setPrice(price);
             } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
         }
 
@@ -358,27 +340,32 @@ public class OrderServiceImpl implements OrderService {
 
                 List<OrderProduct> oldProducts = oldOrder.getProducts();
 
-                for (OrderProduct oldProduct : oldProducts) {
-                    newProducts.add(oldProduct);
-                }
+                newProducts.addAll(oldProducts);
 
-                oldOrder.getProducts().clear();
+                setNewProductList(oldOrder, newProducts);
 
-                oldOrder.getProducts().addAll(new ArrayList<>());
+                oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
 
-                orderRepository.save(oldOrder);
-
-                oldOrder.getProducts().addAll(newProducts);
-
-                BigDecimal price = oldOrder.getProducts().stream()
-                        .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                oldOrder.setPrice(price);
                 return toOrderDTO(orderRepository.save(oldOrder));
             } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
         }
         return toOrderDTO(oldOrder);
+    }
+
+    private void setNewProductList(Order order, List<OrderProduct> products) {
+        order.getProducts().clear();
+
+        order.getProducts().addAll(new ArrayList<>());
+
+        orderRepository.save(order);
+
+        order.getProducts().addAll(products);
+    }
+
+    private BigDecimal calculateNewPrice(List<OrderProduct> products) {
+        return products.stream()
+                .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private OrderDTO toOrderDTO(Order order) {
