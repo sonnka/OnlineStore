@@ -47,7 +47,7 @@ public class OrderController {
     }
 
     @GetMapping("/v1/profile/orders/create")
-    public String createOrder(Principal principal, Model model) {
+    public String createOrderForm(Principal principal, Model model) {
         String email = principal.getName();
         model.addAttribute("customer", customerService.customerProfile(email));
         model.addAttribute("order", new RequestOrderDTO());
@@ -64,8 +64,16 @@ public class OrderController {
         return "order";
     }
 
+    @GetMapping("/v1/profile/orders/{order-id}/delete")
+    public String deleteOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+        String email = principal.getName();
+        var customer = customerService.findCustomerByEmail(email);
+        orderService.deleteOrder(email, customer.getId(), Long.parseLong(orderId));
+        return "redirect:/v1/profile/orders";
+    }
+
     @GetMapping("/v1/profile/orders/{order-id}/edit")
-    public String editOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+    public String editOrderForm(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
         String email = principal.getName();
         var customer = customerService.findCustomerByEmail(email);
         var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
