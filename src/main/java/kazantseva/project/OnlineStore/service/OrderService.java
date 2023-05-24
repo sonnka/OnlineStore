@@ -18,7 +18,9 @@ public interface OrderService {
 
     OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder);
 
-    OrderDTO updateOrder(String email, long customerId, Long orderId, List<Long> list);
+    OrderDTO updateOrder(String email, long customerId, long orderId, OrderDTO newOrder);
+
+    OrderDTO updateProductList(String email, long customerId, Long orderId, List<Long> list);
 
     void deleteOrder(String email, long customerId, long orderId);
 

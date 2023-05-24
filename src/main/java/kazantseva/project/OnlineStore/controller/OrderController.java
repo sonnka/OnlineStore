@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.controller;
 import kazantseva.project.OnlineStore.model.entity.Status;
 import kazantseva.project.OnlineStore.model.request.RequestOrderDTO;
 import kazantseva.project.OnlineStore.model.response.FormDTO;
+import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.PageListOrders;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.OrderService;
@@ -84,12 +85,13 @@ public class OrderController {
         var customer = customerService.findCustomerByEmail(email);
         var order = orderService.getFullOrder(email, customer.getId(), Long.parseLong(orderId));
         List<Long> list = form.getSelectedItems();
-        var newOrder = orderService.updateOrder(email, customer.getId(), order.getId(), list);
+        var newOrder = orderService.updateProductList(email, customer.getId(), order.getId(), list);
         model.addAttribute("order", newOrder);
         model.addAttribute("customer", customer);
         model.addAttribute("allTypes", new String[]{Status.PAID.name(), Status.UNPAID.name()});
         model.addAttribute("list", orderService.getOtherProduct(orderId));
-        return "redirect:/v1/profile/orders/" + orderId;
+        model.addAttribute("form", new FormDTO());
+        return "redirect:/v1/profile/orders/%s/edit".formatted(orderId);
     }
 
     @GetMapping("/v1/profile/orders/{order-id}/products/{product-id}/delete")
@@ -104,6 +106,23 @@ public class OrderController {
         model.addAttribute("customer", customer);
         model.addAttribute("allTypes", new String[]{Status.PAID.name(), Status.UNPAID.name()});
         model.addAttribute("list", orderService.getOtherProduct(orderId));
+        model.addAttribute("form", new FormDTO());
+        return "redirect:/v1/profile/orders/%s/edit".formatted(orderId);
+    }
+
+    @PostMapping("/v1/profile/orders/{order-id}/edit")
+    public String updateOrder(@PathVariable(value = "order-id") String orderId,
+                              @ModelAttribute("order") OrderDTO order,
+                              Principal principal,
+                              Model model) {
+        String email = principal.getName();
+        var customer = customerService.findCustomerByEmail(email);
+        var newOrder = orderService.updateOrder(email, customer.getId(), Long.parseLong(orderId), order);
+        model.addAttribute("order", newOrder);
+        model.addAttribute("customer", customer);
+        model.addAttribute("allTypes", new String[]{Status.PAID.name(), Status.UNPAID.name()});
+        model.addAttribute("list", orderService.getOtherProduct(orderId));
+        model.addAttribute("form", new FormDTO());
         return "redirect:/v1/profile/orders/" + orderId;
     }
 
