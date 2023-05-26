@@ -26,4 +26,14 @@ public class PageController {
     public String products() {
         return "products";
     }
+
+    @GetMapping("/profile")
+    public String profile() {
+        return "profile";
+    }
+
+    @GetMapping("/profile/orders")
+    public String orders() {
+        return "orders";
+    }
 }

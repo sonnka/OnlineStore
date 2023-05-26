@@ -30,7 +30,6 @@ $(document).ready(function () {
             success: function () {
                 window.location = urlSuccess;
             }
-
         }).fail(function () {
             window.location = urlError;
         });

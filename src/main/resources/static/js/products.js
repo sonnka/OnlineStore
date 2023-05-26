@@ -28,7 +28,6 @@ $(document).ready(function () {
             },
             success: function (response) {
                 $('#table tbody').empty();
-                // add table rows
                 $.each(response.content, (i, product) => {
                     let productRow = '<tr>' +
                         '<td>' + product.name + '</td>' +

@@ -51,6 +51,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public UserDetails toUserDetails(Customer customer) {
+        return User.withUsername(customer.getEmail()).password(customer.getPassword()).roles("").build();
+    }
+
+    @Override
+    public CustomerDTO getCustomer(String email, Long customerId) {
+        var customer = findByIdAndCheckByEmail(customerId, email);
+
+        return toCustomerDTO(customer);
+    }
+
+    @Override
     public CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer) {
         var oldCustomer = findByIdAndCheckByEmail(customerId, email);
 
@@ -69,18 +81,6 @@ public class CustomerServiceImpl implements CustomerService {
 
         orderRepository.deleteByCustomer(customer);
         customerRepository.delete(customer);
-    }
-
-    @Override
-    public UserDetails toUserDetails(Customer customer) {
-        return User.withUsername(customer.getEmail()).password(customer.getPassword()).roles("").build();
-    }
-
-    @Override
-    public CustomerDTO getCustomer(String email, Long customerId) {
-        var customer = findByIdAndCheckByEmail(customerId, email);
-
-        return toCustomerDTO(customer);
     }
 
     private Customer findByIdAndCheckByEmail(Long customerId, String email) {
