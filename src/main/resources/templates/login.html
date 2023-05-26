@@ -18,15 +18,18 @@
     <a class="logo" th:href="@{/}">Online Store</a>
     <nav class="nav-items">
         <a th:href="@{/}">Home</a>
-        <a href="products.html">Products</a>
+        <a th:href="@{/products_html}">Products</a>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/v1/profile}">My profile</a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/v1/logout}">Logout</a>
+            <a th:href="@{/v1/profile/orders}">My orders</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/logout}">Logout</a>
         </div>
         <div sec:authorize="isAnonymous()">
-            <a th:href="@{/v1/login}">Register/Login</a>
+            <a th:href="@{/login}">Register/Login</a>
         </div>
     </nav>
 </header>
@@ -84,7 +87,7 @@
                         <div class="form-group mb-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
                             <span>      Not registered ?
-                                <a th:href="@{/v1/register}">   Register/Signup here</a>
+                                <a th:href="@{/register}">   Register/Signup here</a>
                             </span>
                         </div>
                     </form>

@@ -3,13 +3,15 @@ package kazantseva.project.OnlineStore.service.impl;
 import kazantseva.project.OnlineStore.model.entity.*;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.request.RequestProduct;
-import kazantseva.project.OnlineStore.model.response.*;
+import kazantseva.project.OnlineStore.model.response.ListOrders;
+import kazantseva.project.OnlineStore.model.response.OrderDTO;
+import kazantseva.project.OnlineStore.model.response.ProductDTO;
+import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -99,38 +101,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO createOrder(String email, long customerId, OrderDTO order, List<Long> list) {
-        var customer = checkCustomer(customerId, email);
-
-        var newOrder = new Order(null, LocalDateTime.now(ZoneOffset.UTC), Status.UNPAID, customer, new ArrayList<>(), "", "", BigDecimal.ZERO);
-
-        newOrder = orderRepository.save(newOrder);
-
-        if (order == null) {
-            order = new OrderDTO();
-        }
-
-        List<ProductDTO> newList = new ArrayList<>();
-
-        if (list != null) {
-            for (Long id : list) {
-                Optional<Product> product = productRepository.findById(id);
-                product.ifPresent(value -> newList.add(new ProductDTO(
-                        value.getId(),
-                        value.getName(),
-                        value.getPrice(),
-                        1)));
-            }
-        }
-
-        order.setProducts(newList);
-
-        order.setId(newOrder.getId());
-
-        return updateOrder(email, customerId, newOrder.getId(), order);
-    }
-
-    @Override
     public OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
         checkCustomer(customerId, email);
 
@@ -140,87 +110,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO updateOrder(String email, long customerId, long orderId, OrderDTO newOrder) {
-        checkCustomer(customerId, email);
-
-        var order = checkOrder(orderId, customerId);
-
-        return updateOrder(order, newOrder);
-    }
-
-    @Override
-    public OrderDTO updateProductList(String email, long customerId, Long orderId, List<Long> list) {
-        checkCustomer(customerId, email);
-
-        var order = checkOrder(orderId, customerId);
-
-        return updateProductList(order, list);
-    }
-
-    @Override
     public void deleteOrder(String email, long customerId, long orderId) {
         checkCustomer(customerId, email);
 
         var order = checkOrder(orderId, customerId);
 
         orderRepository.delete(order);
-    }
-
-    @Override
-    public PageListOrders getPageOfProducts(String email, Pageable pageable) {
-        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with email " + email + " not found!"));
-        Page<Order> allOrders = orderRepository.findByCustomerId(customer.getId(), pageable);
-        List<ShortOrderDTO> orders = allOrders.stream().map(ShortOrderDTO::new).toList();
-
-        return PageListOrders.builder()
-                .totalPages(allOrders.getTotalPages())
-                .totalAmount(orderRepository.findAllByCustomerId(customer.getId()).size())
-                .amount(orders.size())
-                .orders(orders)
-                .build();
-    }
-
-    @Override
-    public List<ShortProductDTO> getOtherProduct(String orderId) {
-        List<Long> products = productRepository.findByOrderId(Long.parseLong(orderId));
-        List<ShortProductDTO> list = new ArrayList<>();
-        for (Long id : products) {
-            productRepository.findById(id).ifPresent(product -> list.add(new ShortProductDTO(product)));
-        }
-        return list;
-    }
-
-    @Override
-    public OrderDTO removeProduct(String email, Long customerId, Long orderId, Long productId) {
-        checkCustomer(customerId, email);
-
-        var order = checkOrder(orderId, customerId);
-
-        var product = productRepository.findById(productId);
-
-        if (product.isPresent() && order.getProducts().size() > 1) {
-
-            List<OrderProduct> newProducts = order.getProducts().stream()
-                    .filter(item -> !item.getProduct().getId().equals(product.get().getId())).toList();
-
-            order.getProducts().clear();
-
-            order.getProducts().addAll(new ArrayList<>());
-
-            orderRepository.save(order);
-
-            order.getProducts().addAll(newProducts);
-
-            BigDecimal price = order.getProducts().stream()
-                    .map(prod -> BigDecimal.valueOf(prod.getAmount()).multiply(prod.getProduct().getPrice()))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            order.setPrice(price);
-            return toOrderDTO(orderRepository.save(order));
-        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
-
     }
 
     private OrderDTO updateOrder(Order oldOrder, RequestOrder newOrder) {
@@ -257,64 +152,6 @@ public class OrderServiceImpl implements OrderService {
 
         return toOrderDTO(orderRepository.save(oldOrder));
 
-    }
-
-    private OrderDTO updateOrder(Order oldOrder, OrderDTO newOrder) {
-        if (Optional.ofNullable(newOrder.getStatus()).isPresent()) {
-
-            Status status = checkStatus(newOrder.getStatus());
-
-            oldOrder.setStatus(status);
-        }
-
-        if (Optional.ofNullable(newOrder.getProducts()).isPresent()) {
-
-            List<OrderProduct> products = new ArrayList<>();
-            List<ProductDTO> inputProducts = newOrder.getProducts();
-
-            for (ProductDTO current : inputProducts) {
-                Optional<Product> product = productRepository.findById(current.getId());
-                if (product.isPresent() && current.getCount() > 0) {
-                    products.add(new OrderProduct(oldOrder, product.get(), current.getCount()));
-                }
-            }
-            if (products.size() > 0) {
-
-                setNewProductList(oldOrder, products);
-
-                oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
-
-            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
-        }
-
-        Optional.ofNullable(newOrder.getDeliveryAddress()).ifPresent(oldOrder::setDeliveryAddress);
-        Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
-
-        return toOrderDTO(orderRepository.save(oldOrder));
-    }
-
-    private OrderDTO updateProductList(Order oldOrder, List<Long> list) {
-        if (!list.isEmpty()) {
-            List<OrderProduct> newProducts = new ArrayList<>();
-            for (Long id : list) {
-                Optional<Product> product = productRepository.findById(id);
-                product.ifPresent(elem -> newProducts.add(new OrderProduct(oldOrder, elem, 1)));
-            }
-
-            if (newProducts.size() > 0) {
-
-                List<OrderProduct> oldProducts = oldOrder.getProducts();
-
-                newProducts.addAll(oldProducts);
-
-                setNewProductList(oldOrder, newProducts);
-
-                oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
-
-                return toOrderDTO(orderRepository.save(oldOrder));
-            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
-        }
-        return toOrderDTO(oldOrder);
     }
 
     private Customer checkCustomer(long customerId, String email) {

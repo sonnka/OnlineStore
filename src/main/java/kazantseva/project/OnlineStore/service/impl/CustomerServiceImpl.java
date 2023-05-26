@@ -1,12 +1,9 @@
 package kazantseva.project.OnlineStore.service.impl;
 
 import kazantseva.project.OnlineStore.model.entity.Customer;
-import kazantseva.project.OnlineStore.model.entity.Status;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
-import kazantseva.project.OnlineStore.model.request.RequestCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
-import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
@@ -39,6 +36,7 @@ public class CustomerServiceImpl implements CustomerService {
         return LoginResponse.builder().id(user.getId()).email(user.getEmail()).build();
     }
 
+    @Override
     public void register(CreateCustomer customer) {
         if (customerRepository.existsByEmailIgnoreCase(customer.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, customer.getEmail() + " is already occupied!");
@@ -68,65 +66,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional
     public void deleteCustomer(String email, long customerId) {
         var customer = findByIdAndCheckByEmail(customerId, email);
-
-        orderRepository.deleteByCustomer(customer);
-        customerRepository.delete(customer);
-    }
-
-    @Override
-    public Customer findCustomerByEmail(String email) {
-        var customer = customerRepository.findByEmailIgnoreCase(email);
-
-        return customer.orElse(null);
-    }
-
-    @Override
-    public void saveCustomer(RequestCustomerDTO customerDTO) {
-        customerRepository.save(Customer.builder()
-                .id(customerDTO.getId())
-                .name(customerDTO.getName())
-                .surname(customerDTO.getSurname())
-                .email(customerDTO.getEmail())
-                .password(passwordEncoder.encode(customerDTO.getPassword()))
-                .build());
-    }
-
-    @Override
-    public FullCustomerDTO customerProfile(String email) {
-        var customer = findCustomerByEmail(email);
-
-        return FullCustomerDTO.builder()
-                .id(customer.getId())
-                .name(customer.getName())
-                .surname(customer.getSurname())
-                .email(customer.getEmail())
-                .totalAmountOfOrders(orderRepository.findAllByCustomerId(customer.getId()).size())
-                .amountPaidOrders(orderRepository.findAllByCustomerId(customer.getId())
-                        .stream()
-                        .filter(order -> order.getStatus().equals(Status.PAID))
-                        .toList()
-                        .size())
-                .amountUnpaidOrders(orderRepository.findAllByCustomerId(customer.getId())
-                        .stream()
-                        .filter(order -> order.getStatus().equals(Status.UNPAID))
-                        .toList()
-                        .size())
-                .build();
-    }
-
-    @Override
-    public void updateCustomerProfile(String email, RequestCustomer newCustomer) {
-        Customer customer = findCustomerByEmail(email);
-
-        customer.setName(newCustomer.getName());
-        customer.setSurname(newCustomer.getSurname());
-
-        customerRepository.save(customer);
-    }
-
-    @Override
-    public void deleteProfile(String email) {
-        var customer = findCustomerByEmail(email);
 
         orderRepository.deleteByCustomer(customer);
         customerRepository.delete(customer);

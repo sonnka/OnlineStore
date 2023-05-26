@@ -35,10 +35,10 @@
             <a th:href="@{/v1/profile/orders}">My orders</a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/v1/logout}">Logout</a>
+            <a th:href="@{/logout}">Logout</a>
         </div>
         <div sec:authorize="isAnonymous()">
-            <a th:href="@{/v1/login}">Register/Login</a>
+            <a th:href="@{/login}">Register/Login</a>
         </div>
     </nav>
 </header>
