@@ -7,11 +7,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -19,28 +22,33 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.formLogin()
-                .loginPage("/v1/login")
-                .usernameParameter("email")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/", true)
-                .failureUrl("/v1/login?error")
-                .permitAll()
-                .and()
-                .logout()
-                .logoutUrl("/v1/logout");
-
-        http.headers().frameOptions().disable();
-        http.csrf().disable().authorizeHttpRequests((request) -> request
+        http.authorizeHttpRequests((request) -> request
                 .requestMatchers("/").permitAll()
-                .requestMatchers("/v1/**").permitAll()
                 .requestMatchers("/home").permitAll()
                 .requestMatchers("/products").permitAll()
+                .requestMatchers("/products_html").permitAll()
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/login").permitAll()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/customers/**").authenticated()
-                .anyRequest().authenticated()).httpBasic();
+                .anyRequest().authenticated());
+
+        http.httpBasic(withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(c -> c
+                        .frameOptions()
+                        .disable());
+
+        http.formLogin()
+                .loginPage("/login")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/", true)
+                .failureUrl("/login?error")
+                .permitAll()
+                .and()
+                .logout()
+                .logoutUrl("/logout");
 
         return http.build();
     }
