@@ -39,6 +39,10 @@
                     "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js">
     </script>
     <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/order.js}" type="text/javascript"></script>
 </head>
 <body>
 <header class="header">
@@ -67,12 +71,14 @@
                 <div class="col-lg-12 col-md-12 col-12">
                     <h3 class="display-5 mb-2 text-center">Your order</h3>
                     <br><br>
+                    <input id="customerId" th:value="${customerId}" type="hidden">
+                    <input id="orderId" th:value="${orderId}" type="hidden">
                     <div class="float-right col-md-2">
-                        <a th:href="@{/v1/profile/orders/{order-id}/edit(order-id=${order.getId()})}"><input
+                        <a id="editOrderButton"><input
                                 class="profile-edit-btn" name="btnAddMore" type="submit"
                                 value="Edit Order"/></a>
                         <br><br>
-                        <a th:href="@{/v1/profile/orders/{order-id}/delete(order-id=${order.getId()})}"><input
+                        <a id="deleteOrderButton"><input
                                 class="profile-delete-btn" name="btnAddMore" type="submit"
                                 value="Delete Order"/></a>
                     </div>
@@ -81,7 +87,7 @@
                             <label><b>Creation date</b></label>
                         </div>
                         <div class="col-md-3">
-                            <p th:text="${order.getDate()}">
+                            <p id="orderDate">
                         </div>
                     </div>
                     <br><br>
@@ -90,7 +96,7 @@
                             <label><b>Delivery Address</b></label>
                         </div>
                         <div class="col-md-3">
-                            <p th:text="${order.getDeliveryAddress()}">
+                            <p id="orderDeliveryAddress">
                         </div>
                     </div>
                     <br><br>
@@ -99,7 +105,7 @@
                             <label><b>Description</b></label>
                         </div>
                         <div class="col-md-3">
-                            <p th:text="${order.getDescription()}">
+                            <p id="orderDescription">
                         </div>
                     </div>
                     <br><br>
@@ -108,11 +114,11 @@
                             <span><b>Status</b></span>
                         </div>
                         <div class="col-md-3">
-                            <p th:text="${order.getStatus()}">
+                            <p id="orderStatus">
                         </div>
                     </div>
                     <br><br>
-                    <table class="table table-condensed table-responsive" id="shoppingCart">
+                    <table class="table table-condensed table-responsive" id="productsTable">
                         <thead>
                         <tr>
                             <th style="width:60%">Product</th>
@@ -121,24 +127,24 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="product : ${order.getProducts()}">
-                            <td data-th="Product">
-                                <div class="row">
-                                    <div class="col-md-9 text-left mt-sm-2">
-                                        <h6 th:text="${product.getName()}"></h6>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="valueAlign" data-th="Price" th:text="${'₴' + product.getPrice()}"></td>
-                            <td class="valueAlign" data-th="Quantity" th:text="${product.getCount()}"></td>
-                        </tr>
+                        <!--                        <tr th:each="product : ${order.getProducts()}">-->
+                        <!--                            <td data-th="Product">-->
+                        <!--                                <div class="row">-->
+                        <!--                                    <div class="col-md-9 text-left mt-sm-2">-->
+                        <!--                                        <h6 th:text="${product.getName()}"></h6>-->
+                        <!--                                    </div>-->
+                        <!--                                </div>-->
+                        <!--                            </td>-->
+                        <!--                            <td class="valueAlign" data-th="Price" th:text="${'₴' + product.getPrice()}"></td>-->
+                        <!--                            <td class="valueAlign" data-th="Quantity" th:text="${product.getCount()}"></td>-->
+                        <!--                        </tr>-->
 
                         </tbody>
                     </table>
                     <br>
                     <div class="float-right text-right">
                         <h5>Subtotal:</h5>
-                        <h4 th:text="${'₴' + order.getPrice()}"></h4>
+                        <h4 id="orderPrice"></h4>
                     </div>
                 </div>
             </div>

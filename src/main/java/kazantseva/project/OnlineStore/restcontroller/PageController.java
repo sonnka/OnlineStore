@@ -70,4 +70,12 @@ public class PageController {
         model.addAttribute("customerId", customerId);
         return "order";
     }
+
+    @GetMapping("/profile/orders/{order-id}/edit")
+    public String editOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+        long customerId = customerService.getCustomerId(principal.getName());
+        model.addAttribute("orderId", Long.valueOf(orderId));
+        model.addAttribute("customerId", customerId);
+        return "editorder";
+    }
 }

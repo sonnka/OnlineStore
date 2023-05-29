@@ -27,24 +27,15 @@ $(document).ready(function () {
     }
 
     function displayData(responseJson) {
-        var customerNameSurname = $('#customerNameSurname');
-        var customerName = $('#customerName');
-        var customerSurname = $('#customerSurname');
-        var customerEmail = $('#customerEmail');
-        var customerEmail2 = $('#customerEmail2');
-        var totalAmountOfOrders = $('#totalAmountOfOrders');
-        var totalAmountOfOrders2 = $('#totalAmountOfOrders2');
-        var amountPaidOrders = $('#amountPaidOrders');
-        var amountUnpaidOrders = $('#amountUnpaidOrders');
-        customerNameSurname.text(responseJson.name + " " + responseJson.surname);
-        customerName.text(responseJson.name);
-        customerSurname.text(responseJson.surname);
-        customerEmail.text(responseJson.email);
-        customerEmail2.text(responseJson.email);
-        totalAmountOfOrders.text(responseJson.totalAmountOfOrders);
-        totalAmountOfOrders2.text(responseJson.totalAmountOfOrders);
-        amountPaidOrders.text(responseJson.amountOfPaidOrders);
-        amountUnpaidOrders.text(responseJson.amountOfUnpaidOrders);
+        $('#customerNameSurname').text(responseJson.name + " " + responseJson.surname);
+        $('#customerName').text(responseJson.name);
+        $('#customerSurname').text(responseJson.surname);
+        $('#customerEmail').text(responseJson.email);
+        $('#customerEmail2').text(responseJson.email);
+        $('#totalAmountOfOrders').text(responseJson.totalAmountOfOrders);
+        $('#totalAmountOfOrders2').text(responseJson.totalAmountOfOrders);
+        $('#amountPaidOrders').text(responseJson.amountOfPaidOrders);
+        $('#amountUnpaidOrders').text(responseJson.amountOfUnpaidOrders);
     }
 
     function deleteProfile() {
