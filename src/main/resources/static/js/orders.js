@@ -1,39 +1,53 @@
 $(document).ready(function () {
+    var createOrderButton = $('#createOrderButton');
+    var customerId = $('#customerId').val();
     let totalPages = 1;
-    let sort = "name"
+    let sort = "date"
     let dir = "asc";
-    var sortName = $('#sortName');
-    var sortPrice = $('#sortPrice');
+    var sortDate = $('#sortDate');
+    var sortStatus = $('#sortStatus');
+    var sortPrice = $('#orderSortPrice');
 
-    sortName.click(function () {
+    sortDate.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
-        sort = "name";
-        fetchProduct(0);
+        sort = "date";
+        fetchOrder(0);
+    });
+    sortStatus.click(function () {
+        dir = dir === "asc" ? "desc" : "asc";
+        sort = "status";
+        fetchOrder(0);
     });
     sortPrice.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
         sort = "price";
-        fetchProduct(0);
+        fetchOrder(0);
     });
 
-    function fetchProduct(startPage) {
+    createOrderButton.click(function () {
+        window.location = "/profile/orders/create";
+    });
+
+    function fetchOrder(startPage) {
 
         $.ajax({
             type: "GET",
-            url: "/products",
+            url: "/customers/" + customerId + "/orders",
             data: {
                 page: startPage,
-                size: 10,
+                size: 5,
                 sort: sort + "," + dir
             },
             success: function (response) {
-                $('#table tbody').empty();
-                $.each(response.content, (i, product) => {
-                    let productRow = '<tr>' +
-                        '<td>' + product.name + '</td>' +
-                        '<td>' + product.price + '</td>' +
+                $('#ordersTable tbody').empty();
+                $.each(response.content, (i, order) => {
+                    let orderRow = '<tr>' +
+                        '<td>' + order.date + '</td>' +
+                        '<td>' + order.status + '</td>' +
+                        '<td>' + order.price + '</td>' +
+                        '<td><a class="btn btn-primary" href="/profile/orders/' + order.id + '">Open</a></td>' +
                         '</tr>';
-                    $('#table tbody').append(productRow);
+                    $('#ordersTable tbody').append(orderRow);
                 });
 
                 if ($('ul.pagination li').length - 2 != response.totalPages) {
@@ -104,12 +118,12 @@ $(document).ready(function () {
 
         if (val.toUpperCase() === "« FIRST") {
             let currentActive = $("li.active");
-            fetchProduct(0);
+            fetchOrder(0);
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "LAST »") {
-            fetchProduct(totalPages - 1);
+            fetchOrder(totalPages - 1);
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 
@@ -118,7 +132,7 @@ $(document).ready(function () {
             if (activeValue < totalPages) {
                 let currentActive = $("li.active");
                 startPage = activeValue;
-                fetchProduct(startPage);
+                fetchOrder(startPage);
                 $("li.active").removeClass("active");
                 currentActive.next().addClass("active");
             }
@@ -126,20 +140,20 @@ $(document).ready(function () {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue > 1) {
                 startPage = activeValue - 2;
-                fetchProduct(startPage);
+                fetchOrder(startPage);
                 let currentActive = $("li.active");
                 currentActive.removeClass("active");
                 currentActive.prev().addClass("active");
             }
         } else {
             startPage = parseInt(val - 1);
-            fetchProduct(startPage);
+            fetchOrder(startPage);
             $("li.active").removeClass("active");
             $(this).parent().addClass("active");
         }
     });
 
     (function () {
-        fetchProduct(0);
+        fetchOrder(0);
     })();
 });

@@ -1,10 +1,11 @@
 package kazantseva.project.OnlineStore.restcontroller;
 
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
-import kazantseva.project.OnlineStore.model.response.ListOrders;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
+import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +17,9 @@ public class RestOrderController {
     private OrderService orderService;
 
     @GetMapping("/customers/{customer-id}/orders")
-    public ListOrders getOrders(Authentication auth,
-                                @PathVariable("customer-id") long customerId,
-                                Pageable pageable) {
+    public Page<ShortOrderDTO> getOrders(Authentication auth,
+                                         @PathVariable("customer-id") long customerId,
+                                         Pageable pageable) {
         return orderService.getOrders(auth.getName(), customerId, pageable);
     }
 

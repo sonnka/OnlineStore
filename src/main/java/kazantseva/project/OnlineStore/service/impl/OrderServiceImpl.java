@@ -3,7 +3,6 @@ package kazantseva.project.OnlineStore.service.impl;
 import kazantseva.project.OnlineStore.model.entity.*;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.request.RequestProduct;
-import kazantseva.project.OnlineStore.model.response.ListOrders;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ProductDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
@@ -12,6 +11,7 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,16 +34,11 @@ public class OrderServiceImpl implements OrderService {
     private ProductRepository productRepository;
 
     @Override
-    public ListOrders getOrders(String email, long customerId, Pageable pageable) {
+    public Page<ShortOrderDTO> getOrders(String email, long customerId, Pageable pageable) {
         checkCustomer(customerId, email);
 
-        List<Order> orders = orderRepository.findByCustomerId(customerId, pageable).stream().toList();
-
-        return ListOrders.builder()
-                .totalAmount(orderRepository.findAllByCustomerId(customerId).size())
-                .amount(orders.size())
-                .orders(orders.stream().map(ShortOrderDTO::new).toList())
-                .build();
+        return orderRepository.findByCustomerId(customerId, pageable)
+                .map(ShortOrderDTO::new);
     }
 
     @Override

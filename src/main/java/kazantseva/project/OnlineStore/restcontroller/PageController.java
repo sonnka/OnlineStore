@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
 
@@ -53,5 +54,20 @@ public class PageController {
         long customerId = customerService.getCustomerId(principal.getName());
         model.addAttribute("customerId", customerId);
         return "orders";
+    }
+
+    @GetMapping("/profile/orders/create")
+    public String createOrder(Principal principal, Model model) {
+        long customerId = customerService.getCustomerId(principal.getName());
+        model.addAttribute("customerId", customerId);
+        return "createorder";
+    }
+
+    @GetMapping("/profile/orders/{order-id}")
+    public String order(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+        long customerId = customerService.getCustomerId(principal.getName());
+        model.addAttribute("orderId", Long.valueOf(orderId));
+        model.addAttribute("customerId", customerId);
+        return "order";
     }
 }
