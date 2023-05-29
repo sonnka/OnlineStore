@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
+import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
@@ -34,8 +35,8 @@ public class RestCustomerController {
     }
 
     @GetMapping("/customers/{customer-id}")
-    public CustomerDTO getCustomer(Authentication auth,
-                                   @PathVariable("customer-id") long customerId) {
+    public FullCustomerDTO getCustomer(Authentication auth,
+                                       @PathVariable("customer-id") long customerId) {
         return customerService.getCustomer(auth.getName(), customerId);
     }
 

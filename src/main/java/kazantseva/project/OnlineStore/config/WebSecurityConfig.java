@@ -31,6 +31,8 @@ public class WebSecurityConfig {
                 .requestMatchers("/login").permitAll()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/customers/**").authenticated()
+                .requestMatchers("/profile").authenticated()
+                .requestMatchers("/profile/**").authenticated()
                 .anyRequest().authenticated());
 
         http.httpBasic(withDefaults())

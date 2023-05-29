@@ -1,9 +1,11 @@
 package kazantseva.project.OnlineStore.service.impl;
 
 import kazantseva.project.OnlineStore.model.entity.Customer;
+import kazantseva.project.OnlineStore.model.entity.Status;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
+import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
@@ -56,10 +58,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerDTO getCustomer(String email, Long customerId) {
+    public FullCustomerDTO getCustomer(String email, Long customerId) {
         var customer = findByIdAndCheckByEmail(customerId, email);
+        return toFullCustomerDTO(customer);
+    }
 
-        return toCustomerDTO(customer);
+    @Override
+    public Long getCustomerId(String email) {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with email " + email + " not found!"));
+        return customer.getId();
     }
 
     @Override
@@ -101,6 +110,26 @@ public class CustomerServiceImpl implements CustomerService {
                 .name(customer.getName())
                 .surname(customer.getSurname())
                 .email(customer.getEmail())
+                .build();
+    }
+
+    private FullCustomerDTO toFullCustomerDTO(Customer customer) {
+        return FullCustomerDTO.builder()
+                .id(customer.getId())
+                .name(customer.getName())
+                .surname(customer.getSurname())
+                .email(customer.getEmail())
+                .totalAmountOfOrders(orderRepository.findAllByCustomerId(customer.getId()).size())
+                .amountOfPaidOrders(orderRepository.findAllByCustomerId(customer.getId())
+                        .stream()
+                        .filter(order -> order.getStatus().equals(Status.PAID))
+                        .toList()
+                        .size())
+                .amountOfUnpaidOrders(orderRepository.findAllByCustomerId(customer.getId())
+                        .stream()
+                        .filter(order -> order.getStatus().equals(Status.UNPAID))
+                        .toList()
+                        .size())
                 .build();
     }
 }
