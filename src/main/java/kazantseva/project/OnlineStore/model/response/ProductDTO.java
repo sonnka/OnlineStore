@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
+import java.text.DecimalFormat;
 
 @Getter
 @Setter
@@ -18,14 +18,17 @@ public class ProductDTO {
 
     private String name;
 
-    private BigDecimal price;
+    private String price;
 
     private int count;
 
     public ProductDTO(OrderProduct product) {
+        DecimalFormat df = new DecimalFormat("#,###.00");
+        var price = df.format(product.getProduct().getPrice());
+
         this.id = product.getProduct().getId();
         this.name = product.getProduct().getName();
-        this.price = product.getProduct().getPrice();
+        this.price = price;
         this.count = product.getAmount();
     }
 }

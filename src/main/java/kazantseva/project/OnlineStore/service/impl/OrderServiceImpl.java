@@ -12,6 +12,7 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
@@ -209,7 +212,10 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderDTO toOrderDTO(Order order) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        DecimalFormat df = new DecimalFormat("#,###.00");
         String formatDateTime = order.getDate().format(formatter);
+        var price = df.format(order.getPrice());
+        log.info(price);
 
         return new OrderDTO(order.getId(),
                 formatDateTime,
@@ -217,7 +223,7 @@ public class OrderServiceImpl implements OrderService {
                 order.getProducts().stream().map(ProductDTO::new).toList(),
                 order.getDeliveryAddress(),
                 order.getDescription(),
-                order.getPrice()
+                price
         );
     }
 }
