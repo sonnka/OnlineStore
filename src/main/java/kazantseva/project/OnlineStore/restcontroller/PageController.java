@@ -60,7 +60,7 @@ public class PageController {
     public String createOrder(Principal principal, Model model) {
         long customerId = customerService.getCustomerId(principal.getName());
         model.addAttribute("customerId", customerId);
-        return "createorder";
+        return "editorder";
     }
 
     @GetMapping("/profile/orders/{order-id}")
