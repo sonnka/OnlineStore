@@ -3,14 +3,18 @@ $(document).ready(function () {
     var customerId = $('#customerId').val();
     var orderId = $('#orderId').val();
 
-
     var date = $('#date');
     var status = $("#statuses");
     var deliveryAddress = $('#deliveryAddress');
     var description = $('#description');
     var price = $('#price');
 
-    loadOrder();
+    if (orderId === "-1") {
+        createOrder();
+    } else {
+        loadOrder();
+    }
+
 
     var saveButton = $('#saveButton');
     var addProductButton = $('#addProductButton');
@@ -43,6 +47,7 @@ $(document).ready(function () {
         });
         updateList();
         updateOrder();
+        window.location = "/profile/orders/" + orderId + "/edit";
     });
 
     function loadOrder() {
@@ -111,7 +116,7 @@ $(document).ready(function () {
                 window.location = "/profile/orders/" + orderId;
             }
         }).fail(function () {
-            window.location = "/profile/orders/" + orderId;
+            window.location = "/profile/orders/" + orderId + "/edit?error";
         });
 
         listOfProducts = [];
@@ -140,6 +145,29 @@ $(document).ready(function () {
         updateList();
         listOfProducts = listOfProducts.filter(prod => prod.name !== productName);
         updateOrder();
+        window.location = "/profile/orders/" + orderId + "/edit";
+    }
+
+    function createOrder() {
+        jsonData = {
+            "status": "UNPAID",
+            "products": [],
+            "deliveryAddress": "",
+            "description": ""
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/customers/" + customerId + "/orders",
+            data: JSON.stringify(jsonData),
+            contentType: 'application/json',
+            success: function (responseJson) {
+                orderId = responseJson.id;
+                window.location = "/profile/orders/" + orderId + "/edit";
+            }
+        }).fail(function () {
+            window.location = "/profile/orders";
+        });
     }
 
 });

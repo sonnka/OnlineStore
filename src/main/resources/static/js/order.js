@@ -50,9 +50,8 @@ $(document).ready(function () {
             success: function () {
                 window.location = "/profile/orders";
             },
-            error: function (e) {
-                console.log(e);
-                alert("fail");
+            error: function () {
+                window.location = "/profile/orders";
             }
         })
     }

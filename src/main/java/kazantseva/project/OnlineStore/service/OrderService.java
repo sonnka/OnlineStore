@@ -14,7 +14,7 @@ public interface OrderService {
 
     OrderDTO getFullOrder(String email, long customerId, long orderId);
 
-    void createOrder(String email, long customerId, RequestOrder order);
+    OrderDTO createOrder(String email, long customerId, RequestOrder order);
 
     List<ShortProductDTO> getProductList(String email, long customerId, long orderId);
 

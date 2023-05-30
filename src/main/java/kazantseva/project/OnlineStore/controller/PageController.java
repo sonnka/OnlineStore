@@ -1,4 +1,4 @@
-package kazantseva.project.OnlineStore.restcontroller;
+package kazantseva.project.OnlineStore.controller;
 
 import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
@@ -59,6 +59,7 @@ public class PageController {
     @GetMapping("/profile/orders/create")
     public String createOrder(Principal principal, Model model) {
         long customerId = customerService.getCustomerId(principal.getName());
+        model.addAttribute("orderId", -1L);
         model.addAttribute("customerId", customerId);
         return "editorder";
     }

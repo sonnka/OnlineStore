@@ -4,7 +4,7 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Online Store</title>
+    <title>Edit order</title>
     <link crossorigin="anonymous"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
@@ -135,32 +135,6 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <!--                        <tr th:each="product, productStat : *{products}">-->
-                        <!--                            <td data-th="Product">-->
-                        <!--                                <div class="row">-->
-                        <!--                                    <div class="col-md-9 text-left mt-sm-2">-->
-                        <!--                                        <h6 th:text="${product.name}"></h6>-->
-                        <!--                                        <input th:field="*{products[__${productStat.index}__].id}" type="hidden"/>-->
-                        <!--                                    </div>-->
-                        <!--                                </div>-->
-                        <!--                            </td>-->
-                        <!--                            <td class="valueAlign" data-th="Price" th:text="${'₴' + product.price}"></td>-->
-                        <!--                            <td data-th="Quantity">-->
-                        <!--                                <input class="form-control form-control-lg text-center input_count" min="1"-->
-                        <!--                                       style="height: 25px"-->
-                        <!--                                       th:name="|products[${productStat.index}].count|" th:value="${product.count}"-->
-                        <!--                                       type="number"/>-->
-                        <!--                            </td>-->
-                        <!--                                                    <td class="actions" data-th="">-->
-                        <!--                                                        <div class="text-right valueAlign">-->
-                        <!--                                                            <a class="delete" data-toggle="tooltip"-->
-                        <!--                                                               th:href="@{/v1/profile/orders/{order-id}/products/{product-id}/delete(order-id=${order.id},product-id=${product.id})}"-->
-                        <!--                                                               title="Delete">-->
-                        <!--                                                                <i class="material-icons">&#xE872;</i>-->
-                        <!--                                                            </a>-->
-                        <!--                                                        </div>-->
-                        <!--                                                    </td>-->
-                        <!--                        </tr>-->
                         </tbody>
                     </table>
                     <br>
@@ -198,16 +172,6 @@
                     <div class="modal-body">
                         <table class="table table-condensed table-responsive" id="productsList">
                             <tbody>
-                            <!--                                <tr th:each="item : ${list}">-->
-                            <!--                                    <td>-->
-                            <!--                                        <input th:attr="id='scales_' + ${item.id}" th:name="${'selectedItems'}"-->
-                            <!--                                               th:value="${item.id}" type="checkbox">-->
-                            <!--                                        <label th:for="${'scales_' + item.id}" th:text="${item.name}"></label>-->
-                            <!--                                    </td>-->
-                            <!--                                    <td>-->
-                            <!--                                        <label th:text="${'&emsp;' + item.price}"></label>-->
-                            <!--                                    </td>-->
-                            <!--                                </tr>-->
                             </tbody>
                         </table>
                     </div>

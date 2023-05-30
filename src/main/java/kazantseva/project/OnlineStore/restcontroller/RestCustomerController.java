@@ -43,7 +43,7 @@ public class RestCustomerController {
     @PatchMapping("/customers/{customer-id}")
     public CustomerDTO updateCustomer(Authentication auth,
                                       @PathVariable("customer-id") long customerId,
-                                      @RequestBody RequestCustomer customer) {
+                                      @RequestBody @Valid RequestCustomer customer) {
         return customerService.updateCustomer(auth.getName(), customerId, customer);
     }
 

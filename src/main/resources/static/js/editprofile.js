@@ -1,6 +1,6 @@
 $(document).ready(function () {
     var customerId = $('#customerId').val();
-    var saveOrderButton = $('#saveOrderButton');
+    var saveCustomerButton = $('#saveCustomerButton');
 
     var nameSurname = $('#nameSurname');
     var name = $('#name');
@@ -10,8 +10,8 @@ $(document).ready(function () {
 
     loadProfile();
 
-    saveOrderButton.click(function () {
-        updateOrder();
+    saveCustomerButton.click(function () {
+        updateCustomer();
     });
 
     function loadProfile() {
@@ -32,7 +32,7 @@ $(document).ready(function () {
         totalAmount.text(responseJson.totalAmountOfOrders);
     }
 
-    function updateOrder() {
+    function updateCustomer() {
         jsonData = {
             "id": customerId,
             "name": name.val(),
@@ -49,8 +49,7 @@ $(document).ready(function () {
                 window.location = "/profile";
             }
         }).fail(function () {
-            alert("fail");
-            window.location = "/profile";
+            window.location = "/profile/edit?error";
         });
     }
 

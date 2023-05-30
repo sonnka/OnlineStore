@@ -56,8 +56,8 @@ $(document).ready(function () {
                 }
             },
             error: function (e) {
-                alert("ERROR: ", e);
                 console.log("ERROR: ", e);
+                window.location = "/";
             }
         });
     }

@@ -34,10 +34,10 @@ public class RestOrderController {
     }
 
     @PostMapping("/customers/{customer-id}/orders")
-    public void createOrder(Authentication auth,
-                            @PathVariable("customer-id") long customerId,
-                            @RequestBody RequestOrder order) {
-        orderService.createOrder(auth.getName(), customerId, order);
+    public OrderDTO createOrder(Authentication auth,
+                                @PathVariable("customer-id") long customerId,
+                                @RequestBody RequestOrder order) {
+        return orderService.createOrder(auth.getName(), customerId, order);
     }
 
     @GetMapping("/customers/{customer-id}/orders/{order-id}/productList")

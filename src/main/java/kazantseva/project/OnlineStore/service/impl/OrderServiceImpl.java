@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(String email, long customerId, RequestOrder order) {
+    public OrderDTO createOrder(String email, long customerId, RequestOrder order) {
         var customer = checkCustomer(customerId, email);
 
         LocalDateTime date = LocalDateTime.now(ZoneOffset.UTC);
@@ -74,26 +74,22 @@ public class OrderServiceImpl implements OrderService {
                 .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (!price.equals(BigDecimal.ZERO)) {
+        var createdOrder = orderRepository.save(Order.builder()
+                .date(date)
+                .status(status)
+                .customer(customer)
+                .deliveryAddress(order.getDeliveryAddress())
+                .description(order.getDescription())
+                .price(price)
+                .build());
 
-            var createdOrder = orderRepository.save(Order.builder()
-                    .date(date)
-                    .status(status)
-                    .customer(customer)
-                    .deliveryAddress(order.getDeliveryAddress())
-                    .description(order.getDescription())
-                    .price(price)
-                    .build());
+        for (OrderProduct product : products) {
+            product.setOrder(createdOrder);
+        }
 
-            for (OrderProduct product : products) {
-                product.setOrder(createdOrder);
-            }
+        createdOrder.setProducts(products);
 
-            createdOrder.setProducts(products);
-
-            orderRepository.save(createdOrder);
-
-        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+        return toOrderDTO(orderRepository.save(createdOrder));
     }
 
     @Override

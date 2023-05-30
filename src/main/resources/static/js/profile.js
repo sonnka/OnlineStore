@@ -47,7 +47,7 @@ $(document).ready(function () {
             },
             error: function (e) {
                 console.log(e);
-                alert("fail");
+                window.location = "/";
             }
         })
     }
@@ -63,7 +63,7 @@ $(document).ready(function () {
             },
             error: function (e) {
                 console.log(e);
-                alert("fail");
+                window.location = "/";
             }
         })
     }
