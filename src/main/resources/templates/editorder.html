@@ -117,14 +117,11 @@
                         <div class="col-md-2">
                             <span><b>Status</b></span>
                         </div>
-                        <div class="col-md-3" id="statuses">
-
-                            <!--                            <p th:each="ty : ${allTypes}">-->
-                            <!--                                <input th:field="*{status}" th:value="${ty}" type="radio"/>-->
-                            <!--                                <label th:for="${#ids.prev('status')}"-->
-                            <!--                                       th:text="${ty}"></label>-->
-                            <!--                            </p>-->
-
+                        <div class="col-md-3">
+                            <select class="form-select" id="statuses">
+                                <option value="PAID">PAID</option>
+                                <option value="UNPAID">UNPAID</option>
+                            </select>
                         </div>
                     </div>
                     <br><br>
@@ -201,16 +198,16 @@
                     <div class="modal-body">
                         <table class="table table-condensed table-responsive" id="productsList">
                             <tbody>
-                            <!--                            <tr th:each="item : ${list}">-->
-                            <!--                                <td>-->
-                            <!--                                    <input th:attr="id='scales_' + ${item.id}" th:name="${'selectedItems'}"-->
-                            <!--                                           th:value="${item.id}" type="checkbox">-->
-                            <!--                                    <label th:for="${'scales_' + item.id}" th:text="${item.name}"></label>-->
-                            <!--                                </td>-->
-                            <!--                                <td>-->
-                            <!--                                    <label th:text="${'&emsp;' + item.price}"></label>-->
-                            <!--                                </td>-->
-                            <!--                            </tr>-->
+                            <!--                                <tr th:each="item : ${list}">-->
+                            <!--                                    <td>-->
+                            <!--                                        <input th:attr="id='scales_' + ${item.id}" th:name="${'selectedItems'}"-->
+                            <!--                                               th:value="${item.id}" type="checkbox">-->
+                            <!--                                        <label th:for="${'scales_' + item.id}" th:text="${item.name}"></label>-->
+                            <!--                                    </td>-->
+                            <!--                                    <td>-->
+                            <!--                                        <label th:text="${'&emsp;' + item.price}"></label>-->
+                            <!--                                    </td>-->
+                            <!--                                </tr>-->
                             </tbody>
                         </table>
                     </div>

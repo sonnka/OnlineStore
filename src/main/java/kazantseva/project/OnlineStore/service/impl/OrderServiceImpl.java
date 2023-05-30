@@ -6,6 +6,7 @@ import kazantseva.project.OnlineStore.model.request.RequestProduct;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ProductDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
+import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
@@ -93,6 +94,17 @@ public class OrderServiceImpl implements OrderService {
             orderRepository.save(createdOrder);
 
         } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+    }
+
+    @Override
+    public List<ShortProductDTO> getProductList(String email, long customerId, long orderId) {
+        checkCustomer(customerId, email);
+        var order = checkOrder(orderId, customerId);
+
+        return productRepository.findProductsNotInOrder(order.getId()).stream()
+                .filter(id -> productRepository.findById(id).isPresent())
+                .map(id -> productRepository.findById(id).get())
+                .map(ShortProductDTO::new).toList();
     }
 
     @Override
