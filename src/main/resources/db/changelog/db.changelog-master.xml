@@ -5,14 +5,15 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="660" author="admin">
+    <changeSet id="930" author="admin">
         <dropTable tableName="order_product"/>
         <dropTable tableName="orders"/>
+        <dropTable tableName="verification_tokens"/>
         <dropTable tableName="customers"/>
         <dropTable tableName="products"/>
     </changeSet>
 
-    <changeSet id="661" author="admin">
+    <changeSet id="931" author="admin">
         <createTable tableName="products">
             <column name="product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -26,7 +27,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="662" author="admin">
+    <changeSet id="932" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -43,10 +44,32 @@
             <column name="password" type="varchar(200)">
                 <constraints nullable="false"/>
             </column>
+            <column name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="663" author="admin">
+    <changeSet id="933" author="admin">
+        <createTable tableName="verification_tokens">
+            <column name="token_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="token" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_customers_verification_tokens_customer_id"
+                             references="customers(customer_id)"/>
+            </column>
+            <column name="expiry_date" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="934" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -73,7 +96,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="664" author="admin">
+    <changeSet id="935" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -92,7 +115,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="665" author="admin">
+    <changeSet id="936" author="admin">
         <insert tableName="products">
             <column name="name" value="Apple"/>
             <column name="price" value="12.0"/>
@@ -119,7 +142,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="666" author="admin">
+    <changeSet id="937" author="admin">
         <insert tableName="products">
             <column name="name" value="Pineapple"/>
             <column name="price" value="97.4"/>
@@ -146,7 +169,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="667" author="admin">
+    <changeSet id="938" author="admin">
         <insert tableName="products">
             <column name="name" value="Butter"/>
             <column name="price" value="58.0"/>
@@ -173,7 +196,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="668" author="admin">
+    <changeSet id="939" author="admin">
         <insert tableName="products">
             <column name="name" value="Ketchup"/>
             <column name="price" value="50.4"/>
@@ -200,7 +223,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="669" author="admin">
+    <changeSet id="940" author="admin">
         <insert tableName="products">
             <column name="name" value="Paprika"/>
             <column name="price" value="28.4"/>
@@ -227,7 +250,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="670" author="admin">
+    <changeSet id="941" author="admin">
         <insert tableName="products">
             <column name="name" value="Pasta"/>
             <column name="price" value="62.3"/>
