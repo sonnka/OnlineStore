@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -14,14 +16,14 @@ import java.time.LocalDateTime;
 @Table(name = "verification_tokens")
 public class VerificationToken {
 
-    private static final int EXPIRATION = 60 * 24;
+    private static final long EXPIRATION = 24L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "token_id")
     private Long id;
 
-    @Column(name = "token")
+    @Column(name = "token", unique = true)
     private String token;
 
     @OneToOne(targetEntity = Customer.class, fetch = FetchType.EAGER)
@@ -31,5 +33,11 @@ public class VerificationToken {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "expiry_date")
     private LocalDateTime expiryDate;
-    
+
+    public VerificationToken(Customer customer) {
+        this.customer = customer;
+        this.expiryDate = LocalDateTime.now(ZoneOffset.UTC).plusHours(EXPIRATION);
+        this.token = UUID.randomUUID().toString();
+    }
+
 }

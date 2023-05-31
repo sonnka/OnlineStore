@@ -27,6 +27,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/home").permitAll()
                 .requestMatchers("/products").permitAll()
                 .requestMatchers("/products_html").permitAll()
+                .requestMatchers("/confirm-email").permitAll()
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/login").permitAll()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()

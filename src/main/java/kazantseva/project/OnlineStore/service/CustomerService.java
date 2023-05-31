@@ -16,6 +16,8 @@ public interface CustomerService {
 
     LoginResponse login(Authentication auth);
 
+    LoginResponse login(String token);
+
     FullCustomerDTO getCustomer(String email, Long customerId);
 
     Long getCustomerId(String email);
