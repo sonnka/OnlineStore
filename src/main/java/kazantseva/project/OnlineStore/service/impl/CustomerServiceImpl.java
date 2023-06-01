@@ -1,5 +1,7 @@
 package kazantseva.project.OnlineStore.service.impl;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import kazantseva.project.OnlineStore.model.entity.Customer;
 import kazantseva.project.OnlineStore.model.entity.Status;
 import kazantseva.project.OnlineStore.model.entity.VerificationToken;
@@ -14,8 +16,8 @@ import kazantseva.project.OnlineStore.repository.VerificationTokenRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -33,10 +37,10 @@ import java.util.Optional;
 public class CustomerServiceImpl implements CustomerService {
 
     final PasswordEncoder passwordEncoder;
+    private final TemplateEngine templateEngine;
     private CustomerRepository customerRepository;
     private OrderRepository orderRepository;
     private VerificationTokenRepository tokenRepository;
-
     private JavaMailSender emailSender;
 
     @Override
@@ -56,8 +60,12 @@ public class CustomerServiceImpl implements CustomerService {
 
         tokenRepository.save(verificationToken);
 
-        sendMessage(customer.getEmail(), "Complete Registration", "To confirm your account, please click here : "
-                + "http://localhost:8080/confirm-email?token=" + verificationToken.getToken(), "sofiia.kazantseva@faceit.com.ua");
+        try {
+            sendMail(verificationToken.getToken(), customer.getEmail());
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
@@ -122,13 +130,17 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.delete(customer);
     }
 
-    public void sendMessage(String to, String subject, String text, String email) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(email);
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        emailSender.send(message);
+    public void sendMail(String token, String to) throws MessagingException {
+        Context context = new Context();
+        context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token);
+
+        String process = templateEngine.process("letter", context);
+        MimeMessage mimeMessage = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+        helper.setSubject("Email Confirmation");
+        helper.setText(process, true);
+        helper.setTo(to);
+        emailSender.send(mimeMessage);
     }
 
     public void verifyAccount(String email, String verificationToken) {

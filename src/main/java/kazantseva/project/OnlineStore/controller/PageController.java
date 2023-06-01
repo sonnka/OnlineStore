@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 
@@ -78,5 +79,12 @@ public class PageController {
         model.addAttribute("orderId", Long.valueOf(orderId));
         model.addAttribute("customerId", customerId);
         return "editorder";
+    }
+
+
+    @GetMapping("/confirm-email")
+    public String confirm(@RequestParam String token) {
+        customerService.login(token);
+        return "login";
     }
 }

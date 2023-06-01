@@ -28,11 +28,6 @@ public class RestCustomerController {
         return customerService.login(auth);
     }
 
-    @GetMapping("/confirm-email")
-    public LoginResponse login(@RequestParam String token) {
-        return customerService.login(token);
-    }
-
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void register(@RequestBody @Valid CreateCustomer customer) {
