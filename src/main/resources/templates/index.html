@@ -9,11 +9,30 @@
     <title>Online Store</title>
     <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
 </head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js">
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#locales").change(function () {
+            var selectedOption = $('#locales').val();
+            if (selectedOption !== '') {
+                window.location.replace('/?lang=' + selectedOption);
+                document.documentElement.setAttribute('lang', selectedOption);
+            }
+        });
+    });
+</script>
 <body>
 <header class="header">
     <a class="logo" th:href="@{/}">Online Store</a>
+    <span th:text="#{lang.change}"></span>:
+    <select id="locales">
+        <option value=""></option>
+        <option th:text="#{lang.en}" value="en_US"></option>
+        <option th:text="#{lang.uk}" value="uk_UA"></option>
+    </select>
     <nav class="nav-items">
-        <a th:href="@{/}">Home</a>
+        <a th:href="@{/}" th:text="#{home}"></a>
         <a th:href="@{/products_html}">Products</a>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/profile}">My profile</a>
