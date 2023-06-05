@@ -17,20 +17,26 @@
 <body>
 <header class="header">
     <a class="logo" th:href="@{/}">Online Store</a>
+    <div class="switch">
+        <input class="check-toggle check-toggle-round-flat" id="language-toggle" type="checkbox">
+        <label for="language-toggle"></label>
+        <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
+        <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
+    </div>
     <nav class="nav-items">
-        <a th:href="@{/}">Home</a>
-        <a th:href="@{/products_html}">Products</a>
+        <a th:href="@{/}" th:text="#{home}"></a>
+        <a th:href="@{/products_html}" th:text="#{products}"></a>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile}">My profile</a>
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile/orders}">My orders</a>
+            <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/logout}">Logout</a>
+            <a th:href="@{/logout}" th:text="#{logout}"></a>
         </div>
         <div sec:authorize="isAnonymous()">
-            <a th:href="@{/login}">Register/Login</a>
+            <a th:href="@{/login}" th:text="#{login}"></a>
         </div>
     </nav>
 </header>
@@ -41,17 +47,20 @@
                 <div class="profile-head">
                     <h5 id="customerNameSurname"></h5>
                     <h6 id="customerEmail"></h6>
-                    <p class="proile-rating">Amount of orders : <span id="totalAmountOfOrders"></span>
+                    <p>
+                        <br><br>
+                        <span class="proile-rating" th:text="#{amountOfOrders}"></span>
+                        <span id="totalAmountOfOrders"></span>
                     </p>
                     <ul class="nav nav-tabs" id="myTab" role="tablist"></ul>
                 </div>
             </div>
             <div class="col-md-2">
-                <a><input class="profile-edit-btn" id="editProfileButton" name="btnAddMore" type="submit"
-                          value="Edit Profile"/></a>
+                <a><input class="profile-edit-btn" id="editProfileButton" name="btnAddMore" th:value="#{edit}"
+                          type="submit"/></a>
                 <br><br>
-                <a><input class="profile-delete-btn" id="deleteProfileButton" name="btnAddMore" type="submit"
-                          value="Delete Profile"/></a>
+                <a><input class="profile-delete-btn" id="deleteProfileButton" name="btnAddMore" th:value="#{delete}"
+                          type="submit"/></a>
             </div>
         </div>
         <div class="row">
@@ -63,7 +72,7 @@
                             <div class="col-md-3">
                             </div>
                             <div class="col-md-2">
-                                <label>First name</label>
+                                <label th:text="#{firstName}"></label>
                             </div>
                             <div class="col-md-3">
                                 <p id="customerName"></p>
@@ -75,7 +84,7 @@
                             <div class="col-md-3">
                             </div>
                             <div class="col-md-2">
-                                <label>Last name</label>
+                                <label th:text="#{lastName}"></label>
                             </div>
                             <div class="col-md-3">
                                 <p id="customerSurname"></p>
@@ -87,7 +96,7 @@
                             <div class="col-md-3">
                             </div>
                             <div class="col-md-2">
-                                <label>Email</label>
+                                <label th:text="#{email}"></label>
                             </div>
                             <div class="col-md-3">
                                 <p id="customerEmail2"></p>
@@ -99,7 +108,7 @@
                             <div class="col-md-3">
                             </div>
                             <div class="col-md-2">
-                                <label>Total amount of orders</label>
+                                <label th:text="#{totalAmountOfOrders}"></label>
                             </div>
                             <div class="col-md-3">
                                 <p id="totalAmountOfOrders2"></p>
@@ -111,7 +120,7 @@
                             <div class="col-md-3">
                             </div>
                             <div class="col-md-2">
-                                <label>Amount of unpaid orders</label>
+                                <label th:text="#{unpaidOrders}"></label>
                             </div>
                             <div class="col-md-3">
                                 <p id="amountUnpaidOrders"></p>
@@ -123,7 +132,7 @@
                             <div class="col-md-3">
                             </div>
                             <div class="col-md-2">
-                                <label>Amount of paid orders</label>
+                                <label th:text="#{paidOrders}"></label>
                             </div>
                             <div class="col-md-3">
                                 <p id="amountPaidOrders"></p>
@@ -135,7 +144,7 @@
                         <div class="col-md-9">
                             <div class="intro2">
                                 <a id="getOrdersButton">
-                                    <button>My orders</button>
+                                    <button th:text="#{orders}"></button>
                                 </a>
                             </div>
                         </div>

@@ -9,76 +9,65 @@
     <title>Online Store</title>
     <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
 </head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js">
-</script>
-<script type="text/javascript">
-    $(document).ready(function () {
-        $("#locales").change(function () {
-            var selectedOption = $('#locales').val();
-            if (selectedOption !== '') {
-                window.location.replace('/?lang=' + selectedOption);
-                document.documentElement.setAttribute('lang', selectedOption);
-            }
-        });
-    });
-</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <body>
 <header class="header">
+
     <a class="logo" th:href="@{/}">Online Store</a>
-    <span th:text="#{lang.change}"></span>:
-    <select id="locales">
-        <option value=""></option>
-        <option th:text="#{lang.en}" value="en_US"></option>
-        <option th:text="#{lang.uk}" value="uk_UA"></option>
-    </select>
+    <div class="switch">
+        <input class="check-toggle check-toggle-round-flat" id="language-toggle" type="checkbox">
+        <label for="language-toggle"></label>
+        <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
+        <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
+    </div>
+
     <nav class="nav-items">
         <a th:href="@{/}" th:text="#{home}"></a>
-        <a th:href="@{/products_html}">Products</a>
+        <a th:href="@{/products_html}" th:text="#{products}"></a>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile}">My profile</a>
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile/orders}">My orders</a>
+            <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/logout}">Logout</a>
+            <a th:href="@{/logout}" th:text="#{logout}"></a>
         </div>
         <div sec:authorize="isAnonymous()">
-            <a th:href="@{/login}">Register/Login</a>
+            <a th:href="@{/login}" th:text="#{login}"></a>
         </div>
     </nav>
 </header>
 <main>
     <div class="intro">
         <h1>Online Store</h1>
-        <p>Buy everything you need in one click.</p>
+        <p th:text="#{title}"></p>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/products_html}">
-                <button>Go shopping</button>
+                <button th:text="#{shopping}"></button>
             </a>
         </div>
         <div sec:authorize="isAnonymous()">
             <a th:href="@{/login}">
-                <button>Go shopping</button>
+                <button th:text="#{shopping}"></button>
             </a>
         </div>
     </div>
     <div class="achievements">
         <div class="work">
             <i class="fas fa-atom"></i>
-            <p class="work-heading">Convenient</p>
-            <p class="work-text">You can buy all the products you need without leaving your home, even lying in bed.</p>
+            <p class="work-heading" th:text="#{convenient}"></p>
+            <p class="work-text" th:text="#{convenientDesc}"></p>
         </div>
         <div class="work">
             <i class="fas fa-skiing"></i>
-            <p class="work-heading">Fast</p>
-            <p class="work-text">Making a couple of clicks will not take much of your time compared to going to the
-                store.</p>
+            <p class="work-heading" th:text="#{fast}"></p>
+            <p class="work-text" th:text="#{fastDesc}"></p>
         </div>
         <div class="work">
             <i class="fas fa-ethernet"></i>
-            <p class="work-heading">Reliable</p>
-            <p class="work-text">We guarantee the quality and freshness of all products in our online store.</p>
+            <p class="work-heading" th:text="#{reliable}"></p>
+            <p class="work-text" th:text="#{reliableDesc}"></p>
         </div>
     </div>
 </main>

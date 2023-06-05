@@ -25,46 +25,49 @@
 <body>
 <header class="header">
     <a class="logo" th:href="@{/}">Online Store</a>
+    <div class="switch">
+        <input class="check-toggle check-toggle-round-flat" id="language-toggle" type="checkbox">
+        <label for="language-toggle"></label>
+        <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
+        <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
+    </div>
     <nav class="nav-items">
-        <a th:href="@{/}">Home</a>
-        <a th:href="@{/products_html}">Products</a>
+        <a th:href="@{/}" th:text="#{home}"></a>
+        <a th:href="@{/products_html}" th:text="#{products}"></a>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile}">My profile</a>
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile/orders}">My orders</a>
+            <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/logout}">Logout</a>
+            <a th:href="@{/logout}" th:text="#{logout}"></a>
         </div>
         <div sec:authorize="isAnonymous()">
-            <a th:href="@{/login}">Register/Login</a>
+            <a th:href="@{/login}" th:text="#{login}"></a>
         </div>
     </nav>
 </header>
 <main>
     <div class="container my-2">
-        <h1>Order List</h1>
+        <h1 th:text="#{orderList}"></h1>
         <br><br>
-        <a class="btn btn-primary" id="createOrderButton"> Create order </a>
+        <a class="btn btn-primary" id="createOrderButton" th:text="#{createOrder}"></a>
         <br><br>
         <input id="customerId" th:value="${customerId}" type="hidden">
         <table border="1" class="table table-striped table-responsive-md" id="ordersTable">
             <thead>
             <tr>
                 <th>
-                    <a id="sortDate">
-                        Creation date</a>
+                    <a id="sortDate" th:text="#{date}"></a>
                 </th>
                 <th>
-                    <a id="sortStatus">
-                        Status</a>
+                    <a id="sortStatus" th:text="#{status}"></a>
                 </th>
                 <th>
-                    <a id="orderSortPrice">
-                        Price</a>
+                    <a id="orderSortPrice" th:text="#{price}"></a>
                 </th>
-                <th> Actions</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>

@@ -45,38 +45,46 @@
 <body>
 <header class="header">
     <a class="logo" th:href="@{/}">Online Store</a>
+
+    <div class="switch">
+        <input class="check-toggle check-toggle-round-flat" id="language-toggle" type="checkbox">
+        <label for="language-toggle"></label>
+        <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
+        <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
+    </div>
+
     <nav class="nav-items">
-        <a th:href="@{/}">Home</a>
-        <a th:href="@{/products_html}">Products</a>
+        <a th:href="@{/}" th:text="#{home}"></a>
+        <a th:href="@{/products_html}" th:text="#{products}"></a>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile}">My profile</a>
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile/orders}">My orders</a>
+            <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/logout}">Logout</a>
+            <a th:href="@{/logout}" th:text="#{logout}"></a>
         </div>
         <div sec:authorize="isAnonymous()">
-            <a th:href="@{/login}">Register/Login</a>
+            <a th:href="@{/login}" th:text="#{login}"></a>
         </div>
     </nav>
 </header>
 <main>
     <section class="pt-5 pb-5">
         <div th:if="${param.error}">
-            <div class="alert alert-danger">Invalid Data</div>
+            <div class="alert alert-danger" th:text="#{invalidData}"></div>
         </div>
         <div class="container">
             <div class="row w-100">
                 <div class="col-lg-12 col-md-12 col-12">
-                    <h3 class="display-5 mb-2 text-center">Your order</h3>
+                    <h3 class="display-5 mb-2 text-center" th:text="#{yourOrder}"></h3>
                     <br><br>
                     <input id="customerId" th:value="${customerId}" type="hidden">
                     <input id="orderId" th:value="${orderId}" type="hidden">
                     <div class="row">
                         <div class="col-md-2">
-                            <label><b>Creation Date</b></label>
+                            <label th:text="#{date}"><b></b></label>
                         </div>
                         <div class="col-md-3">
                             <input id="date" readonly type="text"/>
@@ -85,14 +93,14 @@
                     <br><br>
                     <div class="row">
                         <div class="col-md-2">
-                            <label><b>Delivery Address</b></label>
+                            <label th:text="#{delivery}"><b></b></label>
                         </div>
                         <div class="col-md-3">
                             <input
                                     class="form-control"
                                     id="deliveryAddress"
                                     name="deliveryAddress"
-                                    placeholder="Enter delivery address"
+                                    th:placeholder="#{enterDeliveryAddress}"
                                     type="text"
                             />
                         </div>
@@ -100,14 +108,14 @@
                     <br><br>
                     <div class="row">
                         <div class="col-md-2">
-                            <label><b>Description</b></label>
+                            <label th:text="#{description}"><b></b></label>
                         </div>
                         <div class="col-md-3">
                             <input
                                     class="form-control"
                                     id="description"
                                     name="description"
-                                    placeholder="Enter description"
+                                    th:placeholder="#{enterDescription}"
                                     type="text"
                             />
                         </div>
@@ -115,12 +123,12 @@
                     <br><br>
                     <div class="row">
                         <div class="col-md-2">
-                            <span><b>Status</b></span>
+                            <span th:text="#{status}"><b></b></span>
                         </div>
                         <div class="col-md-3">
                             <select class="form-select" id="statuses">
-                                <option value="PAID">PAID</option>
-                                <option value="UNPAID">UNPAID</option>
+                                <option th:text="#{PAID}" value="PAID"></option>
+                                <option th:text="#{UNPAID}" value="UNPAID"></option>
                             </select>
                         </div>
                     </div>
@@ -128,9 +136,9 @@
                     <table class="table table-condensed table-responsive" id="productsTable">
                         <thead>
                         <tr>
-                            <th style="width:60%">Product</th>
-                            <th style="width:12%">Price</th>
-                            <th style="width:10%">Quantity</th>
+                            <th style="width:60%" th:text="#{product}"></th>
+                            <th style="width:12%" th:text="#{price}"></th>
+                            <th style="width:10%" th:text="#{count}"></th>
                             <th style="width:16%"></th>
                         </tr>
                         </thead>
@@ -143,18 +151,19 @@
                                data-whatever="product"
                                id="addProductButton"
                                name="btnAddMore"
-                               value="Add"/>
+                               th:value="#{add}"/>
                     </div>
                     <br>
                     <div class="float-right text-right">
-                        <h5>Total:</h5>
+                        <h5 th:text="#{total}"></h5>
                         <h4 id="price"></h4>
                     </div>
                 </div>
             </div>
             <div class="row mt-4 d-flex align-items-center">
                 <div class="col-sm-6 order-md-2 text-right">
-                    <input class="btn btn-primary mb-4 btn-lg pl-5 pr-5" id="saveButton" type="submit" value="Save">
+                    <input class="btn btn-primary mb-4 btn-lg pl-5 pr-5" id="saveButton" th:value="#{save}"
+                           type="submit">
                 </div>
             </div>
         </div>
@@ -165,8 +174,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">
-                            Products
+                        <h5 class="modal-title" id="exampleModalLabel" th:text="#{products}">
                         </h5>
                     </div>
                     <div class="modal-body">
@@ -176,7 +184,8 @@
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" id="addSelectedProducts" type="submit">Add</button>
+                        <button class="btn btn-secondary" id="addSelectedProducts" th:text="#{add}"
+                                type="submit"></button>
                     </div>
                 </div>
 

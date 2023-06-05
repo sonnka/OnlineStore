@@ -6,7 +6,6 @@ $(document).ready(function () {
     var name = $('#name');
     var surname = $('#surname');
     var email = $('#email');
-    var totalAmount = $('#totalAmount');
 
     loadProfile();
 
@@ -29,7 +28,6 @@ $(document).ready(function () {
         name.val(responseJson.name);
         surname.val(responseJson.surname);
         email.text(responseJson.email);
-        totalAmount.text(responseJson.totalAmountOfOrders);
     }
 
     function updateCustomer() {

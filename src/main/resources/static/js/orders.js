@@ -50,7 +50,7 @@ $(document).ready(function () {
                     $('#ordersTable tbody').append(orderRow);
                 });
 
-                if ($('ul.pagination li').length - 2 != response.totalPages) {
+                if ($('ul.pagination li').length - 2 !== response.totalPages) {
                     $('ul.pagination').empty();
                     buildPagination(response);
                 }
@@ -73,9 +73,9 @@ $(document).ready(function () {
         var prev = '';
         if (pageNumber > 0) {
             if (pageNumber !== 0) {
-                first = '<li class="page-item"><a class="page-link">« First</a></li>';
+                first = '<li class="page-item"><a class="page-link" th:text="#{first}"></a></li>';
             }
-            prev = '<li class="page-item"><a class="page-link">‹ Prev</a></li>';
+            prev = '<li class="page-item"><a class="page-link" th:text="#{prev}"></a></li>';
         } else {
             prev = '';
             first = '';
@@ -85,8 +85,8 @@ $(document).ready(function () {
         var last = '';
         if (pageNumber < totalPages) {
             if (pageNumber !== totalPages - 1) {
-                next = '<li class="page-item"><a class="page-link">Next ›</a></li>';
-                last = '<li class="page-item"><a class="page-link">Last »</a></li>';
+                next = '<li class="page-item"><a class="page-link" th:text="#{next}"></a></li>';
+                last = '<li class="page-item"><a class="page-link" th:text="#{last}"></a></li>';
             }
         } else {
             next = '';

@@ -16,20 +16,26 @@
 <body>
 <header class="header">
     <a class="logo" th:href="@{/}">Online Store</a>
+    <div class="switch">
+        <input class="check-toggle check-toggle-round-flat" id="language-toggle" type="checkbox">
+        <label for="language-toggle"></label>
+        <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
+        <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
+    </div>
     <nav class="nav-items">
-        <a th:href="@{/}">Home</a>
-        <a th:href="@{/products_html}">Products</a>
+        <a th:href="@{/}" th:text="#{home}"></a>
+        <a th:href="@{/products_html}" th:text="#{products}"></a>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile}">My profile</a>
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile/orders}">My orders</a>
+            <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/logout}">Logout</a>
+            <a th:href="@{/logout}" th:text="#{logout}"></a>
         </div>
         <div sec:authorize="isAnonymous()">
-            <a th:href="@{/login}">Register/Login</a>
+            <a th:href="@{/login}" th:text="#{login}"></a>
         </div>
     </nav>
 </header>
@@ -39,20 +45,19 @@
         <div class="col-md-6 offset-md-3">
 
             <div th:if="${param.error}">
-                <div class="alert alert-danger">Invalid Email or Password</div>
+                <div class="alert alert-danger" th:text="#{invalidData}"></div>
             </div>
             <div th:if="${param.logout}">
-                <div class="alert alert-success"> You have been logged out.</div>
+                <div class="alert alert-success" th:text="#{successLogout}"></div>
             </div>
             <div th:if="${param.success}">
-                <div class="alert alert-info">
-                    You have successfully logged in app!
+                <div class="alert alert-info" th:text="#{successLogin}">
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <h2 class="text-center">Login Form</h2>
+                    <h2 class="text-center" th:text="#{loginForm}"></h2>
                 </div>
                 <div class="card-body">
                     <form
@@ -62,33 +67,33 @@
                             th:action="@{/login}"
                     >
                         <div class="form-group mb-3">
-                            <label class="control-label"> Email</label>
+                            <label class="control-label" th:text="#{email}"></label>
                             <br>
                             <input
                                     class="form-control"
                                     id="email"
                                     name="email"
-                                    placeholder="Enter email address"
+                                    th:placeholder="#{enterEmail}"
                                     type="text"
                             />
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="control-label"> Password</label>
+                            <label class="control-label" th:text="#{password}"> Password</label>
                             <br>
                             <input
                                     class="form-control"
                                     id="password"
                                     name="password"
-                                    placeholder="Enter password"
+                                    th:placeholder="#{enterPassword}"
                                     type="password"
                             />
                         </div>
                         <div class="form-group mb-3">
-                            <button class="btn btn-primary" type="submit">Submit</button>
-                            <span>      Not registered ?
-                                <a th:href="@{/register}">   Register/Signup here</a>
-                            </span>
+                            <button class="btn btn-primary" th:text="#{submit}" type="submit"></button>
+                            <span th:text="#{notRegistered}"></span>
+                            <a th:href="@{/register}" th:text="#{registerHere}"> </a>
+
                         </div>
                     </form>
                 </div>

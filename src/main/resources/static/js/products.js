@@ -5,6 +5,8 @@ $(document).ready(function () {
     var sortName = $('#sortName');
     var sortPrice = $('#sortPrice');
 
+    fetchProduct(0);
+
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
         sort = "name";
@@ -36,7 +38,7 @@ $(document).ready(function () {
                     $('#table tbody').append(productRow);
                 });
 
-                if ($('ul.pagination li').length - 2 != response.totalPages) {
+                if ($('ul.pagination li').length - 2 !== response.totalPages) {
                     $('ul.pagination').empty();
                     buildPagination(response);
                 }
@@ -57,10 +59,9 @@ $(document).ready(function () {
 
         var first = '';
         var prev = '';
+
         if (pageNumber > 0) {
-            if (pageNumber !== 0) {
-                first = '<li class="page-item"><a class="page-link">« First</a></li>';
-            }
+            first = '<li class="page-item"><a class="page-link">« First</a></li>';
             prev = '<li class="page-item"><a class="page-link">‹ Prev</a></li>';
         } else {
             prev = '';
@@ -85,7 +86,7 @@ $(document).ready(function () {
         var pagingLink = '';
 
         for (var i = start; i <= end; i++) {
-            if (i == (pageNumber + 1)) {
+            if (i === (pageNumber + 1)) {
                 pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>'; // no need to create a link to current page
             } else {
                 pagingLink += '<li class="page-item"><a class="page-link"> ' + i + ' </a></li>';
@@ -139,7 +140,7 @@ $(document).ready(function () {
         }
     });
 
-    (function () {
-        fetchProduct(0);
-    })();
+    // (function () {
+    //     fetchProduct(0);
+    // })();
 });
