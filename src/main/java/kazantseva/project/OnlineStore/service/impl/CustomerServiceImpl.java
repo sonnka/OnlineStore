@@ -15,6 +15,8 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.VerificationTokenRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -30,12 +32,14 @@ import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
+    final ResourceBundleMessageSource messageSource;
     final PasswordEncoder passwordEncoder;
     private final TemplateEngine templateEngine;
     private CustomerRepository customerRepository;
@@ -77,7 +81,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @Transactional
     public LoginResponse login(String token) {
         var customer = customerRepository.findByVerificationToken(token).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid verification token!"));
@@ -131,18 +134,20 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     public void sendMail(String token, String to) throws MessagingException {
-        Context context = new Context();
+        Locale locale = LocaleContextHolder.getLocale();
+        Context context = new Context(locale);
         context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token);
 
         String process = templateEngine.process("letter", context);
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setSubject("Email Confirmation");
+        helper.setSubject(messageSource.getMessage("subject", null, locale));
         helper.setText(process, true);
         helper.setTo(to);
         emailSender.send(mimeMessage);
     }
 
+    @Transactional
     public void verifyAccount(String email, String verificationToken) {
         VerificationToken token = tokenRepository.findByToken(verificationToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -159,7 +164,7 @@ public class CustomerServiceImpl implements CustomerService {
                             "Customer with email " + email + " not found!"));
 
             if (token.getExpiryDate().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
-                tokenRepository.deleteByCustomerId(customer.getId());
+                tokenRepository.delete(token);
                 customerRepository.delete(customer);
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                         "You token is expired! Please, register again!");

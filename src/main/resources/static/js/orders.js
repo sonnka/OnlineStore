@@ -7,6 +7,7 @@ $(document).ready(function () {
     var sortDate = $('#sortDate');
     var sortStatus = $('#sortStatus');
     var sortPrice = $('#orderSortPrice');
+    var myMessage = document.getElementById("myElement").textContent;
 
     sortDate.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
@@ -45,7 +46,7 @@ $(document).ready(function () {
                         '<td>' + order.date + '</td>' +
                         '<td>' + order.status + '</td>' +
                         '<td>' + order.price + '</td>' +
-                        '<td><a class="btn btn-primary" href="/profile/orders/' + order.id + '">Open</a></td>' +
+                        '<td><a class="btn btn-primary" href="/profile/orders/' + order.id + '" >' + myMessage + '</a></td>' +
                         '</tr>';
                     $('#ordersTable tbody').append(orderRow);
                 });
@@ -73,9 +74,9 @@ $(document).ready(function () {
         var prev = '';
         if (pageNumber > 0) {
             if (pageNumber !== 0) {
-                first = '<li class="page-item"><a class="page-link" th:text="#{first}"></a></li>';
+                first = '<li class="page-item"><a class="page-link">«</a></li>';
             }
-            prev = '<li class="page-item"><a class="page-link" th:text="#{prev}"></a></li>';
+            prev = '<li class="page-item"><a class="page-link">‹</a></li>';
         } else {
             prev = '';
             first = '';
@@ -85,8 +86,8 @@ $(document).ready(function () {
         var last = '';
         if (pageNumber < totalPages) {
             if (pageNumber !== totalPages - 1) {
-                next = '<li class="page-item"><a class="page-link" th:text="#{next}"></a></li>';
-                last = '<li class="page-item"><a class="page-link" th:text="#{last}"></a></li>';
+                next = '<li class="page-item"><a class="page-link">›</a></li>';
+                last = '<li class="page-item"><a class="page-link">»</a></li>';
             }
         } else {
             next = '';
@@ -116,18 +117,18 @@ $(document).ready(function () {
         let val = $(this).text();
         console.log('val: ' + val);
 
-        if (val.toUpperCase() === "« FIRST") {
+        if (val.toUpperCase() === "«") {
             let currentActive = $("li.active");
             fetchOrder(0);
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 
-        } else if (val.toUpperCase() === "LAST »") {
+        } else if (val.toUpperCase() === "»") {
             fetchOrder(totalPages - 1);
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 
-        } else if (val.toUpperCase() === "NEXT ›") {
+        } else if (val.toUpperCase() === "›") {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue < totalPages) {
                 let currentActive = $("li.active");
@@ -136,7 +137,7 @@ $(document).ready(function () {
                 $("li.active").removeClass("active");
                 currentActive.next().addClass("active");
             }
-        } else if (val.toUpperCase() === "‹ PREV") {
+        } else if (val.toUpperCase() === "‹") {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue > 1) {
                 startPage = activeValue - 2;

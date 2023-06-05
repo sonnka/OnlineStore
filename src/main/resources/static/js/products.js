@@ -61,8 +61,8 @@ $(document).ready(function () {
         var prev = '';
 
         if (pageNumber > 0) {
-            first = '<li class="page-item"><a class="page-link">« First</a></li>';
-            prev = '<li class="page-item"><a class="page-link">‹ Prev</a></li>';
+            first = '<li class="page-item"><a class="page-link">«</a></li>';
+            prev = '<li class="page-item"><a class="page-link">‹</a></li>';
         } else {
             prev = '';
             first = '';
@@ -72,8 +72,8 @@ $(document).ready(function () {
         var last = '';
         if (pageNumber < totalPages) {
             if (pageNumber !== totalPages - 1) {
-                next = '<li class="page-item"><a class="page-link">Next ›</a></li>';
-                last = '<li class="page-item"><a class="page-link">Last »</a></li>';
+                next = '<li class="page-item"><a class="page-link">›</a></li>';
+                last = '<li class="page-item"><a class="page-link">»</a></li>';
             }
         } else {
             next = '';
@@ -103,18 +103,18 @@ $(document).ready(function () {
         let val = $(this).text();
         console.log('val: ' + val);
 
-        if (val.toUpperCase() === "« FIRST") {
+        if (val.toUpperCase() === "«") {
             let currentActive = $("li.active");
             fetchProduct(0);
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 
-        } else if (val.toUpperCase() === "LAST »") {
+        } else if (val.toUpperCase() === "»") {
             fetchProduct(totalPages - 1);
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 
-        } else if (val.toUpperCase() === "NEXT ›") {
+        } else if (val.toUpperCase() === "›") {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue < totalPages) {
                 let currentActive = $("li.active");
@@ -123,7 +123,7 @@ $(document).ready(function () {
                 $("li.active").removeClass("active");
                 currentActive.next().addClass("active");
             }
-        } else if (val.toUpperCase() === "‹ PREV") {
+        } else if (val.toUpperCase() === "‹") {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue > 1) {
                 startPage = activeValue - 2;
