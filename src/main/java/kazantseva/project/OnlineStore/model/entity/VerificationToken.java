@@ -26,6 +26,9 @@ public class VerificationToken {
     @Column(name = "token", unique = true)
     private String token;
 
+    @Column(name = "locale")
+    private String locale;
+
     @OneToOne(targetEntity = Customer.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "customer_id")
     private Customer customer;
@@ -34,10 +37,11 @@ public class VerificationToken {
     @Column(name = "expiry_date")
     private LocalDateTime expiryDate;
 
-    public VerificationToken(Customer customer) {
+    public VerificationToken(Customer customer, String locale) {
         this.customer = customer;
         this.expiryDate = LocalDateTime.now(ZoneOffset.UTC).plusHours(EXPIRATION);
         this.token = UUID.randomUUID().toString();
+        this.locale = locale;
     }
 
 }

@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.service.impl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import kazantseva.project.OnlineStore.model.entity.Customer;
+import kazantseva.project.OnlineStore.model.entity.CustomerRole;
 import kazantseva.project.OnlineStore.model.entity.Status;
 import kazantseva.project.OnlineStore.model.entity.VerificationToken;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
@@ -58,9 +59,11 @@ public class CustomerServiceImpl implements CustomerService {
                 .password(passwordEncoder.encode(newCustomer.getPassword()))
                 .name(newCustomer.getName())
                 .surname(newCustomer.getSurname())
+                .role(CustomerRole.BUYER)
                 .build());
 
-        VerificationToken verificationToken = new VerificationToken(customer);
+        Locale locale = LocaleContextHolder.getLocale();
+        VerificationToken verificationToken = new VerificationToken(customer, locale.toString());
 
         tokenRepository.save(verificationToken);
 
@@ -81,6 +84,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public LoginResponse login(String token) {
         var customer = customerRepository.findByVerificationToken(token).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid verification token!"));
@@ -95,7 +99,7 @@ public class CustomerServiceImpl implements CustomerService {
         return User.withUsername(customer.getEmail())
                 .password(customer.getPassword())
                 .disabled(!customer.isEnabled())
-                .roles("").build();
+                .roles(String.valueOf(customer.getRole())).build();
     }
 
     @Override

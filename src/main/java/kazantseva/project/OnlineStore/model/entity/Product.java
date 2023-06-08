@@ -27,6 +27,9 @@ public class Product {
     @Column(name = "price")
     private BigDecimal price;
 
+    @Column(name = "image")
+    private String image;
+
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH},
             mappedBy = "product")
     @JsonIgnore

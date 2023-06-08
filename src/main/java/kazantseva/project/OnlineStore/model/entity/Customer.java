@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.List;
 
+
 @Entity
 @Builder
 @Getter
@@ -29,6 +30,13 @@ public class Customer {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "avatar")
+    private String avatar;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private CustomerRole role;
 
     @Column(name = "enabled")
     private boolean enabled;
