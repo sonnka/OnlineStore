@@ -81,6 +81,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public LoginResponse login(String token) {
         var customer = customerRepository.findByVerificationToken(token).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid verification token!"));
