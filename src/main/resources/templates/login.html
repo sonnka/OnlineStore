@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Login</title>
+    <link crossorigin="anonymous"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
+</head>
+<body>
+<header class="header">
+    <a class="logo" th:href="@{/}">Online Store</a>
+    <div class="switch">
+        <input class="check-toggle check-toggle-round-flat" id="language-toggle" type="checkbox">
+        <label for="language-toggle"></label>
+        <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
+        <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
+    </div>
+    <nav class="nav-items">
+        <a th:href="@{/}" th:text="#{home}"></a>
+        <a th:href="@{/products_html}" th:text="#{products}"></a>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/logout}" th:text="#{logout}"></a>
+        </div>
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" th:text="#{login}"></a>
+        </div>
+    </nav>
+</header>
+<br/>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+
+            <div th:if="${param.error}">
+                <div class="alert alert-danger" th:text="#{invalidData}"></div>
+            </div>
+            <div th:if="${param.logout}">
+                <div class="alert alert-success" th:text="#{successLogout}"></div>
+            </div>
+            <div th:if="${param.success}">
+                <div class="alert alert-info" th:text="#{successLogin}">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center" th:text="#{loginForm}"></h2>
+                </div>
+                <div class="card-body">
+                    <form
+                            class="form-horizontal"
+                            method="post"
+                            role="form"
+                            th:action="@{/login}"
+                    >
+                        <div class="form-group mb-3">
+                            <label class="control-label" th:text="#{email}"></label>
+                            <br>
+                            <input
+                                    class="form-control"
+                                    id="email"
+                                    name="email"
+                                    th:placeholder="#{enterEmail}"
+                                    type="text"
+                            />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="control-label" th:text="#{password}"> Password</label>
+                            <br>
+                            <input
+                                    class="form-control"
+                                    id="password"
+                                    name="password"
+                                    th:placeholder="#{enterPassword}"
+                                    type="password"
+                            />
+                        </div>
+                        <div class="form-group mb-3">
+                            <button class="btn btn-primary" th:text="#{submit}" type="submit"></button>
+                            <span th:text="#{notRegistered}"></span>
+                            <a th:href="@{/register}" th:text="#{registerHere}"> </a>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,24 +1,28 @@
-package kazantseva.project.OnlineStore.controller;
+package kazantseva.project.OnlineStore.restcontroller;
 
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
-import kazantseva.project.OnlineStore.model.response.ListOrders;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
+import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
+import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
-public class OrderController {
+public class RestOrderController {
 
     private OrderService orderService;
 
     @GetMapping("/customers/{customer-id}/orders")
-    public ListOrders getOrders(Authentication auth,
-                                @PathVariable("customer-id") long customerId,
-                                Pageable pageable) {
+    public Page<ShortOrderDTO> getOrders(Authentication auth,
+                                         @PathVariable("customer-id") long customerId,
+                                         Pageable pageable) {
         return orderService.getOrders(auth.getName(), customerId, pageable);
     }
 
@@ -30,10 +34,17 @@ public class OrderController {
     }
 
     @PostMapping("/customers/{customer-id}/orders")
-    public void createOrder(Authentication auth,
-                            @PathVariable("customer-id") long customerId,
-                            @RequestBody RequestOrder order) {
-        orderService.createOrder(auth.getName(), customerId, order);
+    public OrderDTO createOrder(Authentication auth,
+                                @PathVariable("customer-id") long customerId,
+                                @RequestBody RequestOrder order) {
+        return orderService.createOrder(auth.getName(), customerId, order);
+    }
+
+    @GetMapping("/customers/{customer-id}/orders/{order-id}/productList")
+    public List<ShortProductDTO> getProductList(Authentication auth,
+                                                @PathVariable("customer-id") long customerId,
+                                                @PathVariable("order-id") long orderId) {
+        return orderService.getProductList(auth.getName(), customerId, orderId);
     }
 
     @PatchMapping("/customers/{customer-id}/orders/{order-id}")

@@ -3,27 +3,33 @@ package kazantseva.project.OnlineStore.service.impl;
 import kazantseva.project.OnlineStore.model.entity.*;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.request.RequestProduct;
-import kazantseva.project.OnlineStore.model.response.ListOrders;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
+import kazantseva.project.OnlineStore.model.response.ProductDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
+import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
@@ -32,16 +38,11 @@ public class OrderServiceImpl implements OrderService {
     private ProductRepository productRepository;
 
     @Override
-    public ListOrders getOrders(String email, long customerId, Pageable pageable) {
+    public Page<ShortOrderDTO> getOrders(String email, long customerId, Pageable pageable) {
         checkCustomer(customerId, email);
 
-        List<Order> orders = orderRepository.findByCustomerId(customerId, pageable).stream().toList();
-
-        return ListOrders.builder()
-                .totalAmount(orderRepository.findAllByCustomerId(customerId).size())
-                .amount(orders.size())
-                .orders(orders.stream().map(ShortOrderDTO::new).toList())
-                .build();
+        return orderRepository.findByCustomerId(customerId, pageable)
+                .map(ShortOrderDTO::new);
     }
 
     @Override
@@ -50,11 +51,11 @@ public class OrderServiceImpl implements OrderService {
 
         var order = checkOrder(orderId, customerId);
 
-        return new OrderDTO(order);
+        return toOrderDTO(order);
     }
 
     @Override
-    public void createOrder(String email, long customerId, RequestOrder order) {
+    public OrderDTO createOrder(String email, long customerId, RequestOrder order) {
         var customer = checkCustomer(customerId, email);
 
         LocalDateTime date = LocalDateTime.now(ZoneOffset.UTC);
@@ -76,26 +77,33 @@ public class OrderServiceImpl implements OrderService {
                 .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (!price.equals(BigDecimal.ZERO)) {
+        var createdOrder = orderRepository.save(Order.builder()
+                .date(date)
+                .status(status)
+                .customer(customer)
+                .deliveryAddress(order.getDeliveryAddress())
+                .description(order.getDescription())
+                .price(price)
+                .build());
 
-            var createdOrder = orderRepository.save(Order.builder()
-                    .date(date)
-                    .status(status)
-                    .customer(customer)
-                    .deliveryAddress(order.getDeliveryAddress())
-                    .description(order.getDescription())
-                    .price(price)
-                    .build());
+        for (OrderProduct product : products) {
+            product.setOrder(createdOrder);
+        }
 
-            for (OrderProduct product : products) {
-                product.setOrder(createdOrder);
-            }
+        createdOrder.setProducts(products);
 
-            createdOrder.setProducts(products);
+        return toOrderDTO(orderRepository.save(createdOrder));
+    }
 
-            orderRepository.save(createdOrder);
+    @Override
+    public List<ShortProductDTO> getProductList(String email, long customerId, long orderId) {
+        checkCustomer(customerId, email);
+        var order = checkOrder(orderId, customerId);
 
-        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+        return productRepository.findProductsNotInOrder(order.getId()).stream()
+                .filter(id -> productRepository.findById(id).isPresent())
+                .map(id -> productRepository.findById(id).get())
+                .map(ShortProductDTO::new).toList();
     }
 
     @Override
@@ -114,6 +122,42 @@ public class OrderServiceImpl implements OrderService {
         var order = checkOrder(orderId, customerId);
 
         orderRepository.delete(order);
+    }
+
+    private OrderDTO updateOrder(Order oldOrder, RequestOrder newOrder) {
+        if (Optional.ofNullable(newOrder.getStatus()).isPresent()) {
+
+            Status status = checkStatus(newOrder.getStatus());
+
+            oldOrder.setStatus(status);
+        }
+
+        if (Optional.ofNullable(newOrder.getProducts()).isPresent()) {
+
+            List<OrderProduct> products = new ArrayList<>();
+            List<RequestProduct> inputProducts = newOrder.getProducts();
+
+            for (RequestProduct current : inputProducts) {
+                Product product = productRepository.findByName(current.name());
+
+                if (product != null && current.count() > 0) {
+                    products.add(new OrderProduct(oldOrder, product, current.count()));
+                }
+            }
+            if (products.size() > 0) {
+
+                setNewProductList(oldOrder, products);
+
+                oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
+
+            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+        }
+
+        Optional.ofNullable(newOrder.getDeliveryAddress()).ifPresent(oldOrder::setDeliveryAddress);
+        Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
+
+        return toOrderDTO(orderRepository.save(oldOrder));
+
     }
 
     private Customer checkCustomer(long customerId, String email) {
@@ -150,44 +194,36 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private OrderDTO updateOrder(Order oldOrder, RequestOrder newOrder) {
-        if (Optional.ofNullable(newOrder.getStatus()).isPresent()) {
+    private void setNewProductList(Order order, List<OrderProduct> products) {
+        order.getProducts().clear();
 
-            Status status = checkStatus(newOrder.getStatus());
+        order.getProducts().addAll(new ArrayList<>());
 
-            oldOrder.setStatus(status);
-        }
+        orderRepository.save(order);
 
-        if (Optional.ofNullable(newOrder.getProducts()).isPresent()) {
+        order.getProducts().addAll(products);
+    }
 
-            List<OrderProduct> products = new ArrayList<>();
-            List<RequestProduct> inputProducts = newOrder.getProducts();
-
-            for (RequestProduct current : inputProducts) {
-                Product product = productRepository.findByName(current.name());
-
-                if (product != null && current.count() >= 0) {
-                    products.add(new OrderProduct(oldOrder, product, current.count()));
-                }
-            }
-
-            oldOrder.setProducts(products);
-        }
-
-        Optional.ofNullable(newOrder.getDeliveryAddress()).ifPresent(oldOrder::setDeliveryAddress);
-        Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
-
-        BigDecimal price = oldOrder.getProducts().stream()
+    private BigDecimal calculateNewPrice(List<OrderProduct> products) {
+        return products.stream()
                 .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
-        oldOrder.setPrice(price);
+    private OrderDTO toOrderDTO(Order order) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        DecimalFormat df = new DecimalFormat("#,###.00");
+        String formatDateTime = order.getDate().format(formatter);
+        var price = df.format(order.getPrice());
+        log.info(price);
 
-        if (!price.equals(BigDecimal.ZERO)) {
-            orderRepository.save(oldOrder);
-
-            return new OrderDTO(oldOrder);
-
-        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+        return new OrderDTO(order.getId(),
+                formatDateTime,
+                String.valueOf(order.getStatus()),
+                order.getProducts().stream().map(ProductDTO::new).toList(),
+                order.getDeliveryAddress(),
+                order.getDescription(),
+                price
+        );
     }
 }

@@ -11,7 +11,6 @@ import java.util.List;
 @Setter
 @ToString
 @AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "customers")
 public class Customer {
     @Id
@@ -31,8 +30,16 @@ public class Customer {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "enabled")
+    private boolean enabled;
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
             mappedBy = "customer")
     @Column(name = "orders")
     private List<Order> orders;
+
+    public Customer() {
+        super();
+        this.enabled = false;
+    }
 }

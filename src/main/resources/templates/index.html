@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Online Store</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<body>
+<header class="header">
+
+    <a class="logo" th:href="@{/}">Online Store</a>
+    <div class="switch">
+        <input class="check-toggle check-toggle-round-flat" id="language-toggle" type="checkbox">
+        <label for="language-toggle"></label>
+        <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
+        <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
+    </div>
+
+    <nav class="nav-items">
+        <a th:href="@{/}" th:text="#{home}"></a>
+        <a th:href="@{/products_html}" th:text="#{products}"></a>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/logout}" th:text="#{logout}"></a>
+        </div>
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" th:text="#{login}"></a>
+        </div>
+    </nav>
+</header>
+<main>
+    <div class="intro">
+        <h1>Online Store</h1>
+        <p th:text="#{title}"></p>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/products_html}">
+                <button th:text="#{shopping}"></button>
+            </a>
+        </div>
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/login}">
+                <button th:text="#{shopping}"></button>
+            </a>
+        </div>
+    </div>
+    <div class="achievements">
+        <div class="work">
+            <i class="fas fa-atom"></i>
+            <p class="work-heading" th:text="#{convenient}"></p>
+            <p class="work-text" th:text="#{convenientDesc}"></p>
+        </div>
+        <div class="work">
+            <i class="fas fa-skiing"></i>
+            <p class="work-heading" th:text="#{fast}"></p>
+            <p class="work-text" th:text="#{fastDesc}"></p>
+        </div>
+        <div class="work">
+            <i class="fas fa-ethernet"></i>
+            <p class="work-heading" th:text="#{reliable}"></p>
+            <p class="work-text" th:text="#{reliableDesc}"></p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

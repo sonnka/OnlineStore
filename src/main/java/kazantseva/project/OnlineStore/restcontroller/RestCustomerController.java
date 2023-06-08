@@ -1,9 +1,10 @@
-package kazantseva.project.OnlineStore.controller;
+package kazantseva.project.OnlineStore.restcontroller;
 
 import jakarta.validation.Valid;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
+import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-public class CustomerController {
+public class RestCustomerController {
 
     private CustomerService customerService;
 
@@ -34,15 +35,15 @@ public class CustomerController {
     }
 
     @GetMapping("/customers/{customer-id}")
-    public CustomerDTO getCustomer(Authentication auth,
-                                   @PathVariable("customer-id") long customerId) {
+    public FullCustomerDTO getCustomer(Authentication auth,
+                                       @PathVariable("customer-id") long customerId) {
         return customerService.getCustomer(auth.getName(), customerId);
     }
 
     @PatchMapping("/customers/{customer-id}")
     public CustomerDTO updateCustomer(Authentication auth,
                                       @PathVariable("customer-id") long customerId,
-                                      @RequestBody RequestCustomer customer) {
+                                      @RequestBody @Valid RequestCustomer customer) {
         return customerService.updateCustomer(auth.getName(), customerId, customer);
     }
 

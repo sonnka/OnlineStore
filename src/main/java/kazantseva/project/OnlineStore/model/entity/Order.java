@@ -34,7 +34,8 @@ public class Order {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order",
+            orphanRemoval = true)
     @JsonIgnore
     @Column(name = "products")
     private List<OrderProduct> products;

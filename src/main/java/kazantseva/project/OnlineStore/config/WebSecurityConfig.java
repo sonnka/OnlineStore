@@ -2,29 +2,64 @@ package kazantseva.project.OnlineStore.config;
 
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+
+import java.util.Locale;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig {
+public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.headers().frameOptions().disable();
-        http.csrf().disable().authorizeHttpRequests((request) -> request
+
+        http.authorizeHttpRequests((request) -> request
+                .requestMatchers("/").permitAll()
                 .requestMatchers("/home").permitAll()
                 .requestMatchers("/products").permitAll()
+                .requestMatchers("/products_html").permitAll()
+                .requestMatchers("/confirm-email").permitAll()
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/login").permitAll()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/customers/**").authenticated()
-                .anyRequest().authenticated()).httpBasic();
+                .requestMatchers("/profile").authenticated()
+                .requestMatchers("/profile/**").authenticated()
+                .anyRequest().authenticated());
+
+        http.httpBasic(withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(c -> c
+                        .frameOptions()
+                        .disable());
+
+        http.formLogin()
+                .loginPage("/login")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/", true)
+                .failureUrl("/login?error")
+                .permitAll()
+                .and()
+                .logout()
+                .logoutUrl("/logout");
 
         return http.build();
     }
@@ -39,4 +74,32 @@ public class WebSecurityConfig {
         return email -> customerRepository.findByEmailIgnoreCase(email)
                 .map(mapper::toUserDetails).orElseThrow(() -> new UsernameNotFoundException(email + " not found"));
     }
+
+    @Bean
+    public LocaleResolver localeResolver() {
+        SessionLocaleResolver slr = new SessionLocaleResolver();
+        slr.setDefaultLocale(Locale.US);
+        return slr;
+    }
+
+    @Bean
+    public LocaleChangeInterceptor localeChangeInterceptor() {
+        LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
+        lci.setParamName("lang");
+        return lci;
+    }
+
+    @Bean(name = "messageSource")
+    public ResourceBundleMessageSource bundleMessageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(localeChangeInterceptor());
+    }
 }
+
