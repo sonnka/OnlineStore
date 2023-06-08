@@ -18,6 +18,8 @@ import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -62,17 +64,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .role(CustomerRole.BUYER)
                 .build());
 
-        Locale locale = LocaleContextHolder.getLocale();
-        VerificationToken verificationToken = new VerificationToken(customer, locale.toString());
-
-        tokenRepository.save(verificationToken);
-
-        try {
-            sendMail(verificationToken.getToken(), customer.getEmail());
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
-
+        generateTokenAndSendMail(customer);
     }
 
     @Override
@@ -109,6 +101,58 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Page<CustomerDTO> getCustomers(String email, Pageable pageable) {
+        checkAdminByEmail(email);
+
+        return customerRepository.findByRole(CustomerRole.BUYER, pageable)
+                .map(this::toCustomerDTO);
+    }
+
+    @Override
+    public Page<CustomerDTO> getAdmins(String email, Pageable pageable) {
+        checkAdminByEmail(email);
+
+        return customerRepository.findByRole(CustomerRole.ADMIN, pageable)
+                .map(this::toCustomerDTO);
+    }
+
+    @Override
+    @Transactional
+    public void toAdmin(String email, Long customerId) {
+        checkAdminByEmail(email);
+
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with ID " + customerId + " not found!"));
+
+        if (CustomerRole.ADMIN.equals(customer.getRole())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "This customer is already admin!");
+        }
+
+        orderRepository.deleteByCustomer(customer);
+        customer.setRole(CustomerRole.ADMIN);
+
+    }
+
+    @Override
+    @Transactional
+    public void resendEmail(String email, Long customerId) {
+        checkAdminByEmail(email);
+
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with ID " + customerId + " not found!"));
+
+        if (customer.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "This customer's email address has already been successfully confirmed");
+        }
+
+        generateTokenAndSendMail(customer);
+    }
+
+    @Override
     public Long getCustomerId(String email) {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -131,28 +175,97 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional
     public void deleteCustomer(String email, long customerId) {
-        var customer = findByIdAndCheckByEmail(customerId, email);
 
-        orderRepository.deleteByCustomer(customer);
-        customerRepository.delete(customer);
+        var currentCustomer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with email " + email + " not found!"));
+
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with ID " + customerId + " not found!"));
+
+        if (!customer.getEmail().equals(email)) {
+            if (CustomerRole.ADMIN.equals(currentCustomer.getRole())) {
+                if (!CustomerRole.ADMIN.equals(customer.getRole())) {
+                    deleteByAdmin(customer);
+                    return;
+                }
+            }
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        deleteYourself(customer);
     }
 
-    public void sendMail(String token, String to) throws MessagingException {
+    @Transactional
+    public void generateTokenAndSendMail(Customer customer) {
+        tokenRepository.deleteByCustomer(customer);
+
+        Locale locale = LocaleContextHolder.getLocale();
+
+        VerificationToken verificationToken = new VerificationToken(customer, locale.toString());
+
+        tokenRepository.save(verificationToken);
+
+        try {
+            sendConfirmationMail(verificationToken.getToken(), customer.getEmail());
+        } catch (MessagingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "Failed to send confirmation email, please try again in 24 hours!");
+        }
+
+    }
+
+    private void deleteYourself(Customer customer) {
+        orderRepository.deleteByCustomer(customer);
+        customerRepository.deleteById(customer.getId());
+    }
+
+    private void deleteByAdmin(Customer customer) {
+        try {
+            sendDeletionMail(customer.getEmail());
+            orderRepository.deleteByCustomer(customer);
+            customerRepository.deleteById(customer.getId());
+        } catch (MessagingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "Failed to send email, please try again!");
+        }
+    }
+
+    @Transactional
+    public void sendConfirmationMail(String token, String to) throws MessagingException {
         Locale locale = LocaleContextHolder.getLocale();
         Context context = new Context(locale);
         context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token);
 
         String process = templateEngine.process("letter", context);
+
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
         helper.setSubject(messageSource.getMessage("subject", null, locale));
         helper.setText(process, true);
         helper.setTo(to);
+
         emailSender.send(mimeMessage);
     }
 
-    @Transactional
-    public void verifyAccount(String email, String verificationToken) {
+    private void sendDeletionMail(String to) throws MessagingException {
+        Context context = new Context();
+
+        String process = templateEngine.process("deleteletter", context);
+
+        MimeMessage mimeMessage = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        helper.setSubject("Your account was deleted");
+        helper.setText(process, true);
+        helper.setTo(to);
+
+        emailSender.send(mimeMessage);
+    }
+
+    private void verifyAccount(String email, String verificationToken) {
         VerificationToken token = tokenRepository.findByToken(verificationToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No such verification token!"));
@@ -190,6 +303,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         return customer;
+    }
+
+    private void checkAdminByEmail(String email) {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with email " + email + " not found!"));
+        if (!CustomerRole.ADMIN.equals(customer.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
     }
 
     private CustomerDTO toCustomerDTO(Customer customer) {

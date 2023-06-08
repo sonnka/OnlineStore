@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1080" author="admin">
+    <changeSet id="1100" author="admin">
         <dropTable tableName="order_product"/>
         <dropTable tableName="orders"/>
         <dropTable tableName="verification_tokens"/>
@@ -13,7 +13,7 @@
         <dropTable tableName="products"/>
     </changeSet>
 
-    <changeSet id="1081" author="admin">
+    <changeSet id="1101" author="admin">
         <createTable tableName="products">
             <column name="product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -30,7 +30,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1082" author="admin">
+    <changeSet id="1102" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -59,7 +59,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1083" author="admin">
+    <changeSet id="1103" author="admin">
         <createTable tableName="verification_tokens">
             <column name="token_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -81,7 +81,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1084" author="admin">
+    <changeSet id="1104" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -108,7 +108,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1085" author="admin">
+    <changeSet id="1105" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -127,7 +127,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1086" author="admin">
+    <changeSet id="1106" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Apple"/>
@@ -160,7 +160,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1087" author="admin">
+    <changeSet id="1107" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Pineapple"/>
@@ -193,7 +193,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1088" author="admin">
+    <changeSet id="1108" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Butter"/>
@@ -226,7 +226,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1089" author="admin">
+    <changeSet id="1109" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Ketchup"/>
@@ -259,7 +259,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1090" author="admin">
+    <changeSet id="1110" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Paprika"/>
@@ -292,7 +292,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1091" author="admin">
+    <changeSet id="1111" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Pasta"/>
@@ -325,7 +325,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1092" author="admin">
+    <changeSet id="1112" author="admin">
         <insert tableName="customers">
             <column name="name" value="Harry"/>
             <column name="surname" value="Potter"/>

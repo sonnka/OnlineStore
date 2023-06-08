@@ -87,4 +87,14 @@ public class PageController {
         customerService.login(token);
         return "login";
     }
+
+    @GetMapping("/admin/customers_list")
+    public String customers() {
+        return "customers";
+    }
+
+    @GetMapping("/admin/admins_list")
+    public String admins() {
+        return "admins";
+    }
 }

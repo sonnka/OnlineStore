@@ -8,6 +8,8 @@ import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +53,27 @@ public class RestCustomerController {
     public void deleteCustomer(Authentication auth,
                                @PathVariable("customer-id") long customerId) {
         customerService.deleteCustomer(auth.getName(), customerId);
+    }
+
+    @GetMapping("/admin/customers")
+    public Page<CustomerDTO> getCustomers(Authentication auth, Pageable pageable) {
+        return customerService.getCustomers(auth.getName(), pageable);
+    }
+
+    @GetMapping("/admin/admins")
+    public Page<CustomerDTO> getAdmins(Authentication auth, Pageable pageable) {
+        return customerService.getAdmins(auth.getName(), pageable);
+    }
+
+    @GetMapping("/admin/customers/{customer-id}/admin")
+    public void toAdmin(Authentication auth,
+                        @PathVariable("customer-id") long customerId) {
+        customerService.toAdmin(auth.getName(), customerId);
+    }
+
+    @GetMapping("/admin/customers/{customer-id}/resend")
+    public void resendEmail(Authentication auth,
+                            @PathVariable("customer-id") long customerId) {
+        customerService.resendEmail(auth.getName(), customerId);
     }
 }
