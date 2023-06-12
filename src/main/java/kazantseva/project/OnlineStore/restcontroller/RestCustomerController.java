@@ -65,7 +65,7 @@ public class RestCustomerController {
         return customerService.getAdmins(auth.getName(), pageable);
     }
 
-    @GetMapping("/admin/customers/{customer-id}/admin")
+    @PatchMapping("/admin/customers/{customer-id}/admin")
     public void toAdmin(Authentication auth,
                         @PathVariable("customer-id") long customerId) {
         customerService.toAdmin(auth.getName(), customerId);

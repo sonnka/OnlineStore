@@ -51,6 +51,7 @@ public class CustomerServiceImpl implements CustomerService {
     private JavaMailSender emailSender;
 
     @Override
+    @Transactional
     public void register(CreateCustomer newCustomer) {
         if (customerRepository.existsByEmailIgnoreCase(newCustomer.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, newCustomer.getEmail() + " is already occupied!");
@@ -251,6 +252,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void sendDeletionMail(String to) throws MessagingException {
+        Locale locale = LocaleContextHolder.getLocale();
         Context context = new Context();
 
         String process = templateEngine.process("deleteletter", context);
@@ -258,7 +260,7 @@ public class CustomerServiceImpl implements CustomerService {
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
 
-        helper.setSubject("Your account was deleted");
+        helper.setSubject(messageSource.getMessage("subject2", null, locale));
         helper.setText(process, true);
         helper.setTo(to);
 
