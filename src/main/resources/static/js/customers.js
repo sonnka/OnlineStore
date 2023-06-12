@@ -3,39 +3,51 @@ $(document).ready(function () {
     let sort = "name"
     let dir = "asc";
     var sortName = $('#sortName');
-    var sortPrice = $('#sortPrice');
+    var sortSurname = $('#sortSurname');
+    var sortEmail = $('#sortEmail');
 
-    fetchProduct(0);
+
+    fetchCustomer(0);
 
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
         sort = "name";
-        fetchProduct(0);
+        fetchCustomer(0);
     });
-    sortPrice.click(function () {
+    sortSurname.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
-        sort = "price";
-        fetchProduct(0);
+        sort = "surname";
+        fetchCustomer(0);
+    });
+    sortEmail.click(function () {
+        dir = dir === "asc" ? "desc" : "asc";
+        sort = "email";
+        fetchCustomer(0);
     });
 
-    function fetchProduct(startPage) {
+    function fetchCustomer(startPage) {
 
         $.ajax({
             type: "GET",
-            url: "/products",
+            url: "/admin/customers",
             data: {
                 page: startPage,
-                size: 10,
+                size: 7,
                 sort: sort + "," + dir
             },
             success: function (response) {
-                $('#table tbody').empty();
-                $.each(response.content, (i, product) => {
-                    let productRow = '<tr>' +
-                        '<td>' + product.name + '</td>' +
-                        '<td>' + product.price + '</td>' +
+                $('#customersTable tbody').empty();
+                $.each(response.content, (i, customer) => {
+                    let customerRow = '<tr>' +
+                        '<td>' + customer.name + '</td>' +
+                        '<td>' + customer.surname + '</td>' +
+                        '<td>' + customer.email + '</td>' +
+                        '<td><a class="btn btn-primary" href="/profile/orders" >Send</a></td>' +
+                        '<td><a class="btn btn-delete" href="/profile/orders/" ><span class="mdi mdi-delete mdi-24px"></span>\n' +
+                        '  <span class="mdi mdi-delete-empty mdi-24px"></span>\n' +
+                        '  <span>Delete</span></a></td>' +
                         '</tr>';
-                    $('#table tbody').append(productRow);
+                    $('#customersTable tbody').append(customerRow);
                 });
 
                 if ($('ul.pagination li').length - 2 !== response.totalPages) {
@@ -59,9 +71,10 @@ $(document).ready(function () {
 
         var first = '';
         var prev = '';
-
         if (pageNumber > 0) {
-            first = '<li class="page-item"><a class="page-link">«</a></li>';
+            if (pageNumber !== 0) {
+                first = '<li class="page-item"><a class="page-link">«</a></li>';
+            }
             prev = '<li class="page-item"><a class="page-link">‹</a></li>';
         } else {
             prev = '';
@@ -86,7 +99,7 @@ $(document).ready(function () {
         var pagingLink = '';
 
         for (var i = start; i <= end; i++) {
-            if (i === (pageNumber + 1)) {
+            if (i == (pageNumber + 1)) {
                 pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>'; // no need to create a link to current page
             } else {
                 pagingLink += '<li class="page-item"><a class="page-link"> ' + i + ' </a></li>';
@@ -105,12 +118,12 @@ $(document).ready(function () {
 
         if (val.toUpperCase() === "«") {
             let currentActive = $("li.active");
-            fetchProduct(0);
+            fetchCustomer(0);
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "»") {
-            fetchProduct(totalPages - 1);
+            fetchCustomer(totalPages - 1);
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 
@@ -119,7 +132,7 @@ $(document).ready(function () {
             if (activeValue < totalPages) {
                 let currentActive = $("li.active");
                 startPage = activeValue;
-                fetchProduct(startPage);
+                fetchCustomer(startPage);
                 $("li.active").removeClass("active");
                 currentActive.next().addClass("active");
             }
@@ -127,16 +140,17 @@ $(document).ready(function () {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue > 1) {
                 startPage = activeValue - 2;
-                fetchProduct(startPage);
+                fetchCustomer(startPage);
                 let currentActive = $("li.active");
                 currentActive.removeClass("active");
                 currentActive.prev().addClass("active");
             }
         } else {
             startPage = parseInt(val - 1);
-            fetchProduct(startPage);
+            fetchCustomer(startPage);
             $("li.active").removeClass("active");
             $(this).parent().addClass("active");
         }
     });
+
 });
