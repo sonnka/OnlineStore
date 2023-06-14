@@ -93,7 +93,8 @@ $(document).ready(function () {
         $('#productsList tbody').empty();
         $.each(responseJson, (i, product) => {
             let productRow = '<tr>' +
-                '<td> <input type="checkbox" class="checkbox"> <label class="name">&emsp;&emsp;' + product.name + '&emsp;&emsp;</label></td>' +
+                '<td> <input type="checkbox" class="checkbox"> <label class="name">&emsp;&emsp;' + product.name
+                + '&emsp;&emsp;</label></td>' +
                 '<td> <label class="price">' + product.price + '</label></td></tr>'
             $('#productsList tbody').append(productRow);
         });

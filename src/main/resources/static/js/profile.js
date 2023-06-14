@@ -5,6 +5,10 @@ $(document).ready(function () {
     var deleteProfileButton = $('#deleteProfileButton');
     var getOrdersButton = $('#getOrdersButton');
 
+    $('#fileImage').change(function () {
+        showImageThumbnail(this);
+    });
+
     editProfileButton.click(function () {
         window.location = "/profile/edit";
     });
@@ -15,6 +19,17 @@ $(document).ready(function () {
         window.location = "/profile/orders";
     });
 
+
+    function showImageThumbnail(fileInput) {
+        file = fileInput.files[0];
+        reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#thumbnail').attr('src', e.target.result);
+        };
+
+        reader.readAsDataURL(file);
+    }
 
     function loadProfile() {
         url = "/customers/" + customerId;

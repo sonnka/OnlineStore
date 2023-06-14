@@ -218,6 +218,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void deleteYourself(Customer customer) {
+        tokenRepository.deleteByCustomer(customer);
         orderRepository.deleteByCustomer(customer);
         customerRepository.deleteById(customer.getId());
     }
@@ -225,6 +226,7 @@ public class CustomerServiceImpl implements CustomerService {
     private void deleteByAdmin(Customer customer) {
         try {
             sendDeletionMail(customer.getEmail());
+            tokenRepository.deleteByCustomer(customer);
             orderRepository.deleteByCustomer(customer);
             customerRepository.deleteById(customer.getId());
         } catch (MessagingException e) {

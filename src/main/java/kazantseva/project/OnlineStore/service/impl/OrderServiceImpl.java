@@ -12,7 +12,6 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Slf4j
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
@@ -215,7 +213,6 @@ public class OrderServiceImpl implements OrderService {
         DecimalFormat df = new DecimalFormat("#,###.00");
         String formatDateTime = order.getDate().format(formatter);
         var price = df.format(order.getPrice());
-        log.info(price);
 
         return new OrderDTO(order.getId(),
                 formatDateTime,

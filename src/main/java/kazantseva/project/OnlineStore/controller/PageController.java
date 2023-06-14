@@ -97,4 +97,9 @@ public class PageController {
     public String admins() {
         return "admins";
     }
+
+//    @PostMapping("/upload")
+//    public String uploadImage() {
+//        return "";
+//    }
 }

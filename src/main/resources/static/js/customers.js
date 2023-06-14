@@ -38,16 +38,35 @@ $(document).ready(function () {
             success: function (response) {
                 $('#customersTable tbody').empty();
                 $.each(response.content, (i, customer) => {
+                    var customerId = customer.id;
                     let customerRow = '<tr>' +
+                        '<td><div class="text-left">' + customerId + '</div></td>' +
                         '<td>' + customer.name + '</td>' +
                         '<td>' + customer.surname + '</td>' +
                         '<td>' + customer.email + '</td>' +
-                        '<td><a class="btn btn-primary" href="/profile/orders" >Send</a></td>' +
-                        '<td><a class="btn btn-delete" href="/profile/orders/" ><span class="mdi mdi-delete mdi-24px"></span>\n' +
-                        '  <span class="mdi mdi-delete-empty mdi-24px"></span>\n' +
-                        '  <span>Delete</span></a></td>' +
+                        '<td class="actions" data-th=""> <div class="text-right valueAlign">' +
+                        '<a type="button" title="resend letter" class="resendLetter">' +
+                        '<i class="material-icons send">&#xe0be;</i></a></div></td> ' +
+                        '<td class="actions" data-th=""> <div class="text-right valueAlign">' +
+                        '<a type="button" title="make admin" class="makeAdmin">' +
+                        '<i class="material-icons admin">&#xe7fd;</i></a></div></td> ' +
+                        '<td class="actions" data-th=""> <div class="text-right valueAlign">' +
+                        '<a type="button" title="delete" class="deleteCustomer">' +
+                        '<i class="material-icons">&#xE872;</i></a></div></td> ' +
                         '</tr>';
                     $('#customersTable tbody').append(customerRow);
+                });
+                $('#customersTable tbody').on('click', '.resendLetter', function () {
+                    let customerId = $(this).closest('tr').find('.text-left').text();
+                    resendLetter(customerId);
+                });
+                $('#customersTable tbody').on('click', '.makeAdmin', function () {
+                    let customerId = $(this).closest('tr').find('.text-left').text();
+                    makeAdmin(customerId);
+                });
+                $('#customersTable tbody').on('click', '.deleteCustomer', function () {
+                    let customerId = $(this).closest('tr').find('.text-left').text();
+                    deleteCustomer(customerId);
                 });
 
                 if ($('ul.pagination li').length - 2 !== response.totalPages) {
@@ -59,6 +78,42 @@ $(document).ready(function () {
                 console.log("ERROR: ", e);
                 window.location = "/";
             }
+        });
+    }
+
+    function resendLetter(customerId) {
+        $.ajax({
+            type: "GET",
+            url: "/admin/customers/" + customerId + "/resend",
+            success: function () {
+                window.location = "/admin/customers_list?success_send";
+            }
+        }).fail(function () {
+            window.location = "/admin/customers_list?error_send";
+        });
+    }
+
+    function makeAdmin(customerId) {
+        $.ajax({
+            type: "PATCH",
+            url: "/admin/customers/" + customerId + "/admin",
+            success: function () {
+                window.location = "/admin/customers_list?success_admin";
+            }
+        }).fail(function () {
+            window.location = "/admin/customers_list?error_admin";
+        });
+    }
+
+    function deleteCustomer(customerId) {
+        $.ajax({
+            type: "DELETE",
+            url: "/customers/" + customerId,
+            success: function () {
+                window.location = "/admin/customers_list?success_delete";
+            }
+        }).fail(function () {
+            window.location = "/admin/customers_list?error_delete";
         });
     }
 

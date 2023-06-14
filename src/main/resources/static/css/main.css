@@ -473,3 +473,14 @@ input.check-toggle-round-flat:checked + label:after {
     margin-left: 44px;
 }
 
+.material-icons {
+    color: #b40000;
+}
+
+.send {
+    color: #1b76d0;
+}
+
+.admin {
+    color: #009a1e;
+}
