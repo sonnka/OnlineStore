@@ -16,6 +16,7 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.VerificationTokenRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
@@ -200,16 +202,23 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Transactional
     public void generateTokenAndSendMail(Customer customer) {
+
+        VerificationToken firstToken = tokenRepository.findFirstByCustomerOrderByIdDesc(customer).orElse(null);
+
+        String locale = LocaleContextHolder.getLocale().toString();
+
+        if (firstToken != null) {
+            locale = firstToken.getLocale();
+        }
+
         tokenRepository.deleteByCustomer(customer);
 
-        Locale locale = LocaleContextHolder.getLocale();
-
-        VerificationToken verificationToken = new VerificationToken(customer, locale.toString());
+        VerificationToken verificationToken = new VerificationToken(customer, locale);
 
         tokenRepository.save(verificationToken);
 
         try {
-            sendConfirmationMail(verificationToken.getToken(), customer.getEmail());
+            sendConfirmationMail(verificationToken, customer.getEmail());
         } catch (MessagingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "Failed to send confirmation email, please try again in 24 hours!");
@@ -236,10 +245,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Transactional
-    public void sendConfirmationMail(String token, String to) throws MessagingException {
-        Locale locale = LocaleContextHolder.getLocale();
+    public void sendConfirmationMail(VerificationToken token, String to) throws MessagingException {
+        Locale locale = new Locale(token.getLocale());
+        log.info(token.getLocale());
+        log.info(locale.toString());
         Context context = new Context(locale);
-        context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token);
+        context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token.getToken());
 
         String process = templateEngine.process("letter", context);
 

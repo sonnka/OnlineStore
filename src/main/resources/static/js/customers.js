@@ -2,12 +2,19 @@ $(document).ready(function () {
     let totalPages = 1;
     let sort = "name"
     let dir = "asc";
+    var sortId = $('#sortId');
     var sortName = $('#sortName');
     var sortSurname = $('#sortSurname');
     var sortEmail = $('#sortEmail');
 
 
     fetchCustomer(0);
+
+    sortId.click(function () {
+        dir = dir === "asc" ? "desc" : "asc";
+        sort = "id";
+        fetchCustomer(0);
+    });
 
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
@@ -44,13 +51,11 @@ $(document).ready(function () {
                         '<td>' + customer.name + '</td>' +
                         '<td>' + customer.surname + '</td>' +
                         '<td>' + customer.email + '</td>' +
-                        '<td class="actions" data-th=""> <div class="text-right valueAlign">' +
+                        '<td class="actions" data-th=""> ' +
                         '<a type="button" title="resend letter" class="resendLetter">' +
-                        '<i class="material-icons send">&#xe0be;</i></a></div></td> ' +
-                        '<td class="actions" data-th=""> <div class="text-right valueAlign">' +
+                        '<i class="material-icons send">&#xe0be;</i></a>&emsp;' +
                         '<a type="button" title="make admin" class="makeAdmin">' +
-                        '<i class="material-icons admin">&#xe7fd;</i></a></div></td> ' +
-                        '<td class="actions" data-th=""> <div class="text-right valueAlign">' +
+                        '<i class="material-icons admin">&#xe7fd;</i></a></div> &emsp;' +
                         '<a type="button" title="delete" class="deleteCustomer">' +
                         '<i class="material-icons">&#xE872;</i></a></div></td> ' +
                         '</tr>';
