@@ -167,8 +167,8 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer) {
         var oldCustomer = findByIdAndCheckByEmail(customerId, email);
 
-        Optional.ofNullable(customer.getName()).ifPresent(oldCustomer::setName);
-        Optional.ofNullable(customer.getSurname()).ifPresent(oldCustomer::setSurname);
+        Optional.of(customer.getName()).ifPresent(oldCustomer::setName);
+        Optional.of(customer.getSurname()).ifPresent(oldCustomer::setSurname);
 
         customerRepository.save(oldCustomer);
 
