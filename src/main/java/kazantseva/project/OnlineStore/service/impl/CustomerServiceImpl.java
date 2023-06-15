@@ -246,9 +246,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Transactional
     public void sendConfirmationMail(VerificationToken token, String to) throws MessagingException {
-        Locale locale = new Locale(token.getLocale());
-        log.info(token.getLocale());
+        Locale locale = new Locale(token.getLocale().split("_")[0], token.getLocale().split("_")[1]);
+
         log.info(locale.toString());
+
         Context context = new Context(locale);
         context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token.getToken());
 
@@ -265,7 +266,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void sendDeletionMail(String to) throws MessagingException {
-        Locale locale = LocaleContextHolder.getLocale();
         Context context = new Context();
 
         String process = templateEngine.process("deleteletter", context);
@@ -273,7 +273,7 @@ public class CustomerServiceImpl implements CustomerService {
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
 
-        helper.setSubject(messageSource.getMessage("subject2", null, locale));
+        helper.setSubject(messageSource.getMessage("subject2", null, Locale.US));
         helper.setText(process, true);
         helper.setTo(to);
 
