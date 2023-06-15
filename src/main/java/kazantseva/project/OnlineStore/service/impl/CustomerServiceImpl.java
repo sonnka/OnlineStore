@@ -133,8 +133,14 @@ public class CustomerServiceImpl implements CustomerService {
                     "This customer is already admin!");
         }
 
-        orderRepository.deleteByCustomer(customer);
-        customer.setRole(CustomerRole.ADMIN);
+        try {
+            sendAdminMail(customer.getEmail());
+            orderRepository.deleteByCustomer(customer);
+            customer.setRole(CustomerRole.ADMIN);
+        } catch (MessagingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "Failed to send email, please try again!");
+        }
 
     }
 
@@ -248,8 +254,6 @@ public class CustomerServiceImpl implements CustomerService {
     public void sendConfirmationMail(VerificationToken token, String to) throws MessagingException {
         Locale locale = new Locale(token.getLocale().split("_")[0], token.getLocale().split("_")[1]);
 
-        log.info(locale.toString());
-
         Context context = new Context(locale);
         context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token.getToken());
 
@@ -265,8 +269,24 @@ public class CustomerServiceImpl implements CustomerService {
         emailSender.send(mimeMessage);
     }
 
+    @Transactional
+    public void sendAdminMail(String to) throws MessagingException {
+        Context context = new Context(Locale.US);
+
+        String process = templateEngine.process("adminletter", context);
+
+        MimeMessage mimeMessage = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        helper.setSubject(messageSource.getMessage("subject3", null, Locale.US));
+        helper.setText(process, true);
+        helper.setTo(to);
+
+        emailSender.send(mimeMessage);
+    }
+
     private void sendDeletionMail(String to) throws MessagingException {
-        Context context = new Context();
+        Context context = new Context(Locale.US);
 
         String process = templateEngine.process("deleteletter", context);
 
