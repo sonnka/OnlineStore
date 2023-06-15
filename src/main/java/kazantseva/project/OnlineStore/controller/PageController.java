@@ -98,6 +98,16 @@ public class PageController {
         return "admins";
     }
 
+    @GetMapping("/admin/products/{product-id}/edit")
+    public String editProduct(@PathVariable(value = "product-id") String productId, Principal principal, Model model) {
+        return "editproduct";
+    }
+
+    @GetMapping("/admin/products")
+    public String addProduct() {
+        return "editproduct";
+    }
+
 //    @PostMapping("/upload")
 //    public String uploadImage() {
 //        return "";
