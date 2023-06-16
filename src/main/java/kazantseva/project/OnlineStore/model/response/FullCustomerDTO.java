@@ -10,7 +10,9 @@ public record FullCustomerDTO(
         String email,
         int totalAmountOfOrders,
         int amountOfUnpaidOrders,
-        int amountOfPaidOrders
+        int amountOfPaidOrders,
+
+        int amountOfAddedAdmins
 
 ) {
 }

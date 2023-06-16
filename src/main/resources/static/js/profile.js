@@ -51,6 +51,7 @@ $(document).ready(function () {
         $('#totalAmountOfOrders2').text(responseJson.totalAmountOfOrders);
         $('#amountPaidOrders').text(responseJson.amountOfPaidOrders);
         $('#amountUnpaidOrders').text(responseJson.amountOfUnpaidOrders);
+        $('#amountGrantedAdmins').text(responseJson.amountOfAddedAdmins);
     }
 
     function deleteProfile() {

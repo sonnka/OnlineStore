@@ -381,6 +381,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private FullCustomerDTO toFullCustomerDTO(Customer customer) {
+
         return FullCustomerDTO.builder()
                 .id(customer.getId())
                 .name(customer.getName())
@@ -397,6 +398,9 @@ public class CustomerServiceImpl implements CustomerService {
                         .filter(order -> order.getStatus().equals(Status.UNPAID))
                         .toList()
                         .size())
+                .amountOfAddedAdmins(customerRepository.findAll()
+                        .stream().filter(c -> customer.getEmail().equals(c.getGrantedAdminBy()))
+                        .toList().size())
                 .build();
     }
 }
