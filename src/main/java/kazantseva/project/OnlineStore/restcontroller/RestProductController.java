@@ -21,6 +21,11 @@ public class RestProductController {
         return productService.getProductsByPage(pageable);
     }
 
+    @GetMapping("/admin/products/{product-id}")
+    public ShortProductDTO getProduct(@PathVariable("product-id") Long productId, Authentication auth) {
+        return productService.getProduct(auth.getName(), productId);
+    }
+
     @PatchMapping("/admin/products/{product-id}")
     public ShortProductDTO updateProduct(@PathVariable("product-id") Long productId,
                                          @RequestBody CreateProduct product,

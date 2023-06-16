@@ -5,6 +5,8 @@ $(document).ready(function () {
     var sortId = $('#sortId');
     var sortName = $('#sortName');
     var sortPrice = $('#sortPrice');
+    var table = $('#table tbody');
+    var createProductButton = $('#createProductButton');
 
     fetchProduct(0);
 
@@ -25,6 +27,10 @@ $(document).ready(function () {
         fetchProduct(0);
     });
 
+    createProductButton.click(function () {
+        window.location = "/admin/products/create";
+    });
+
     function fetchProduct(startPage) {
 
         $.ajax({
@@ -36,7 +42,7 @@ $(document).ready(function () {
                 sort: sort + "," + dir
             },
             success: function (response) {
-                $('#table tbody').empty();
+                table.empty();
                 $.each(response.content, (i, product) => {
                     var productId = product.id;
                     let productRow = '<tr>' +
@@ -52,11 +58,11 @@ $(document).ready(function () {
                     $('#table tbody').append(productRow);
                 });
 
-                $('#table tbody').on('click', '.editProduct', function () {
+                table.on('click', '.editProduct', function () {
                     let productId = $(this).closest('tr').find('.text-left').text();
                     editProduct(productId);
                 });
-                $('#table tbody').on('click', '.deleteProduct', function () {
+                table.on('click', '.deleteProduct', function () {
                     let productId = $(this).closest('tr').find('.text-left').text();
                     deleteProduct(productId);
                 });

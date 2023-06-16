@@ -31,6 +31,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ShortProductDTO getProduct(String email, Long productId) {
+        checkAdmin(email);
+        return new ShortProductDTO(productRepository.findById(productId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Product with id " + productId + " not found!")));
+    }
+
+    @Override
     public ShortProductDTO updateProduct(String email, Long productId, CreateProduct newProduct) {
         checkAdmin(email);
 

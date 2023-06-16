@@ -99,12 +99,14 @@ public class PageController {
     }
 
     @GetMapping("/admin/products/{product-id}/edit")
-    public String editProduct(@PathVariable(value = "product-id") String productId, Principal principal, Model model) {
+    public String editProduct(@PathVariable(value = "product-id") String productId, Model model) {
+        model.addAttribute("productId", Long.valueOf(productId));
         return "editproduct";
     }
 
-    @GetMapping("/admin/products")
-    public String addProduct() {
+    @GetMapping("/admin/products/create")
+    public String addProduct(Model model) {
+        model.addAttribute("productId", -1L);
         return "editproduct";
     }
 
