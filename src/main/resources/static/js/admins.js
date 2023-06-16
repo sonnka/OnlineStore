@@ -41,6 +41,8 @@ $(document).ready(function () {
                         '<td>' + admin.name + '</td>' +
                         '<td>' + admin.surname + '</td>' +
                         '<td>' + admin.email + '</td>' +
+                        '<td>' + admin.grantedAdminBy + '</td>' +
+                        '<td>' + admin.grantedDate + '</td>' +
                         '</tr>';
                     $('#adminsTable tbody').append(adminRow);
                 });

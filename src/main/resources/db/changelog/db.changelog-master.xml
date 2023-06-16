@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1100" author="admin">
+    <changeSet id="1160" author="admin">
         <dropTable tableName="order_product"/>
         <dropTable tableName="orders"/>
         <dropTable tableName="verification_tokens"/>
@@ -13,7 +13,7 @@
         <dropTable tableName="products"/>
     </changeSet>
 
-    <changeSet id="1101" author="admin">
+    <changeSet id="1161" author="admin">
         <createTable tableName="products">
             <column name="product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -30,7 +30,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1102" author="admin">
+    <changeSet id="1162" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -56,10 +56,16 @@
             <column name="enabled" type="boolean">
                 <constraints nullable="false"/>
             </column>
+            <column name="granted_admin_by" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="granted_date" type="datetime">
+                <constraints nullable="true"/>
+            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="1103" author="admin">
+    <changeSet id="1163" author="admin">
         <createTable tableName="verification_tokens">
             <column name="token_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -81,7 +87,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1104" author="admin">
+    <changeSet id="1164" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -108,7 +114,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1105" author="admin">
+    <changeSet id="1165" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -127,7 +133,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1106" author="admin">
+    <changeSet id="1166" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Apple"/>
@@ -160,7 +166,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1107" author="admin">
+    <changeSet id="1167" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Pineapple"/>
@@ -193,7 +199,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1108" author="admin">
+    <changeSet id="1168" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Butter"/>
@@ -226,7 +232,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1109" author="admin">
+    <changeSet id="1169" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Ketchup"/>
@@ -259,7 +265,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1110" author="admin">
+    <changeSet id="1170" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Paprika"/>
@@ -292,7 +298,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1111" author="admin">
+    <changeSet id="1171" author="admin">
         <insert tableName="products">
             <column name="image" value=""/>
             <column name="name" value="Pasta"/>
@@ -325,14 +331,17 @@
         </insert>
     </changeSet>
 
-    <changeSet id="1112" author="admin">
+    <changeSet id="1172" author="admin">
         <insert tableName="customers">
             <column name="name" value="Harry"/>
             <column name="surname" value="Potter"/>
             <column name="email" value="sofiia.kazantseva@faceit.com.ua"/>
             <column name="password" value="$2a$10$1DqcI7dd8QlQq2TTpsZueOi5hzFcB1Y7ZoFdzQDoH.dJ8QLqdC.Da"/>
-            <column name="enabled" valueBoolean="true"/>
             <column name="role" value="ADMIN"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email" value="sofiia.kazantseva@faceit.com.ua"/>
+            <column name="granted_admin_by" value="-"/>
+            <column name="granted_date" defaultOnNull="true"/>
         </insert>
     </changeSet>
 

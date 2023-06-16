@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.restcontroller;
 import jakarta.validation.Valid;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
+import kazantseva.project.OnlineStore.model.response.AdminDTO;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
@@ -61,7 +62,7 @@ public class RestCustomerController {
     }
 
     @GetMapping("/admin/admins")
-    public Page<CustomerDTO> getAdmins(Authentication auth, Pageable pageable) {
+    public Page<AdminDTO> getAdmins(Authentication auth, Pageable pageable) {
         return customerService.getAdmins(auth.getName(), pageable);
     }
 

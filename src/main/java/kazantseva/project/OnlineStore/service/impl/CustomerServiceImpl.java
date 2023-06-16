@@ -8,6 +8,7 @@ import kazantseva.project.OnlineStore.model.entity.Status;
 import kazantseva.project.OnlineStore.model.entity.VerificationToken;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
+import kazantseva.project.OnlineStore.model.response.AdminDTO;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
@@ -36,6 +37,7 @@ import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -112,11 +114,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Page<CustomerDTO> getAdmins(String email, Pageable pageable) {
+    public Page<AdminDTO> getAdmins(String email, Pageable pageable) {
         checkAdminByEmail(email);
 
         return customerRepository.findByRole(CustomerRole.ADMIN, pageable)
-                .map(this::toCustomerDTO);
+                .map(this::toAdminDTO);
     }
 
     @Override
@@ -137,6 +139,9 @@ public class CustomerServiceImpl implements CustomerService {
             sendAdminMail(customer.getEmail());
             orderRepository.deleteByCustomer(customer);
             customer.setRole(CustomerRole.ADMIN);
+            customer.setGrantedAdminBy(email);
+            customer.setDate(LocalDateTime.now(ZoneOffset.UTC));
+            customerRepository.save(customer);
         } catch (MessagingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "Failed to send email, please try again!");
@@ -355,6 +360,23 @@ public class CustomerServiceImpl implements CustomerService {
                 .name(customer.getName())
                 .surname(customer.getSurname())
                 .email(customer.getEmail())
+                .build();
+    }
+
+    private AdminDTO toAdminDTO(Customer customer) {
+        String date = "-";
+        if (customer.getDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+            date = customer.getDate().format(formatter);
+        }
+
+        return AdminDTO.builder()
+                .id(customer.getId())
+                .name(customer.getName())
+                .surname(customer.getSurname())
+                .email(customer.getEmail())
+                .grantedAdminBy(customer.getGrantedAdminBy())
+                .grantedDate(date)
                 .build();
     }
 

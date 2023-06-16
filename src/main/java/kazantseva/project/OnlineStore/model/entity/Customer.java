@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -40,6 +41,13 @@ public class Customer {
 
     @Column(name = "enabled")
     private boolean enabled;
+
+    @Column(name = "granted_admin_by")
+    private String grantedAdminBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "granted_date")
+    private LocalDateTime date;
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
             mappedBy = "customer")
