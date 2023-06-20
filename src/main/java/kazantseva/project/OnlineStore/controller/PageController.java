@@ -109,9 +109,4 @@ public class PageController {
         model.addAttribute("productId", -1L);
         return "editproduct";
     }
-
-//    @PostMapping("/upload")
-//    public String uploadImage() {
-//        return "";
-//    }
 }

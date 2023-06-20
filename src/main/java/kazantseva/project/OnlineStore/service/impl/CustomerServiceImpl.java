@@ -146,7 +146,6 @@ public class CustomerServiceImpl implements CustomerService {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "Failed to send email, please try again!");
         }
-
     }
 
     @Override
@@ -189,7 +188,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional
     public void deleteCustomer(String email, long customerId) {
-
         var currentCustomer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Customer with email " + email + " not found!"));
@@ -213,7 +211,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Transactional
     public void generateTokenAndSendMail(Customer customer) {
-
         VerificationToken firstToken = tokenRepository.findFirstByCustomerOrderByIdDesc(customer).orElse(null);
 
         String locale = LocaleContextHolder.getLocale().toString();
@@ -234,7 +231,6 @@ public class CustomerServiceImpl implements CustomerService {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "Failed to send confirmation email, please try again in 24 hours!");
         }
-
     }
 
     private void deleteYourself(Customer customer) {
@@ -381,7 +377,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private FullCustomerDTO toFullCustomerDTO(Customer customer) {
-
         return FullCustomerDTO.builder()
                 .id(customer.getId())
                 .name(customer.getName())

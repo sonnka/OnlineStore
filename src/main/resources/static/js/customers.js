@@ -6,6 +6,7 @@ $(document).ready(function () {
     var sortName = $('#sortName');
     var sortSurname = $('#sortSurname');
     var sortEmail = $('#sortEmail');
+    var table = $('#customersTable tbody');
 
 
     fetchCustomer(0);
@@ -43,7 +44,7 @@ $(document).ready(function () {
                 sort: sort + "," + dir
             },
             success: function (response) {
-                $('#customersTable tbody').empty();
+                table.empty();
                 $.each(response.content, (i, customer) => {
                     var customerId = customer.id;
                     let customerRow = '<tr>' +
@@ -59,17 +60,17 @@ $(document).ready(function () {
                         '<a type="button" title="delete" class="deleteCustomer">' +
                         '<i class="material-icons">&#xE872;</i></a></div></td> ' +
                         '</tr>';
-                    $('#customersTable tbody').append(customerRow);
+                    table.append(customerRow);
                 });
-                $('#customersTable tbody').on('click', '.resendLetter', function () {
+                table.on('click', '.resendLetter', function () {
                     let customerId = $(this).closest('tr').find('.text-left').text();
                     resendLetter(customerId);
                 });
-                $('#customersTable tbody').on('click', '.makeAdmin', function () {
+                table.on('click', '.makeAdmin', function () {
                     let customerId = $(this).closest('tr').find('.text-left').text();
                     makeAdmin(customerId);
                 });
-                $('#customersTable tbody').on('click', '.deleteCustomer', function () {
+                table.on('click', '.deleteCustomer', function () {
                     let customerId = $(this).closest('tr').find('.text-left').text();
                     deleteCustomer(customerId);
                 });
@@ -159,8 +160,8 @@ $(document).ready(function () {
         var pagingLink = '';
 
         for (var i = start; i <= end; i++) {
-            if (i == (pageNumber + 1)) {
-                pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>'; // no need to create a link to current page
+            if (i === (pageNumber + 1)) {
+                pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>';
             } else {
                 pagingLink += '<li class="page-item"><a class="page-link"> ' + i + ' </a></li>';
             }
@@ -174,12 +175,13 @@ $(document).ready(function () {
     $(document).on("click", "ul.pagination li a", function () {
         var data = $(this).attr('data');
         let val = $(this).text();
+        var active = $("li.active");
         console.log('val: ' + val);
 
         if (val.toUpperCase() === "«") {
-            let currentActive = $("li.active");
+            let currentActive = active;
             fetchCustomer(0);
-            $("li.active").removeClass("active");
+            active.removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "»") {
@@ -190,10 +192,10 @@ $(document).ready(function () {
         } else if (val.toUpperCase() === "›") {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue < totalPages) {
-                let currentActive = $("li.active");
+                let currentActive = active;
                 startPage = activeValue;
                 fetchCustomer(startPage);
-                $("li.active").removeClass("active");
+                active.removeClass("active");
                 currentActive.next().addClass("active");
             }
         } else if (val.toUpperCase() === "‹") {
@@ -201,14 +203,14 @@ $(document).ready(function () {
             if (activeValue > 1) {
                 startPage = activeValue - 2;
                 fetchCustomer(startPage);
-                let currentActive = $("li.active");
+                let currentActive = active;
                 currentActive.removeClass("active");
                 currentActive.prev().addClass("active");
             }
         } else {
             startPage = parseInt(val - 1);
             fetchCustomer(startPage);
-            $("li.active").removeClass("active");
+            active.removeClass("active");
             $(this).parent().addClass("active");
         }
     });

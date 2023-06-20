@@ -110,26 +110,27 @@ $(document).ready(function () {
     $(document).on("click", "ul.pagination li a", function () {
         var data = $(this).attr('data');
         let val = $(this).text();
+        var active = $("li.active");
         console.log('val: ' + val);
 
         if (val.toUpperCase() === "«") {
-            let currentActive = $("li.active");
+            let currentActive = active;
             fetchAdmin(0);
-            $("li.active").removeClass("active");
+            active.removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "»") {
             fetchAdmin(totalPages - 1);
             $("li.active").removeClass("active");
-            currentActive.next().addClass("active");
+            active.next().addClass("active");
 
         } else if (val.toUpperCase() === "›") {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue < totalPages) {
-                let currentActive = $("li.active");
+                let currentActive = active;
                 startPage = activeValue;
                 fetchAdmin(startPage);
-                $("li.active").removeClass("active");
+                active.removeClass("active");
                 currentActive.next().addClass("active");
             }
         } else if (val.toUpperCase() === "‹") {
@@ -137,14 +138,14 @@ $(document).ready(function () {
             if (activeValue > 1) {
                 startPage = activeValue - 2;
                 fetchAdmin(startPage);
-                let currentActive = $("li.active");
+                let currentActive = active;
                 currentActive.removeClass("active");
                 currentActive.prev().addClass("active");
             }
         } else {
             startPage = parseInt(val - 1);
             fetchAdmin(startPage);
-            $("li.active").removeClass("active");
+            active.removeClass("active");
             $(this).parent().addClass("active");
         }
     });
