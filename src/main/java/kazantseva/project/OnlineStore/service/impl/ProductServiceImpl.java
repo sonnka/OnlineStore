@@ -8,6 +8,8 @@ import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.ProductRepository;
 import kazantseva.project.OnlineStore.service.ProductService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
@@ -33,7 +36,9 @@ public class ProductServiceImpl implements ProductService {
     private CustomerRepository customerRepository;
 
     @Override
+    @Cacheable(value = "products", key = "#pageable")
     public Page<ShortProductDTO> getProductsByPage(Pageable pageable) {
+        log.info("caching");
         return productRepository.findAll(pageable)
                 .map(ShortProductDTO::new);
     }
