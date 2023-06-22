@@ -1,7 +1,6 @@
 package kazantseva.project.OnlineStore.service.impl;
 
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import kazantseva.project.OnlineStore.model.entity.Customer;
 import kazantseva.project.OnlineStore.model.entity.CustomerRole;
 import kazantseva.project.OnlineStore.model.entity.Status;
@@ -16,15 +15,13 @@ import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.VerificationTokenRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
+import kazantseva.project.OnlineStore.service.EmailService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,8 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,7 +39,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -54,13 +48,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     public static String UPLOAD_DIRECTORY = "tmp/images/customers";
 
-    final ResourceBundleMessageSource messageSource;
     final PasswordEncoder passwordEncoder;
-    private final TemplateEngine templateEngine;
     private CustomerRepository customerRepository;
     private OrderRepository orderRepository;
     private VerificationTokenRepository tokenRepository;
-    private JavaMailSender emailSender;
+    private EmailService emailService;
 
     @Override
     @Transactional
@@ -144,7 +136,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         try {
-            sendAdminMail(customer.getEmail());
+            emailService.sendAdminMail(customer.getEmail());
             orderRepository.deleteByCustomer(customer);
             customer.setRole(CustomerRole.ADMIN);
             customer.setGrantedAdminBy(email);
@@ -196,14 +188,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void uploadAvatar(String email, Long customerId, MultipartFile file) {
-
         var customer = findByIdAndCheckByEmail(customerId, email);
 
         if (file != null && file.getOriginalFilename() != null) {
 
             String fileExtension = file.getOriginalFilename().split("\\.")[1];
 
-            String generatedFileName = customer.getSurname() + "_" + customerId + "." + fileExtension;
+            String generatedFileName = "avatar_" + customerId + "." + fileExtension;
 
             Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, generatedFileName);
 
@@ -262,7 +253,7 @@ public class CustomerServiceImpl implements CustomerService {
         tokenRepository.save(verificationToken);
 
         try {
-            sendConfirmationMail(verificationToken, customer.getEmail());
+            emailService.sendConfirmationMail(verificationToken, customer.getEmail());
         } catch (MessagingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "Failed to send confirmation email, please try again in 24 hours!");
@@ -277,7 +268,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void deleteByAdmin(Customer customer) {
         try {
-            sendDeletionMail(customer.getEmail());
+            emailService.sendDeletionMail(customer.getEmail());
             tokenRepository.deleteByCustomer(customer);
             orderRepository.deleteByCustomer(customer);
             customerRepository.deleteById(customer.getId());
@@ -285,56 +276,6 @@ public class CustomerServiceImpl implements CustomerService {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "Failed to send email, please try again!");
         }
-    }
-
-    @Transactional
-    public void sendConfirmationMail(VerificationToken token, String to) throws MessagingException {
-        Locale locale = new Locale(token.getLocale().split("_")[0], token.getLocale().split("_")[1]);
-
-        Context context = new Context(locale);
-        context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token.getToken());
-
-        String process = templateEngine.process("letter", context);
-
-        MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-
-        helper.setSubject(messageSource.getMessage("subject", null, locale));
-        helper.setText(process, true);
-        helper.setTo(to);
-
-        emailSender.send(mimeMessage);
-    }
-
-    @Transactional
-    public void sendAdminMail(String to) throws MessagingException {
-        Context context = new Context(Locale.US);
-
-        String process = templateEngine.process("adminletter", context);
-
-        MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-
-        helper.setSubject(messageSource.getMessage("subject3", null, Locale.US));
-        helper.setText(process, true);
-        helper.setTo(to);
-
-        emailSender.send(mimeMessage);
-    }
-
-    private void sendDeletionMail(String to) throws MessagingException {
-        Context context = new Context(Locale.US);
-
-        String process = templateEngine.process("deleteletter", context);
-
-        MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-
-        helper.setSubject(messageSource.getMessage("subject2", null, Locale.US));
-        helper.setText(process, true);
-        helper.setTo(to);
-
-        emailSender.send(mimeMessage);
     }
 
     private void verifyAccount(String email, String verificationToken) {
@@ -397,6 +338,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private AdminDTO toAdminDTO(Customer customer) {
         String date = "-";
+
         if (customer.getDate() != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
             date = customer.getDate().format(formatter);

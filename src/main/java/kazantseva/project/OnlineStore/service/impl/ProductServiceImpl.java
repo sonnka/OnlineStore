@@ -62,6 +62,35 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public void uploadImage(String email, Long productId, MultipartFile file) {
+        checkAdmin(email);
+
+        var product = productRepository.findById(productId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Product with id " + productId + " not found!"));
+        if (file != null && file.getOriginalFilename() != null) {
+
+            String fileExtension = file.getOriginalFilename().split("\\.")[1];
+
+            String generatedFileName = "product_" + productId + "." + fileExtension;
+
+            Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, generatedFileName);
+
+            product.setImage("");
+            product.setImage(generatedFileName);
+            productRepository.save(product);
+
+            try {
+                Files.createDirectories(Path.of(UPLOAD_DIRECTORY));
+
+                Files.copy(file.getInputStream(), fileNameAndPath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @Override
     public void deleteProduct(String email, Long productId) {
         checkAdmin(email);
 
@@ -91,36 +120,6 @@ public class ProductServiceImpl implements ProductService {
                         .build())
         );
     }
-
-    @Override
-    public void uploadImage(String email, Long productId, MultipartFile file) {
-        checkAdmin(email);
-
-        var product = productRepository.findById(productId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Product with id " + productId + " not found!"));
-        if (file != null && file.getOriginalFilename() != null) {
-
-            String fileExtension = file.getOriginalFilename().split("\\.")[1];
-
-            String generatedFileName = product.getName() + "_" + productId + "." + fileExtension;
-
-            Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, generatedFileName);
-
-            product.setImage("");
-            product.setImage(generatedFileName);
-            productRepository.save(product);
-
-            try {
-                Files.createDirectories(Path.of(UPLOAD_DIRECTORY));
-
-                Files.copy(file.getInputStream(), fileNameAndPath, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
 
     private void checkAdmin(String email) {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
