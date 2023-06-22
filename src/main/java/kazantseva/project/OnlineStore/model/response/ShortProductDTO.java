@@ -20,6 +20,8 @@ public class ShortProductDTO {
 
     private String price;
 
+    private String image;
+
     public ShortProductDTO(Product product) {
         DecimalFormat df = new DecimalFormat("#,###.00");
         var price = df.format(product.getPrice());
@@ -27,5 +29,6 @@ public class ShortProductDTO {
         this.id = product.getId();
         this.name = product.getName();
         this.price = price;
+        this.image = product.getImage();
     }
 }

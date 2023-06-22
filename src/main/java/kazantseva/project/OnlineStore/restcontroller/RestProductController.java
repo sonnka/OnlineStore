@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -45,4 +46,10 @@ public class RestProductController {
         return productService.createProduct(auth.getName(), product);
     }
 
+    @PostMapping("/admin/products/{product-id}/upload")
+    public void uploadImage(@PathVariable("product-id") Long productId,
+                            @RequestParam("file") MultipartFile file,
+                            Authentication auth) {
+        productService.uploadImage(auth.getName(), productId, file);
+    }
 }

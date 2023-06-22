@@ -38,7 +38,7 @@ $(document).ready(function () {
             url: "/products",
             data: {
                 page: startPage,
-                size: 10,
+                size: 7,
                 sort: sort + "," + dir
             },
             success: function (response) {
@@ -47,6 +47,8 @@ $(document).ready(function () {
                     var productId = product.id;
                     let productRow = '<tr>' +
                         '<td><div class="text-left">' + productId + '</div></td>' +
+                        '<td><img alt="img"  height="70" id="thumbnail" width="70" src="http://images.example.com/products/' + product.image
+                        + '" onerror="this.onerror=null;this.src=\'http://images.example.com/products/default.png\'" ' + '/></td>' +
                         '<td>' + product.name + '</td>' +
                         '<td>' + product.price + '</td>' +
                         '<td> ' +

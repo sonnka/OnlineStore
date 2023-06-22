@@ -97,6 +97,7 @@
             <thead>
             <tr>
                 <th sec:authorize="hasRole('ADMIN')"><a id="sortId" th:text="#{id}"></a></th>
+                <th><a th:text="#{image}"></a></th>
                 <th><a id="sortName" th:text="#{product}"></a></th>
                 <th><a id="sortPrice" th:text="#{price}"></a></th>
                 <th sec:authorize="hasRole('ADMIN')"><a th:text="#{actions}"></a></th>

@@ -1,9 +1,9 @@
 $(document).ready(function () {
     var productId = $('#productId').val();
-    var saveProductButton = $('#saveProductButton');
 
     var name = $('#name');
     var price = $('#price');
+    var image = $('#thumbnail');
 
     if (productId === "-1") {
         createProduct();
@@ -11,25 +11,26 @@ $(document).ready(function () {
         loadProduct();
     }
 
-    $('#fileImage').change(function () {
-        showImageThumbnail(this);
+
+    $('#imageForm').submit(function (event) {
+        event.preventDefault();
+        var formData = new FormData();
+        formData.append('file', $('#imageFile')[0].files[0]);
+        $.ajax({
+            type: 'POST',
+            url: '/admin/products/' + productId + '/upload',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                loadProduct();
+            },
+            error: function (error) {
+                loadProduct();
+            }
+        });
     });
 
-
-    saveProductButton.click(function () {
-        updateProduct();
-    });
-
-    function showImageThumbnail(fileInput) {
-        file = fileInput.files[0];
-        reader = new FileReader();
-
-        reader.onload = function (e) {
-            $('#thumbnail').attr('src', e.target.result);
-        };
-
-        reader.readAsDataURL(file);
-    }
 
     function createProduct() {
 
@@ -48,6 +49,8 @@ $(document).ready(function () {
     function displayData(responseJson) {
         name.val(responseJson.name);
         price.val(responseJson.price);
+        image.attr('onerror', "this.onerror=null;this.src='http://images.example.com/products/default.png'");
+        image.attr('src', "http://images.example.com/products/" + responseJson.image);
     }
 
     function updateProduct() {

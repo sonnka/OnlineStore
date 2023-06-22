@@ -25,13 +25,15 @@ $(document).ready(function () {
             url: "/products",
             data: {
                 page: startPage,
-                size: 10,
+                size: 7,
                 sort: sort + "," + dir
             },
             success: function (response) {
                 $('#table tbody').empty();
                 $.each(response.content, (i, product) => {
                     let productRow = '<tr>' +
+                        '<td><img alt="img" align="center" height="70" id="thumbnail" width="70" src="http://images.example.com/products/' + product.image
+                        + '" onerror="this.onerror=null;this.src=\'http://images.example.com/products/default.png\'" ' + '/></td>' +
                         '<td>' + product.name + '</td>' +
                         '<td>' + product.price + '</td>' +
                         '</tr>';

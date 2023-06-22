@@ -12,14 +12,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
+
+    public static String UPLOAD_DIRECTORY = "tmp/images/products";
 
     private ProductRepository productRepository;
     private CustomerRepository customerRepository;
@@ -83,6 +91,35 @@ public class ProductServiceImpl implements ProductService {
                         .build())
         );
     }
+
+    @Override
+    public void uploadImage(String email, Long productId, MultipartFile file) {
+        checkAdmin(email);
+
+        var product = productRepository.findById(productId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Product with id " + productId + " not found!"));
+        if (file != null && file.getOriginalFilename() != null) {
+
+            String fileExtension = file.getOriginalFilename().split("\\.")[1];
+
+            String generatedFileName = product.getName() + "_" + productId + "." + fileExtension;
+
+            Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, generatedFileName);
+
+            product.setImage(generatedFileName);
+            productRepository.save(product);
+
+            try {
+                Files.createDirectories(Path.of(UPLOAD_DIRECTORY));
+
+                Files.copy(file.getInputStream(), fileNameAndPath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 
     private void checkAdmin(String email) {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
