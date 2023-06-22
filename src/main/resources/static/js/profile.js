@@ -4,6 +4,11 @@ $(document).ready(function () {
     var editProfileButton = $('#editProfileButton');
     var deleteProfileButton = $('#deleteProfileButton');
     var getOrdersButton = $('#getOrdersButton');
+    var image = $('#thumbnail');
+
+    $('#fileImage').change(function () {
+        showImageThumbnail(this);
+    });
 
     editProfileButton.click(function () {
         window.location = "/profile/edit";
@@ -15,6 +20,17 @@ $(document).ready(function () {
         window.location = "/profile/orders";
     });
 
+
+    function showImageThumbnail(fileInput) {
+        file = fileInput.files[0];
+        reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#thumbnail').attr('src', e.target.result);
+        };
+
+        reader.readAsDataURL(file);
+    }
 
     function loadProfile() {
         url = "/customers/" + customerId;
@@ -36,6 +52,10 @@ $(document).ready(function () {
         $('#totalAmountOfOrders2').text(responseJson.totalAmountOfOrders);
         $('#amountPaidOrders').text(responseJson.amountOfPaidOrders);
         $('#amountUnpaidOrders').text(responseJson.amountOfUnpaidOrders);
+        $('#amountGrantedAdmins').text(responseJson.amountOfAddedAdmins);
+        image.attr('src', "http://images.example.com/customers/default.png");
+        image.attr('onerror', "this.onerror=null;this.src='http://images.example.com/customers/default.png'");
+        image.attr('src', "http://images.example.com/customers/" + responseJson.avatar);
     }
 
     function deleteProfile() {

@@ -36,6 +36,20 @@ body {
     padding: 35px 20px;
 }
 
+.btn {
+    text-align: center;
+    align-self: center;
+    vertical-align: center;
+    align-content: center;
+    align-items: center;
+    border: 1px solid #ffffff;
+    height: 34px;
+    padding: 0 24px 0 16px;
+    letter-spacing: 0.25px;
+    border-radius: 24px;
+    cursor: pointer;
+}
+
 .intro {
     display: flex;
     flex-direction: column;
@@ -457,4 +471,16 @@ input.check-toggle-round-flat:checked + label {
 
 input.check-toggle-round-flat:checked + label:after {
     margin-left: 44px;
+}
+
+.material-icons {
+    color: #b40000;
+}
+
+.send {
+    color: #1b76d0;
+}
+
+.admin {
+    color: #009a1e;
 }

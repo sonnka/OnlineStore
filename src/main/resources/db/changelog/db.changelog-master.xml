@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1010" author="admin">
+    <changeSet id="1160" author="admin">
         <dropTable tableName="order_product"/>
         <dropTable tableName="orders"/>
         <dropTable tableName="verification_tokens"/>
@@ -13,7 +13,7 @@
         <dropTable tableName="products"/>
     </changeSet>
 
-    <changeSet id="1011" author="admin">
+    <changeSet id="1161" author="admin">
         <createTable tableName="products">
             <column name="product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -24,10 +24,13 @@
             <column name="price" type="decimal(10,2)">
                 <constraints nullable="false"/>
             </column>
+            <column name="image" type="varchar(250)">
+                <constraints nullable="true"/>
+            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="1012" author="admin">
+    <changeSet id="1162" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -44,13 +47,25 @@
             <column name="password" type="varchar(200)">
                 <constraints nullable="false"/>
             </column>
+            <column name="role" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="avatar" type="varchar(250)">
+                <constraints nullable="true"/>
+            </column>
             <column name="enabled" type="boolean">
                 <constraints nullable="false"/>
+            </column>
+            <column name="granted_admin_by" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="granted_date" type="datetime">
+                <constraints nullable="true"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="1013" author="admin">
+    <changeSet id="1163" author="admin">
         <createTable tableName="verification_tokens">
             <column name="token_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -66,10 +81,13 @@
             <column name="expiry_date" type="datetime">
                 <constraints nullable="false"/>
             </column>
+            <column name="locale" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="1014" author="admin">
+    <changeSet id="1164" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -96,7 +114,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1015" author="admin">
+    <changeSet id="1165" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -115,165 +133,215 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1016" author="admin">
+    <changeSet id="1166" author="admin">
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Apple"/>
             <column name="price" value="12.0"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Milk"/>
             <column name="price" value="38.9"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Cake"/>
             <column name="price" value="203.58"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Chicken"/>
             <column name="price" value="189.0"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Juice"/>
             <column name="price" value="87.1"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Eggs"/>
             <column name="price" value="49.0"/>
         </insert>
     </changeSet>
 
-    <changeSet id="1017" author="admin">
+    <changeSet id="1167" author="admin">
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Pineapple"/>
             <column name="price" value="97.4"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Potatoes"/>
             <column name="price" value="15.0"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Lobster"/>
             <column name="price" value="1052.9"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Banana"/>
             <column name="price" value="67.0"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Pizza"/>
             <column name="price" value="196.15"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Sushi"/>
             <column name="price" value="956.0"/>
         </insert>
     </changeSet>
 
-    <changeSet id="1018" author="admin">
+    <changeSet id="1168" author="admin">
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Butter"/>
             <column name="price" value="58.0"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Bread"/>
             <column name="price" value="31.75"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Black tea"/>
             <column name="price" value="70.1"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Green tea"/>
             <column name="price" value="39.6"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Salt"/>
             <column name="price" value="20.5"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Sugar"/>
             <column name="price" value="28.23"/>
         </insert>
     </changeSet>
 
-    <changeSet id="1019" author="admin">
+    <changeSet id="1169" author="admin">
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Ketchup"/>
             <column name="price" value="50.4"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Flour"/>
             <column name="price" value="19.46"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Fish"/>
             <column name="price" value="74.8"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Onion"/>
             <column name="price" value="47.21"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Cucumber"/>
             <column name="price" value="58.32"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Tomato"/>
             <column name="price" value="72.37"/>
         </insert>
     </changeSet>
 
-    <changeSet id="1020" author="admin">
+    <changeSet id="1170" author="admin">
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Paprika"/>
             <column name="price" value="28.4"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Candy"/>
             <column name="price" value="19.10"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Cookies"/>
             <column name="price" value="144.8"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Cheese"/>
             <column name="price" value="87.0"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Olive oil"/>
             <column name="price" value="164.4"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Ice cream"/>
             <column name="price" value="23.79"/>
         </insert>
     </changeSet>
 
-    <changeSet id="1021" author="admin">
+    <changeSet id="1171" author="admin">
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Pasta"/>
             <column name="price" value="62.3"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Rice"/>
             <column name="price" value="60.10"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Chocolate"/>
             <column name="price" value="38.0"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Crab"/>
             <column name="price" value="501.87"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Yogurt"/>
             <column name="price" value="36.0"/>
         </insert>
         <insert tableName="products">
+            <column name="image" value=""/>
             <column name="name" value="Lemon"/>
             <column name="price" value="49.26"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="1172" author="admin">
+        <insert tableName="customers">
+            <column name="name" value="Harry"/>
+            <column name="surname" value="Potter"/>
+            <column name="email" value="sofiia.kazantseva@faceit.com.ua"/>
+            <column name="password" value="$2a$10$1DqcI7dd8QlQq2TTpsZueOi5hzFcB1Y7ZoFdzQDoH.dJ8QLqdC.Da"/>
+            <column name="role" value="ADMIN"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email" value="sofiia.kazantseva@faceit.com.ua"/>
+            <column name="granted_admin_by" value="-"/>
+            <column name="granted_date" defaultOnNull="true"/>
         </insert>
     </changeSet>
 

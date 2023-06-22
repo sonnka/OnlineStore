@@ -18,10 +18,13 @@ services:
     ports:
       - "8080:8080"
     restart: always
-
+    volumes:
+      - /var/www/images/customers:/tmp/images/customers
+      - /var/www/images/products:/tmp/images/products
     depends_on:
       - mysql-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/property?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: spring
+    user: "1000:1000"

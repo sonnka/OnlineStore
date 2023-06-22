@@ -2,10 +2,19 @@ $(document).ready(function () {
     let totalPages = 1;
     let sort = "name"
     let dir = "asc";
+    var sortId = $('#sortId');
     var sortName = $('#sortName');
     var sortPrice = $('#sortPrice');
+    var table = $('#table tbody');
+    var createProductButton = $('#createProductButton');
 
     fetchProduct(0);
+
+    sortId.click(function () {
+        dir = dir === "asc" ? "desc" : "asc";
+        sort = "id";
+        fetchProduct(0);
+    });
 
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
@@ -16,6 +25,10 @@ $(document).ready(function () {
         dir = dir === "asc" ? "desc" : "asc";
         sort = "price";
         fetchProduct(0);
+    });
+
+    createProductButton.click(function () {
+        createProduct();
     });
 
     function fetchProduct(startPage) {
@@ -29,17 +42,31 @@ $(document).ready(function () {
                 sort: sort + "," + dir
             },
             success: function (response) {
-                $('#table tbody').empty();
+                table.empty();
                 $.each(response.content, (i, product) => {
+                    var productId = product.id;
                     let productRow = '<tr>' +
-                        '<td><img alt="img" height="70" id="thumbnail" width="70" ' +
-                        'src="http://images.example.com/products/' + product.image +
-                        '" onerror="this.onerror=null;this.src=\'http://images.example.com/products/default.png\'" ' +
-                        '/></td>' +
+                        '<td><div class="text-left">' + productId + '</div></td>' +
+                        '<td><img alt="img"  height="70" id="thumbnail" width="70" src="http://images.example.com/products/' + product.image
+                        + '" onerror="this.onerror=null;this.src=\'http://images.example.com/products/default.png\'" ' + '/></td>' +
                         '<td>' + product.name + '</td>' +
                         '<td>' + product.price + '</td>' +
+                        '<td> ' +
+                        '<a type="button" title="edit product" class="editProduct">' +
+                        '<i class="material-icons admin">&#xe3c9;</i></a>&emsp;&emsp;' +
+                        '<a type="button" title="delete product" class="deleteProduct">' +
+                        '<i class="material-icons">&#xE872;</i></a></div></td> ' +
                         '</tr>';
                     $('#table tbody').append(productRow);
+                });
+
+                table.on('click', '.editProduct', function () {
+                    let productId = $(this).closest('tr').find('.text-left').text();
+                    editProduct(productId);
+                });
+                table.on('click', '.deleteProduct', function () {
+                    let productId = $(this).closest('tr').find('.text-left').text();
+                    deleteProduct(productId);
                 });
 
                 if ($('ul.pagination li').length - 2 !== response.totalPages) {
@@ -51,6 +78,26 @@ $(document).ready(function () {
                 console.log("ERROR: ", e);
                 window.location = "/";
             }
+        });
+    }
+
+    function createProduct() {
+        window.location = "/admin/products/create";
+    }
+
+    function editProduct(productId) {
+        window.location = "/admin/products/" + productId + "/edit";
+    }
+
+    function deleteProduct(productId) {
+        $.ajax({
+            type: "DELETE",
+            url: "/admin/products/" + productId,
+            success: function () {
+                window.location = "/products_html?success";
+            }
+        }).fail(function () {
+            window.location = "/products_html?error";
         });
     }
 
@@ -103,7 +150,6 @@ $(document).ready(function () {
     }
 
     $(document).on("click", "ul.pagination li a", function () {
-        var data = $(this).attr('data');
         let val = $(this).text();
         var active = $("li.active");
         console.log('val: ' + val);

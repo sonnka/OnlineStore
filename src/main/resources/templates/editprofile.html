@@ -26,10 +26,16 @@
     <nav class="nav-items">
         <a th:href="@{/}" th:text="#{home}"></a>
         <a th:href="@{/products_html}" th:text="#{products}"></a>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/customers_list}" th:text="#{customers}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/admins_list}" th:text="#{admins}"></a>
+        </div>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/profile}" th:text="#{profile}"></a>
         </div>
-        <div sec:authorize="isAuthenticated()">
+        <div sec:authorize="hasRole('BUYER')">
             <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
@@ -47,65 +53,82 @@
         </div>
         <input id="customerId" th:value="${customerId}" type="hidden">
         <div class="row">
-            <div class="col-md-10">
-                <div class="profile-head">
-                    <h5 id="nameSurname"></h5>
-                    <h6 id="email"></h6>
-                    <br><br><br>
-                    <ul class="nav nav-tabs" id="myTab" role="tablist"></ul>
-                </div>
+            <div class="col-md-4">
+                <img alt="avatar" class="rounded-circle" height="270" id="thumbnail" width="270"/>
+                <br><br>
+                <form enctype="multipart/form-data" id="imageForm">
+                    <input id="imageFile" name="imageFile" type="file"/>
+                    <br> <br>
+                    <button type="submit">Upload</button>
+                </form>
             </div>
-            <div class="col-md-2">
-                <input class="profile-save-btn" id="saveCustomerButton" name="btnAddMore" th:value="#{save}"
-                       type="submit"/>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="tab-content profile-tab" id="myTabContent">
-                    <div aria-labelledby="home-tab" class="tab-pane fade show active" id="home" role="tabpanel">
+            <div class="row col-md-8">
 
-                        <div class="row">
-                            <div class="col-md-3">
+
+                <div class="col-md-10">
+                    <div class="profile-head">
+                        <h5 id="nameSurname"></h5>
+                        <h6 id="email"></h6>
+                        <br><br><br>
+                        <ul class="nav nav-tabs" id="myTab" role="tablist"></ul>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <input class="profile-save-btn" id="saveCustomerButton" name="btnAddMore" th:value="#{save}"
+                           type="submit"/>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="tab-content profile-tab" id="myTabContent">
+                        <div aria-labelledby="home-tab" class="tab-pane fade show active" id="home" role="tabpanel">
+                            <div class="col-md-6">
                             </div>
-                            <div class="col-md-2">
-                                <label th:text="#{name}"></label>
+                            <div class="col-md-5">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label th:text="#{name}"></label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input
+                                                class="form-control"
+                                                id="name"
+                                                name="name"
+                                                th:placeholder="#{enterName}"
+                                                type="text"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-3">
-                                <input
-                                        class="form-control"
-                                        id="name"
-                                        name="name"
-                                        th:placeholder="#{enterName}"
-                                        type="text"
-                                />
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-1">
                             </div>
                         </div>
                         <br><br><br><br><br>
-                        <div class="row">
-                            <div class="col-md-3">
-                            </div>
-                            <div class="col-md-2">
-                                <label th:text="#{surname}"></label>
-                            </div>
-                            <div class="col-md-3">
-                                <input
-                                        class="form-control"
-                                        id="surname"
-                                        name="surname"
-                                        th:placeholder="#{enterSurname}"
-                                        type="text"
-                                />
-                            </div>
-                            <div class="col-md-4">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-5">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label th:text="#{surname}"></label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input
+                                            class="form-control"
+                                            id="surname"
+                                            name="surname"
+                                            th:placeholder="#{enterSurname}"
+                                            type="text"
+                                    />
+                                </div>
                             </div>
                         </div>
+                        <div class="col-md-1">
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </main>
 </body>

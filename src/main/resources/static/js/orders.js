@@ -101,7 +101,7 @@ $(document).ready(function () {
 
         for (var i = start; i <= end; i++) {
             if (i == (pageNumber + 1)) {
-                pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>'; // no need to create a link to current page
+                pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>';
             } else {
                 pagingLink += '<li class="page-item"><a class="page-link"> ' + i + ' </a></li>';
             }
@@ -115,26 +115,27 @@ $(document).ready(function () {
     $(document).on("click", "ul.pagination li a", function () {
         var data = $(this).attr('data');
         let val = $(this).text();
+        var active = $("li.active");
         console.log('val: ' + val);
 
         if (val.toUpperCase() === "«") {
-            let currentActive = $("li.active");
+            let currentActive = active;
             fetchOrder(0);
-            $("li.active").removeClass("active");
+            active.removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "»") {
             fetchOrder(totalPages - 1);
-            $("li.active").removeClass("active");
+            active.removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "›") {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue < totalPages) {
-                let currentActive = $("li.active");
+                let currentActive = active;
                 startPage = activeValue;
                 fetchOrder(startPage);
-                $("li.active").removeClass("active");
+                active.removeClass("active");
                 currentActive.next().addClass("active");
             }
         } else if (val.toUpperCase() === "‹") {
@@ -142,7 +143,7 @@ $(document).ready(function () {
             if (activeValue > 1) {
                 startPage = activeValue - 2;
                 fetchOrder(startPage);
-                let currentActive = $("li.active");
+                let currentActive = active;
                 currentActive.removeClass("active");
                 currentActive.prev().addClass("active");
             }

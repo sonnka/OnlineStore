@@ -6,11 +6,32 @@ $(document).ready(function () {
     var name = $('#name');
     var surname = $('#surname');
     var email = $('#email');
+    var image = $('#thumbnail');
+    var customerImage = "default.png";
 
     loadProfile();
 
     saveCustomerButton.click(function () {
         updateCustomer();
+    });
+
+    $('#imageForm').submit(function (event) {
+        event.preventDefault();
+        var formData = new FormData();
+        formData.append('file', $('#imageFile')[0].files[0]);
+        $.ajax({
+            type: 'POST',
+            url: '/customers/' + customerId + '/upload',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                loadProfile();
+            },
+            error: function (error) {
+                loadProfile();
+            }
+        });
     });
 
     function loadProfile() {
@@ -28,6 +49,10 @@ $(document).ready(function () {
         name.val(responseJson.name);
         surname.val(responseJson.surname);
         email.text(responseJson.email);
+        image.attr('src', "http://images.example.com/customers/default.png");
+        image.attr('onerror', "this.onerror=null;this.src='http://images.example.com/customers/default.png'");
+        image.attr('src', "http://images.example.com/customers/" + responseJson.avatar);
+        customerImage = responseJson.avatar;
     }
 
     function updateCustomer() {
@@ -36,6 +61,7 @@ $(document).ready(function () {
             "name": name.val(),
             "surname": surname.val(),
             "email": email.val(),
+            "avatar": customerImage
         };
 
         $.ajax({

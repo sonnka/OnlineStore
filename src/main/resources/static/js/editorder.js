@@ -8,6 +8,7 @@ $(document).ready(function () {
     var deliveryAddress = $('#deliveryAddress');
     var description = $('#description');
     var price = $('#price');
+    var table = $('#productsTable tbody');
 
     if (orderId === "-1") {
         createOrder();
@@ -67,7 +68,7 @@ $(document).ready(function () {
         description.val(responseJson.description);
         price.text(responseJson.price);
 
-        $('#productsTable tbody').empty();
+        table.empty();
         $.each(responseJson.products, (i, product) => {
             var productName = product.name;
 
@@ -80,9 +81,9 @@ $(document).ready(function () {
                 '<a type="button" title="delete" class="deleteProduct">' +
                 '<i class="material-icons">&#xE872;</i></a></div></td> ' +
                 '</tr>';
-            $('#productsTable tbody').append(productRow);
+            table.append(productRow);
         });
-        $('#productsTable tbody').on('click', '.deleteProduct', function () {
+        table.on('click', '.deleteProduct', function () {
             let productName = $(this).closest('tr').find('.text-left').text();
             deleteProduct(productName);
         });
@@ -93,7 +94,8 @@ $(document).ready(function () {
         $('#productsList tbody').empty();
         $.each(responseJson, (i, product) => {
             let productRow = '<tr>' +
-                '<td> <input type="checkbox" class="checkbox"> <label class="name">&emsp;&emsp;' + product.name + '&emsp;&emsp;</label></td>' +
+                '<td> <input type="checkbox" class="checkbox"> <label class="name">&emsp;&emsp;' + product.name
+                + '&emsp;&emsp;</label></td>' +
                 '<td> <label class="price">' + product.price + '</label></td></tr>'
             $('#productsList tbody').append(productRow);
         });

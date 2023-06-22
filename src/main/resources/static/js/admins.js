@@ -3,43 +3,48 @@ $(document).ready(function () {
     let sort = "name"
     let dir = "asc";
     var sortName = $('#sortName');
-    var sortPrice = $('#sortPrice');
+    var sortSurname = $('#sortSurname');
+    var sortEmail = $('#sortEmail');
 
-    fetchProduct(0);
+    fetchAdmin(0);
 
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
         sort = "name";
-        fetchProduct(0);
+        fetchAdmin(0);
     });
-    sortPrice.click(function () {
+    sortSurname.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
-        sort = "price";
-        fetchProduct(0);
+        sort = "surname";
+        fetchAdmin(0);
+    });
+    sortEmail.click(function () {
+        dir = dir === "asc" ? "desc" : "asc";
+        sort = "email";
+        fetchAdmin(0);
     });
 
-    function fetchProduct(startPage) {
+    function fetchAdmin(startPage) {
 
         $.ajax({
             type: "GET",
-            url: "/products",
+            url: "/admin/admins",
             data: {
                 page: startPage,
                 size: 7,
                 sort: sort + "," + dir
             },
             success: function (response) {
-                $('#table tbody').empty();
-                $.each(response.content, (i, product) => {
-                    let productRow = '<tr>' +
-                        '<td><img alt="img" height="70" id="thumbnail" width="70" ' +
-                        'src="http://images.example.com/products/' + product.image +
-                        '" onerror="this.onerror=null;this.src=\'http://images.example.com/products/default.png\'" ' +
-                        '/></td>' +
-                        '<td>' + product.name + '</td>' +
-                        '<td>' + product.price + '</td>' +
+                $('#adminsTable tbody').empty();
+                $.each(response.content, (i, admin) => {
+                    let adminRow = '<tr>' +
+                        '<td>' + admin.name + '</td>' +
+                        '<td>' + admin.surname + '</td>' +
+                        '<td>' + admin.email + '</td>' +
+                        '<td>' + admin.grantedAdminBy + '</td>' +
+                        '<td>' + admin.grantedDate + '</td>' +
                         '</tr>';
-                    $('#table tbody').append(productRow);
+                    $('#adminsTable tbody').append(adminRow);
                 });
 
                 if ($('ul.pagination li').length - 2 !== response.totalPages) {
@@ -110,21 +115,21 @@ $(document).ready(function () {
 
         if (val.toUpperCase() === "«") {
             let currentActive = active;
-            fetchProduct(0);
+            fetchAdmin(0);
             active.removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "»") {
-            fetchProduct(totalPages - 1);
-            active.removeClass("active");
-            currentActive.next().addClass("active");
+            fetchAdmin(totalPages - 1);
+            $("li.active").removeClass("active");
+            active.next().addClass("active");
 
         } else if (val.toUpperCase() === "›") {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue < totalPages) {
                 let currentActive = active;
                 startPage = activeValue;
-                fetchProduct(startPage);
+                fetchAdmin(startPage);
                 active.removeClass("active");
                 currentActive.next().addClass("active");
             }
@@ -132,14 +137,14 @@ $(document).ready(function () {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue > 1) {
                 startPage = activeValue - 2;
-                fetchProduct(startPage);
+                fetchAdmin(startPage);
                 let currentActive = active;
                 currentActive.removeClass("active");
                 currentActive.prev().addClass("active");
             }
         } else {
             startPage = parseInt(val - 1);
-            fetchProduct(startPage);
+            fetchAdmin(startPage);
             active.removeClass("active");
             $(this).parent().addClass("active");
         }

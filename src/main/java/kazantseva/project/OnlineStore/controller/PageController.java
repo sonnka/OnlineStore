@@ -87,4 +87,26 @@ public class PageController {
         customerService.login(token);
         return "login";
     }
+
+    @GetMapping("/admin/customers_list")
+    public String customers() {
+        return "customers";
+    }
+
+    @GetMapping("/admin/admins_list")
+    public String admins() {
+        return "admins";
+    }
+
+    @GetMapping("/admin/products/{product-id}/edit")
+    public String editProduct(@PathVariable(value = "product-id") String productId, Model model) {
+        model.addAttribute("productId", Long.valueOf(productId));
+        return "editproduct";
+    }
+
+    @GetMapping("/admin/products/create")
+    public String addProduct(Model model) {
+        model.addAttribute("productId", -1L);
+        return "editproduct";
+    }
 }

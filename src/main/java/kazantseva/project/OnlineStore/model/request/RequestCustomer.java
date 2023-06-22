@@ -21,4 +21,6 @@ public class RequestCustomer {
     @NotBlank
     @Size(min = 2, max = 24)
     private String surname;
+
+    private String avatar;
 }
