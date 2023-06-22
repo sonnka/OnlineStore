@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @AllArgsConstructor
@@ -48,6 +49,13 @@ public class RestCustomerController {
                                       @PathVariable("customer-id") long customerId,
                                       @RequestBody @Valid RequestCustomer customer) {
         return customerService.updateCustomer(auth.getName(), customerId, customer);
+    }
+
+    @PostMapping("/customers/{customer-id}/upload")
+    public void uploadAvatar(Authentication auth,
+                             @PathVariable("customer-id") long customerId,
+                             @RequestParam("file") MultipartFile file) {
+        customerService.uploadAvatar(auth.getName(), customerId, file);
     }
 
     @DeleteMapping("/customers/{customer-id}")

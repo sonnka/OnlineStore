@@ -56,7 +56,11 @@
             <div class="col-md-4">
                 <img alt="avatar" class="rounded-circle" height="270" id="thumbnail" width="270"/>
                 <br><br>
-                <input accept="image/png, image/jpeg" id="fileImage" name="fileImage" type="file"/>
+                <form enctype="multipart/form-data" id="imageForm">
+                    <input id="imageFile" name="imageFile" type="file"/>
+                    <br> <br>
+                    <button type="submit">Upload</button>
+                </form>
             </div>
             <div class="row col-md-8">
 

@@ -4,6 +4,7 @@ $(document).ready(function () {
     var editProfileButton = $('#editProfileButton');
     var deleteProfileButton = $('#deleteProfileButton');
     var getOrdersButton = $('#getOrdersButton');
+    var image = $('#thumbnail');
 
     $('#fileImage').change(function () {
         showImageThumbnail(this);
@@ -52,6 +53,9 @@ $(document).ready(function () {
         $('#amountPaidOrders').text(responseJson.amountOfPaidOrders);
         $('#amountUnpaidOrders').text(responseJson.amountOfUnpaidOrders);
         $('#amountGrantedAdmins').text(responseJson.amountOfAddedAdmins);
+        image.attr('src', "http://images.example.com/customers/default.png");
+        image.attr('onerror', "this.onerror=null;this.src='http://images.example.com/customers/default.png'");
+        image.attr('src', "http://images.example.com/customers/" + responseJson.avatar);
     }
 
     function deleteProfile() {

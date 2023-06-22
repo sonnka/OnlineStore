@@ -107,6 +107,7 @@ public class ProductServiceImpl implements ProductService {
 
             Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, generatedFileName);
 
+            product.setImage("");
             product.setImage(generatedFileName);
             productRepository.save(product);
 

@@ -31,10 +31,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -45,6 +51,8 @@ import java.util.Optional;
 @Slf4j
 @AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
+
+    public static String UPLOAD_DIRECTORY = "tmp/images/customers";
 
     final ResourceBundleMessageSource messageSource;
     final PasswordEncoder passwordEncoder;
@@ -179,10 +187,38 @@ public class CustomerServiceImpl implements CustomerService {
 
         Optional.of(customer.getName()).ifPresent(oldCustomer::setName);
         Optional.of(customer.getSurname()).ifPresent(oldCustomer::setSurname);
+        Optional.ofNullable(customer.getAvatar()).ifPresent(oldCustomer::setAvatar);
 
         customerRepository.save(oldCustomer);
 
         return toCustomerDTO(oldCustomer);
+    }
+
+    @Override
+    public void uploadAvatar(String email, Long customerId, MultipartFile file) {
+
+        var customer = findByIdAndCheckByEmail(customerId, email);
+
+        if (file != null && file.getOriginalFilename() != null) {
+
+            String fileExtension = file.getOriginalFilename().split("\\.")[1];
+
+            String generatedFileName = customer.getSurname() + "_" + customerId + "." + fileExtension;
+
+            Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, generatedFileName);
+
+            customer.setAvatar("");
+            customer.setAvatar(generatedFileName);
+            customerRepository.save(customer);
+
+            try {
+                Files.createDirectories(Path.of(UPLOAD_DIRECTORY));
+
+                Files.copy(file.getInputStream(), fileNameAndPath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override
@@ -382,6 +418,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .name(customer.getName())
                 .surname(customer.getSurname())
                 .email(customer.getEmail())
+                .avatar(customer.getAvatar())
                 .totalAmountOfOrders(orderRepository.findAllByCustomerId(customer.getId()).size())
                 .amountOfPaidOrders(orderRepository.findAllByCustomerId(customer.getId())
                         .stream()

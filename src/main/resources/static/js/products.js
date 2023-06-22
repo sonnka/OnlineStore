@@ -32,8 +32,10 @@ $(document).ready(function () {
                 $('#table tbody').empty();
                 $.each(response.content, (i, product) => {
                     let productRow = '<tr>' +
-                        '<td><img alt="img" align="center" height="70" id="thumbnail" width="70" src="http://images.example.com/products/' + product.image
-                        + '" onerror="this.onerror=null;this.src=\'http://images.example.com/products/default.png\'" ' + '/></td>' +
+                        '<td><img alt="img" height="70" id="thumbnail" width="70" ' +
+                        'src="http://images.example.com/products/' + product.image +
+                        '" onerror="this.onerror=null;this.src=\'http://images.example.com/products/default.png\'" ' +
+                        '/></td>' +
                         '<td>' + product.name + '</td>' +
                         '<td>' + product.price + '</td>' +
                         '</tr>';

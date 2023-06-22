@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface CustomerService {
     UserDetails toUserDetails(Customer customer);
@@ -34,6 +35,8 @@ public interface CustomerService {
     Long getCustomerId(String email);
 
     CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer);
+
+    void uploadAvatar(String email, Long customerId, MultipartFile file);
 
     void deleteCustomer(String email, long customerId);
 }
