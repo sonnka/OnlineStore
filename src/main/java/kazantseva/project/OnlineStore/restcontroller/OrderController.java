@@ -5,6 +5,7 @@ import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
 import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.service.OrderService;
+import kazantseva.project.OnlineStore.swagger.OrderAPI;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-public class RestOrderController {
+public class OrderController implements OrderAPI {
 
     private OrderService orderService;
 

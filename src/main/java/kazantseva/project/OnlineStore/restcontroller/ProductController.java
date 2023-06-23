@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.restcontroller;
 import kazantseva.project.OnlineStore.model.request.CreateProduct;
 import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.service.ProductService;
+import kazantseva.project.OnlineStore.swagger.ProductAPI;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @AllArgsConstructor
-public class RestProductController {
+public class ProductController implements ProductAPI {
 
     private ProductService productService;
 

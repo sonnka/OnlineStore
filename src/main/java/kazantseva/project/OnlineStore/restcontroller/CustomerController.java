@@ -8,6 +8,7 @@ import kazantseva.project.OnlineStore.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.service.CustomerService;
+import kazantseva.project.OnlineStore.swagger.CustomerAPI;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,14 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @AllArgsConstructor
-public class RestCustomerController {
+public class CustomerController implements CustomerAPI {
 
     private CustomerService customerService;
-
-    @GetMapping("/home")
-    public String hello() {
-        return "Hello";
-    }
 
     @PostMapping("/login")
     public LoginResponse login(Authentication auth) {
