@@ -1,4 +1,4 @@
-package kazantseva.project.OnlineStore.restcontroller;
+package kazantseva.project.OnlineStore.controller.rest;
 
 import jakarta.validation.Valid;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;

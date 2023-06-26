@@ -1,4 +1,4 @@
-package kazantseva.project.OnlineStore.restcontroller;
+package kazantseva.project.OnlineStore.controller.rest;
 
 import kazantseva.project.OnlineStore.model.mongo.CreateProduct;
 import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
