@@ -100,12 +100,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<ShortProductDTO> getProductList(String email, long customerId, long orderId) {
-//        checkCustomer(customerId, email);
-//        var order = checkOrder(orderId, customerId);
-//
-//        return productRepository.findProductsNotInOrder(order.getId()).stream()
-//                .map(ShortProductDTO::new).toList();
-        return new ArrayList<>();
+        checkCustomer(customerId, email);
+        var order = checkOrder(orderId, customerId);
+
+        var productsId = order.getProducts().stream().map(OrderProduct::getProductId).toList();
+
+        return productRepository.findByIdNotIn(productsId).stream()
+                .map(ShortProductDTO::new).toList();
     }
 
     @Override

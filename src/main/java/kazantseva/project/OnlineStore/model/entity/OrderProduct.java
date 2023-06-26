@@ -24,6 +24,7 @@ public class OrderProduct {
     @JsonIgnore
     private Order order;
 
+    @Column(name = "product_id")
     private String productId;
 
     @Column(name = "amount")
