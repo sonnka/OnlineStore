@@ -1,4 +1,4 @@
-package kazantseva.project.OnlineStore.model.request;
+package kazantseva.project.OnlineStore.model.mongo;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -1,4 +1,4 @@
-package kazantseva.project.OnlineStore.model.request;
+package kazantseva.project.OnlineStore.model.mongo;
 
 import lombok.*;
 
@@ -11,9 +11,13 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class CreateProduct {
 
+    private String name;
+
     private String image;
 
-    private String name;
+    private String category;
+
+    private String description;
 
     private BigDecimal price;
 }

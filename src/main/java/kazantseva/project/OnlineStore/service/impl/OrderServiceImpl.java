@@ -1,15 +1,19 @@
 package kazantseva.project.OnlineStore.service.impl;
 
-import kazantseva.project.OnlineStore.model.entity.*;
+import kazantseva.project.OnlineStore.model.entity.Customer;
+import kazantseva.project.OnlineStore.model.entity.Order;
+import kazantseva.project.OnlineStore.model.entity.OrderProduct;
+import kazantseva.project.OnlineStore.model.entity.Status;
+import kazantseva.project.OnlineStore.model.mongo.Product;
+import kazantseva.project.OnlineStore.model.mongo.ProductDTO;
+import kazantseva.project.OnlineStore.model.mongo.RequestProduct;
+import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
-import kazantseva.project.OnlineStore.model.request.RequestProduct;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
-import kazantseva.project.OnlineStore.model.response.ProductDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
-import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
-import kazantseva.project.OnlineStore.repository.ProductRepository;
+import kazantseva.project.OnlineStore.repository.mongo.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,12 +71,13 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findByName(current.name());
 
             if (product != null && current.count() > 0) {
-                products.add(new OrderProduct(new Order(), product, current.count()));
+                products.add(new OrderProduct(new Order(), product.getId(), current.count()));
             }
         }
 
         BigDecimal price = products.stream()
-                .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
+                .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(
+                        productRepository.findById(product.getProductId()).get().getPrice()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         var createdOrder = orderRepository.save(Order.builder()
@@ -95,13 +100,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<ShortProductDTO> getProductList(String email, long customerId, long orderId) {
-        checkCustomer(customerId, email);
-        var order = checkOrder(orderId, customerId);
-
-        return productRepository.findProductsNotInOrder(order.getId()).stream()
-                .filter(id -> productRepository.findById(id).isPresent())
-                .map(id -> productRepository.findById(id).get())
-                .map(ShortProductDTO::new).toList();
+//        checkCustomer(customerId, email);
+//        var order = checkOrder(orderId, customerId);
+//
+//        return productRepository.findProductsNotInOrder(order.getId()).stream()
+//                .map(ShortProductDTO::new).toList();
+        return new ArrayList<>();
     }
 
     @Override
@@ -139,7 +143,7 @@ public class OrderServiceImpl implements OrderService {
                 Product product = productRepository.findByName(current.name());
 
                 if (product != null && current.count() > 0) {
-                    products.add(new OrderProduct(oldOrder, product, current.count()));
+                    products.add(new OrderProduct(oldOrder, product.getId(), current.count()));
                 }
             }
             if (products.size() > 0) {
@@ -204,7 +208,8 @@ public class OrderServiceImpl implements OrderService {
 
     private BigDecimal calculateNewPrice(List<OrderProduct> products) {
         return products.stream()
-                .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(product.getProduct().getPrice()))
+                .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(
+                        productRepository.findById(product.getProductId()).get().getPrice()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -217,10 +222,28 @@ public class OrderServiceImpl implements OrderService {
         return new OrderDTO(order.getId(),
                 formatDateTime,
                 String.valueOf(order.getStatus()),
-                order.getProducts().stream().map(ProductDTO::new).toList(),
+                toProductList(order.getProducts()),
                 order.getDeliveryAddress(),
                 order.getDescription(),
                 price
         );
+    }
+
+    public List<ProductDTO> toProductList(List<OrderProduct> list) {
+        DecimalFormat df = new DecimalFormat("#,###.00");
+        List<ProductDTO> products = new ArrayList<>();
+        for (OrderProduct orderProduct : list) {
+            var product = productRepository.findById(orderProduct.getProductId());
+            if (product.isPresent()) {
+                var price = df.format(product.get().getPrice());
+                products.add(ProductDTO.builder()
+                        .id(product.get().getId())
+                        .name(product.get().getName())
+                        .price(price)
+                        .count(orderProduct.getAmount())
+                        .build());
+            }
+        }
+        return products;
     }
 }

@@ -1,7 +1,7 @@
 package kazantseva.project.OnlineStore.restcontroller;
 
-import kazantseva.project.OnlineStore.model.request.CreateProduct;
-import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
+import kazantseva.project.OnlineStore.model.mongo.CreateProduct;
+import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
 import kazantseva.project.OnlineStore.service.ProductService;
 import kazantseva.project.OnlineStore.swagger.ProductAPI;
 import lombok.AllArgsConstructor;
@@ -24,19 +24,19 @@ public class ProductController implements ProductAPI {
     }
 
     @GetMapping("/admin/products/{product-id}")
-    public ShortProductDTO getProduct(@PathVariable("product-id") Long productId, Authentication auth) {
+    public ShortProductDTO getProduct(@PathVariable("product-id") String productId, Authentication auth) {
         return productService.getProduct(auth.getName(), productId);
     }
 
     @PatchMapping("/admin/products/{product-id}")
-    public ShortProductDTO updateProduct(@PathVariable("product-id") Long productId,
+    public ShortProductDTO updateProduct(@PathVariable("product-id") String productId,
                                          @RequestBody CreateProduct product,
                                          Authentication auth) {
         return productService.updateProduct(auth.getName(), productId, product);
     }
 
     @DeleteMapping("/admin/products/{product-id}")
-    public void deleteProduct(@PathVariable("product-id") Long productId,
+    public void deleteProduct(@PathVariable("product-id") String productId,
                               Authentication auth) {
         productService.deleteProduct(auth.getName(), productId);
     }
@@ -48,7 +48,7 @@ public class ProductController implements ProductAPI {
     }
 
     @PostMapping("/admin/products/{product-id}/upload")
-    public void uploadImage(@PathVariable("product-id") Long productId,
+    public void uploadImage(@PathVariable("product-id") String productId,
                             @RequestParam("file") MultipartFile file,
                             Authentication auth) {
         productService.uploadImage(auth.getName(), productId, file);

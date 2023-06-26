@@ -1,9 +1,9 @@
 package kazantseva.project.OnlineStore.restcontroller;
 
+import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
-import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.service.OrderService;
 import kazantseva.project.OnlineStore.swagger.OrderAPI;
 import lombok.AllArgsConstructor;

@@ -24,17 +24,14 @@ public class OrderProduct {
     @JsonIgnore
     private Order order;
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "product_id")
-    @JsonIgnore
-    private Product product;
+    private String productId;
 
     @Column(name = "amount")
     private int amount;
 
-    public OrderProduct(Order order, Product product, int amount) {
+    public OrderProduct(Order order, String productId, int amount) {
         this.order = order;
-        this.product = product;
+        this.productId = productId;
         this.amount = amount;
     }
 }

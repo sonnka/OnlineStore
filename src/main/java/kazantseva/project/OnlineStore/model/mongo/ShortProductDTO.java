@@ -1,6 +1,5 @@
-package kazantseva.project.OnlineStore.model.response;
+package kazantseva.project.OnlineStore.model.mongo;
 
-import kazantseva.project.OnlineStore.model.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,13 +13,17 @@ import java.text.DecimalFormat;
 @NoArgsConstructor
 public class ShortProductDTO {
 
-    private Long id;
+    private String id;
 
     private String name;
 
-    private String price;
+    private String category;
+
+    private String description;
 
     private String image;
+
+    private String price;
 
     public ShortProductDTO(Product product) {
         DecimalFormat df = new DecimalFormat("#,###.00");
@@ -28,7 +31,9 @@ public class ShortProductDTO {
 
         this.id = product.getId();
         this.name = product.getName();
-        this.price = price;
+        this.category = product.getCategory();
+        this.description = product.getDescription();
         this.image = product.getImage();
+        this.price = price;
     }
 }

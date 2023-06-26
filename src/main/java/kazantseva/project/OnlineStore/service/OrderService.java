@@ -1,9 +1,9 @@
 package kazantseva.project.OnlineStore.service;
 
+import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
-import kazantseva.project.OnlineStore.model.response.ShortProductDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -9,6 +9,15 @@ services:
       - "3306:3306"
     restart: always
 
+  mongo-service:
+    image: mongo:latest
+    container_name: mongo-db
+    environment:
+      - MONGO_INITDB_DATABASE=mongo-db
+    ports:
+      - "27017:27017"
+    restart: always
+
   onlinestore:
     image: online-store
     container_name: online-store-app
@@ -23,6 +32,7 @@ services:
       - /var/www/images/products:/tmp/images/products
     depends_on:
       - mysql-service
+      - mongo-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/property?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
