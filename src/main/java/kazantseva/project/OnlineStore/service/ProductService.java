@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 public interface ProductService {
     Page<ShortProductDTO> getProductsByPage(Pageable pageable);
 
@@ -18,4 +20,6 @@ public interface ProductService {
     ShortProductDTO createProduct(String email, CreateProduct product);
 
     void uploadImage(String email, String productId, MultipartFile file);
+
+    void uploadDataFromCsv(MultipartFile file) throws IOException;
 }

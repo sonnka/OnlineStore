@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 
 @RestController
 @AllArgsConstructor
@@ -52,5 +54,10 @@ public class ProductController implements ProductAPI {
                             @RequestParam("file") MultipartFile file,
                             Authentication auth) {
         productService.uploadImage(auth.getName(), productId, file);
+    }
+
+    @PostMapping("/csv/upload")
+    public void uploadDataFromCsv(@RequestParam("file") MultipartFile file) throws IOException {
+        productService.uploadDataFromCsv(file);
     }
 }

@@ -1,5 +1,7 @@
 package kazantseva.project.OnlineStore.service.impl;
 
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import kazantseva.project.OnlineStore.model.entity.CustomerRole;
 import kazantseva.project.OnlineStore.model.mongo.CreateProduct;
 import kazantseva.project.OnlineStore.model.mongo.Product;
@@ -7,6 +9,7 @@ import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.mongo.ProductRepository;
 import kazantseva.project.OnlineStore.service.ProductService;
+import kazantseva.project.OnlineStore.util.Util;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,11 +21,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -128,6 +135,32 @@ public class ProductServiceImpl implements ProductService {
                         .price(product.getPrice())
                         .build())
         );
+    }
+
+    @Override
+    public void uploadDataFromCsv(MultipartFile file) throws IOException {
+        CsvToBean<Product> csvDataList = new CsvToBeanBuilder<Product>(new InputStreamReader(file.getInputStream()))
+                .withType(Product.class)
+                .withSeparator(',')
+                .withIgnoreEmptyLine(true)
+                .build();
+        List<Product> products = csvDataList.parse();
+        products.removeIf(Objects::isNull);
+        List<Product> removeList = new ArrayList<>();
+        for (Product product : products) {
+            product.setPrice(Util.formatPrice(product.getStringPrice()));
+            if (BigDecimal.ZERO.compareTo(product.getPrice()) >= 0) {
+                removeList.add(product);
+            } else {
+                product.setRating(Util.randomRating());
+                product.setAvailable(Util.randomAvailable());
+                product.setCalories(Util.randomCalories());
+                product.setManufacturingDate(Util.randomManufacturingDate());
+                product.setExpiryDate(Util.randomExpiryDate());
+            }
+        }
+        products.removeAll(removeList);
+        productRepository.saveAll(products);
     }
 
     private void checkAdmin(String email) {

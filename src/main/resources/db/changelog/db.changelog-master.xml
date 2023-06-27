@@ -5,14 +5,14 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1190" author="admin">
+    <changeSet id="1200" author="admin">
         <dropTable tableName="order_product"/>
         <dropTable tableName="orders"/>
         <dropTable tableName="verification_tokens"/>
         <dropTable tableName="customers"/>
     </changeSet>
 
-    <changeSet id="1192" author="admin">
+    <changeSet id="1201" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -47,7 +47,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1193" author="admin">
+    <changeSet id="1202" author="admin">
         <createTable tableName="verification_tokens">
             <column name="token_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -69,7 +69,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1194" author="admin">
+    <changeSet id="1203" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -96,7 +96,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1195" author="admin">
+    <changeSet id="1204" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -114,7 +114,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1196" author="admin">
+    <changeSet id="1205" author="admin">
         <insert tableName="customers">
             <column name="name" value="Harry"/>
             <column name="surname" value="Potter"/>

@@ -26,7 +26,7 @@ public class ShortProductDTO {
     private String price;
 
     public ShortProductDTO(Product product) {
-        DecimalFormat df = new DecimalFormat("#,###.00");
+        DecimalFormat df = new DecimalFormat("#,##0.00");
         var price = df.format(product.getPrice());
 
         this.id = product.getId();
