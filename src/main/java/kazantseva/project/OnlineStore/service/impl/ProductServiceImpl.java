@@ -27,10 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -144,9 +141,13 @@ public class ProductServiceImpl implements ProductService {
                 .withSeparator(',')
                 .withIgnoreEmptyLine(true)
                 .build();
+
         List<Product> products = csvDataList.parse();
+
         products.removeIf(Objects::isNull);
+
         List<Product> removeList = new ArrayList<>();
+
         for (Product product : products) {
             product.setPrice(Util.formatPrice(product.getStringPrice()));
             if (BigDecimal.ZERO.compareTo(product.getPrice()) >= 0) {
@@ -159,7 +160,8 @@ public class ProductServiceImpl implements ProductService {
                 product.setExpiryDate(Util.randomExpiryDate());
             }
         }
-        products.removeAll(removeList);
+        products.removeAll(new HashSet<>(removeList));
+
         productRepository.saveAll(products);
     }
 

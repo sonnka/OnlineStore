@@ -75,10 +75,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        BigDecimal price = products.stream()
-                .map(product -> BigDecimal.valueOf(product.getAmount()).multiply(
-                        productRepository.findById(product.getProductId()).get().getPrice()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal price = calculateNewPrice(products);
 
         var createdOrder = orderRepository.save(Order.builder()
                 .date(date)
