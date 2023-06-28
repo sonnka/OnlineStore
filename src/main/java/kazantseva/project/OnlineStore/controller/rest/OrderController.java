@@ -5,7 +5,7 @@ import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
 import kazantseva.project.OnlineStore.service.OrderService;
-import kazantseva.project.OnlineStore.swagger.OrderAPI;
+import kazantseva.project.OnlineStore.util.swagger.OrderAPI;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

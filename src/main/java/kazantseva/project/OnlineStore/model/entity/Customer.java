@@ -54,6 +54,9 @@ public class Customer {
     @Column(name = "orders")
     private List<Order> orders;
 
+    @OneToOne(mappedBy = "customer")
+    private Basket basket;
+
     public Customer() {
         super();
         this.enabled = false;

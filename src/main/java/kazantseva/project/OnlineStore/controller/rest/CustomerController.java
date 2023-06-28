@@ -8,7 +8,7 @@ import kazantseva.project.OnlineStore.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import kazantseva.project.OnlineStore.service.CustomerService;
-import kazantseva.project.OnlineStore.swagger.CustomerAPI;
+import kazantseva.project.OnlineStore.util.swagger.CustomerAPI;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

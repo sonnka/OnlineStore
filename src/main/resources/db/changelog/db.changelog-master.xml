@@ -5,14 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1200" author="admin">
-        <dropTable tableName="order_product"/>
-        <dropTable tableName="orders"/>
-        <dropTable tableName="verification_tokens"/>
-        <dropTable tableName="customers"/>
-    </changeSet>
-
-    <changeSet id="1201" author="admin">
+    <changeSet id="1233" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -38,6 +31,8 @@
             <column name="enabled" type="boolean">
                 <constraints nullable="false"/>
             </column>
+            <column name="basket_id" type="bigint">
+            </column>
             <column name="granted_admin_by" type="varchar(50)">
                 <constraints nullable="true"/>
             </column>
@@ -45,9 +40,32 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
+
+        <createTable tableName="baskets">
+            <column name="basket_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="bigint">
+            </column>
+            <column name="products" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_baskets_customers_basket_id"
+                                 baseTableName="baskets"
+                                 baseColumnNames="customer_id"
+                                 referencedTableName="customers"
+                                 referencedColumnNames="customer_id"/>
+
+        <addForeignKeyConstraint constraintName="fk_customers_baskets_customer_id"
+                                 baseTableName="customers"
+                                 baseColumnNames="basket_id"
+                                 referencedTableName="baskets"
+                                 referencedColumnNames="basket_id"/>
     </changeSet>
 
-    <changeSet id="1202" author="admin">
+    <changeSet id="1234" author="admin">
         <createTable tableName="verification_tokens">
             <column name="token_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -69,7 +87,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1203" author="admin">
+    <changeSet id="1235" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -96,7 +114,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1204" author="admin">
+    <changeSet id="1236" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -114,7 +132,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1205" author="admin">
+    <changeSet id="1237" author="admin">
         <insert tableName="customers">
             <column name="name" value="Harry"/>
             <column name="surname" value="Potter"/>

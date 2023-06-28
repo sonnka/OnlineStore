@@ -3,7 +3,7 @@ package kazantseva.project.OnlineStore.controller.rest;
 import kazantseva.project.OnlineStore.model.mongo.CreateProduct;
 import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
 import kazantseva.project.OnlineStore.service.ProductService;
-import kazantseva.project.OnlineStore.swagger.ProductAPI;
+import kazantseva.project.OnlineStore.util.swagger.ProductAPI;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
