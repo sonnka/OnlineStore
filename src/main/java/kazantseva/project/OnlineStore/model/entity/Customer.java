@@ -54,8 +54,7 @@ public class Customer {
     @Column(name = "orders")
     private List<Order> orders;
 
-    @OneToOne(mappedBy = "customer")
-    private Basket basket;
+    private Long basket;
 
     public Customer() {
         super();

@@ -2,10 +2,17 @@ $(document).ready(function () {
     let totalPages = 1;
     let sort = "name"
     let dir = "asc";
+    var sortId = $('#sortId');
     var sortName = $('#sortName');
     var sortPrice = $('#sortPrice');
 
     fetchProduct(0);
+
+    sortId.click(function () {
+        dir = dir === "asc" ? "desc" : "asc";
+        sort = "id";
+        fetchProduct(0);
+    });
 
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
@@ -31,15 +38,26 @@ $(document).ready(function () {
             success: function (response) {
                 $('#table tbody').empty();
                 $.each(response.content, (i, product) => {
+                    var productId = product.id;
                     let productRow = '<tr>' +
+                        '<td><div class="text-left">' + productId + '</div></td>' +
                         '<td><img alt="img" height="60" id="thumbnail" width="60" ' +
                         'src="http://images.example.com/products/' + product.image +
                         '" onerror="this.onerror=null;this.src=\'http://images.example.com/products/default.png\'" ' +
                         '/></td>' +
                         '<td>' + product.name + '</td>' +
                         '<td>' + product.price + '</td>' +
+                        '<td><a type="button" title="add product" class="addProduct">' +
+                        '<i class="material-icons admin">&#xe145;</i></a></td>' +
                         '</tr>';
                     $('#table tbody').append(productRow);
+                });
+
+                $('#table tbody').on('click', '.addProduct', function (e) {
+                    let productId = $(this).closest('tr').find('.text-left').text();
+                    alert("click");
+                    addProductToBasket(productId);
+                    e.stopImmediatePropagation();
                 });
 
                 if ($('ul.pagination li').length - 2 !== response.totalPages) {
@@ -52,6 +70,21 @@ $(document).ready(function () {
                 window.location = "/";
             }
         });
+    }
+
+    function addProductToBasket(productId) {
+        alert("before sending request");
+        $.ajax({
+            type: "PATCH",
+            url: "/basket/" + productId,
+            contentType: 'application/json',
+            success: function () {
+
+            }
+        }).fail(function () {
+            window.location = "/products_html";
+        });
+
     }
 
     function buildPagination(response) {

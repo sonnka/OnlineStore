@@ -1,7 +1,7 @@
 package kazantseva.project.OnlineStore.model.request;
 
 import jakarta.validation.constraints.Size;
-import kazantseva.project.OnlineStore.model.mongo.RequestProduct;
+import kazantseva.project.OnlineStore.model.mongo.request.RequestProduct;
 import lombok.Getter;
 import lombok.Setter;
 

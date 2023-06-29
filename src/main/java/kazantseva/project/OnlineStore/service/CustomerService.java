@@ -24,6 +24,8 @@ public interface CustomerService {
 
     FullCustomerDTO getCustomer(String email, Long customerId);
 
+    Long getBasketId(String email);
+
     Page<CustomerDTO> getCustomers(String email, Pageable pageable);
 
     Page<AdminDTO> getAdmins(String email, Pageable pageable);

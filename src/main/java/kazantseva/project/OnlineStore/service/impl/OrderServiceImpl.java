@@ -1,13 +1,9 @@
 package kazantseva.project.OnlineStore.service.impl;
 
-import kazantseva.project.OnlineStore.model.entity.Customer;
-import kazantseva.project.OnlineStore.model.entity.Order;
-import kazantseva.project.OnlineStore.model.entity.OrderProduct;
-import kazantseva.project.OnlineStore.model.entity.Status;
-import kazantseva.project.OnlineStore.model.mongo.Product;
-import kazantseva.project.OnlineStore.model.mongo.ProductDTO;
-import kazantseva.project.OnlineStore.model.mongo.RequestProduct;
-import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
+import kazantseva.project.OnlineStore.model.entity.*;
+import kazantseva.project.OnlineStore.model.mongo.entity.Product;
+import kazantseva.project.OnlineStore.model.mongo.request.RequestProduct;
+import kazantseva.project.OnlineStore.model.mongo.response.ProductDTO;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
@@ -16,6 +12,7 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.mongo.ProductRepository;
 import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,14 +21,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
@@ -43,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
     public Page<ShortOrderDTO> getOrders(String email, long customerId, Pageable pageable) {
         checkCustomer(customerId, email);
 
-        return orderRepository.findByCustomerId(customerId, pageable)
+        return orderRepository.findByCustomerIdAndType(customerId, Type.PUBLISHED, pageable)
                 .map(ShortOrderDTO::new);
     }
 
@@ -56,55 +52,55 @@ public class OrderServiceImpl implements OrderService {
         return toOrderDTO(order);
     }
 
-    @Override
-    public OrderDTO createOrder(String email, long customerId, RequestOrder order) {
-        var customer = checkCustomer(customerId, email);
-
-        LocalDateTime date = LocalDateTime.now(ZoneOffset.UTC);
-
-        Status status = checkStatus(order.getStatus());
-
-        List<OrderProduct> products = new ArrayList<>();
-        List<RequestProduct> inputProducts = order.getProducts();
-
-        for (RequestProduct current : inputProducts) {
-            Product product = productRepository.findByName(current.name());
-
-            if (product != null && current.count() > 0) {
-                products.add(new OrderProduct(new Order(), product.getId(), current.count()));
-            }
-        }
-
-        BigDecimal price = calculateNewPrice(products);
-
-        var createdOrder = orderRepository.save(Order.builder()
-                .date(date)
-                .status(status)
-                .customer(customer)
-                .deliveryAddress(order.getDeliveryAddress())
-                .description(order.getDescription())
-                .price(price)
-                .build());
-
-        for (OrderProduct product : products) {
-            product.setOrder(createdOrder);
-        }
-
-        createdOrder.setProducts(products);
-
-        return toOrderDTO(orderRepository.save(createdOrder));
-    }
-
-    @Override
-    public List<ShortProductDTO> getProductList(String email, long customerId, long orderId) {
-        checkCustomer(customerId, email);
-        var order = checkOrder(orderId, customerId);
-
-        var productsId = order.getProducts().stream().map(OrderProduct::getProductId).toList();
-
-        return productRepository.findByIdNotIn(productsId).stream()
-                .map(ShortProductDTO::new).toList();
-    }
+//    @Override
+//    public OrderDTO createOrder(String email, long customerId, RequestOrder order) {
+//        var customer = checkCustomer(customerId, email);
+//
+//        LocalDateTime date = LocalDateTime.now(ZoneOffset.UTC);
+//
+//        Status status = checkStatus(order.getStatus());
+//
+//        List<OrderProduct> products = new ArrayList<>();
+//        List<RequestProduct> inputProducts = order.getProducts();
+//
+//        for (RequestProduct current : inputProducts) {
+//            Product product = productRepository.findByName(current.name());
+//
+//            if (product != null && current.count() > 0) {
+//                products.add(new OrderProduct(new Order(), product.getId(), current.count()));
+//            }
+//        }
+//
+//        BigDecimal price = calculateNewPrice(products);
+//
+//        var createdOrder = orderRepository.save(Order.builder()
+//                .date(date)
+//                .status(status)
+//                .customer(customer)
+//                .deliveryAddress(order.getDeliveryAddress())
+//                .description(order.getDescription())
+//                .price(price)
+//                .build());
+//
+//        for (OrderProduct product : products) {
+//            product.setOrder(createdOrder);
+//        }
+//
+//        createdOrder.setProducts(products);
+//
+//        return toOrderDTO(orderRepository.save(createdOrder));
+//    }
+//
+//    @Override
+//    public List<ShortProductDTO> getProductList(String email, long customerId, long orderId) {
+//        checkCustomer(customerId, email);
+//        var order = checkOrder(orderId, customerId);
+//
+//        var productsId = order.getProducts().stream().map(OrderProduct::getProductId).toList();
+//
+//        return productRepository.findByIdNotIn(productsId).stream()
+//                .map(ShortProductDTO::new).toList();
+//    }
 
     @Override
     public OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
@@ -112,7 +108,35 @@ public class OrderServiceImpl implements OrderService {
 
         var order = checkOrder(orderId, customerId);
 
-        return updateOrder(order, newOrder);
+        if (Status.PAID == order.getStatus()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You can not change the paid order.");
+        }
+
+        var updatedOrder = updateOrder(order, newOrder);
+
+        log.info("Before 2 : ");
+        return toOrderDTO(orderRepository.save(updatedOrder));
+    }
+
+    @Override
+    public OrderDTO publishOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
+        var customer = checkCustomer(customerId, email);
+
+        var order = checkOrder(orderId, customerId);
+
+        var updatedOrder = updateOrder(order, newOrder);
+
+        updatedOrder.setType(Type.PUBLISHED);
+
+        customer.setBasket(orderRepository.save(Order.builder()
+                        .customer(customer)
+                        .type(Type.DRAFT)
+                        .status(Status.UNPAID)
+                        .build())
+                .getId());
+
+        return toOrderDTO(orderRepository.save(updatedOrder));
     }
 
     @Override
@@ -120,11 +144,51 @@ public class OrderServiceImpl implements OrderService {
         checkCustomer(customerId, email);
 
         var order = checkOrder(orderId, customerId);
-
+        if (Status.UNPAID == order.getStatus()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You can not delete the unpaid order!");
+        }
         orderRepository.delete(order);
     }
 
-    private OrderDTO updateOrder(Order oldOrder, RequestOrder newOrder) {
+    @Override
+    public void updateBasket(String email, String productId) {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with email " + email + " not found!"));
+
+        var order = orderRepository.findById(customer.getBasket()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Order with id " + customer.getBasket() + " not found!"));
+
+        List<OrderProduct> oldList = new ArrayList<>(order.getProducts());
+
+        var product = productRepository.findById(productId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Product with id " + productId + " not found!"));
+
+        if (oldList.stream().map(OrderProduct::getProductId).toList().contains(productId)) {
+            for (OrderProduct orderProduct : oldList) {
+                if (orderProduct.getProductId().equals(productId)) {
+                    int amount = orderProduct.getAmount() + 1;
+                    orderProduct.setAmount(amount);
+                    break;
+                }
+            }
+        } else {
+            oldList.add(new OrderProduct(order, product.getId(), 1));
+        }
+
+        setNewProductList(order, oldList);
+
+        order.setPrice(calculateNewPrice(order.getProducts()));
+
+        log.info("Before");
+        orderRepository.save(order);
+        log.info("After");
+    }
+
+    private Order updateOrder(Order oldOrder, RequestOrder newOrder) {
         if (Optional.ofNullable(newOrder.getStatus()).isPresent()) {
 
             Status status = checkStatus(newOrder.getStatus());
@@ -138,25 +202,25 @@ public class OrderServiceImpl implements OrderService {
             List<RequestProduct> inputProducts = newOrder.getProducts();
 
             for (RequestProduct current : inputProducts) {
-                Product product = productRepository.findByName(current.name());
+                Product product = productRepository.findById(current.id()).orElse(null);
 
                 if (product != null && current.count() > 0) {
                     products.add(new OrderProduct(oldOrder, product.getId(), current.count()));
                 }
             }
-            if (products.size() > 0) {
+//            if (products.size() > 0) {
 
-                setNewProductList(oldOrder, products);
+            setNewProductList(oldOrder, products);
 
-                oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
+            oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
 
-            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
+//            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
         }
 
         Optional.ofNullable(newOrder.getDeliveryAddress()).ifPresent(oldOrder::setDeliveryAddress);
         Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
 
-        return toOrderDTO(orderRepository.save(oldOrder));
+        return oldOrder;
 
     }
 
@@ -199,7 +263,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.getProducts().addAll(new ArrayList<>());
 
-        orderRepository.save(order);
+//        orderRepository.save(order);
 
         order.getProducts().addAll(products);
     }
@@ -212,10 +276,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private OrderDTO toOrderDTO(Order order) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-        DecimalFormat df = new DecimalFormat("#,###.00");
-        String formatDateTime = order.getDate().format(formatter);
-        var price = df.format(order.getPrice());
+        String formatDateTime = null;
+        var price = "0.00";
+        if (order.getDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+            formatDateTime = order.getDate().format(formatter);
+        }
+        if (order.getPrice() != null) {
+            DecimalFormat df = new DecimalFormat("#,###.00");
+            price = df.format(order.getPrice());
+        }
 
         return new OrderDTO(order.getId(),
                 formatDateTime,

@@ -55,7 +55,7 @@ $(document).ready(function () {
                         '<a type="button" title="edit product" class="editProduct">' +
                         '<i class="material-icons admin">&#xe3c9;</i></a>&emsp;&emsp;' +
                         '<a type="button" title="delete product" class="deleteProduct">' +
-                        '<i class="material-icons">&#xE872;</i></a></div></td> ' +
+                        '<i class="material-icons">&#xE872;</i></a></td> ' +
                         '</tr>';
                     $('#table tbody').append(productRow);
                 });

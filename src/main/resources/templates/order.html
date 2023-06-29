@@ -68,6 +68,9 @@
         <div sec:authorize="hasRole('BUYER')">
             <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/profile/basket}" th:text="#{basket}"></a>
+        </div>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/logout}" th:text="#{logout}"></a>
         </div>
@@ -77,6 +80,11 @@
     </nav>
 </header>
 <main>
+    <div id="myElement1" style="display: none;" th:text="#{unpaidError}"></div>
+    <div id="myElement2" style="display: none;" th:text="#{deleteError}"></div>
+    <div th:if="${param.error}">
+        <div class="alert alert-danger" id="error"></div>
+    </div>
     <section class="pt-5 pb-5">
         <div class="container">
             <div class="row w-100">

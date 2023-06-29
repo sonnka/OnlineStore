@@ -36,6 +36,9 @@
         <div sec:authorize="hasRole('BUYER')">
             <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/profile/basket}" th:text="#{basket}"></a>
+        </div>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/logout}" th:text="#{logout}"></a>
         </div>

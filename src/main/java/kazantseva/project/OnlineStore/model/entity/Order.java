@@ -27,6 +27,10 @@ public class Order {
     private LocalDateTime date;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private Type type;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;
 

@@ -1,7 +1,7 @@
 package kazantseva.project.OnlineStore.controller.rest;
 
-import kazantseva.project.OnlineStore.model.mongo.CreateProduct;
-import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
+import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
+import kazantseva.project.OnlineStore.model.mongo.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.service.ProductService;
 import kazantseva.project.OnlineStore.util.swagger.ProductAPI;
 import lombok.AllArgsConstructor;

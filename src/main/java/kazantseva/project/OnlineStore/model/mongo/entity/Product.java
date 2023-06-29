@@ -1,4 +1,4 @@
-package kazantseva.project.OnlineStore.model.mongo;
+package kazantseva.project.OnlineStore.model.mongo.entity;
 
 import com.opencsv.bean.CsvBindByName;
 import jakarta.persistence.EnumType;

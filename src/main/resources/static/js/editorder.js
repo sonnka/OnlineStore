@@ -10,16 +10,11 @@ $(document).ready(function () {
     var price = $('#price');
     var table = $('#productsTable tbody');
 
-    if (orderId === "-1") {
-        createOrder();
-    } else {
-        loadOrder();
-    }
+    loadOrder();
 
 
     var saveButton = $('#saveButton');
-    var addProductButton = $('#addProductButton');
-    var addSelectedProducts = $('#addSelectedProducts');
+
 
     saveButton.click(function () {
         listOfProducts = [];
@@ -27,29 +22,30 @@ $(document).ready(function () {
         updateOrder();
     });
 
-    addProductButton.click(function () {
-        $.get("/customers/" + customerId + "/orders/" + orderId + "/productList", function (responseJson) {
-            displayList(responseJson)
-        }).fail(function () {
-            window.location = "/profile/orders/" + orderId;
-        });
-    });
 
-    addSelectedProducts.click(function () {
-        $('input[type="checkbox"]:checked').each(function () {
-            var $row = $(this).closest('tr');
-            var name = $row.find('label.name').text().trim();
-
-            var selectedProduct = {
-                "name": name,
-                "count": 1
-            }
-            listOfProducts.push(selectedProduct);
-        });
-        updateList();
-        updateOrder();
-        window.location = "/profile/orders/" + orderId + "/edit";
-    });
+    // addProductButton.click(function () {
+    //     $.get("/customers/" + customerId + "/orders/" + orderId + "/productList", function (responseJson) {
+    //         displayList(responseJson)
+    //     }).fail(function () {
+    //         window.location = "/profile/orders/" + orderId;
+    //     });
+    // });
+    //
+    // addSelectedProducts.click(function () {
+    //     $('input[type="checkbox"]:checked').each(function () {
+    //         var $row = $(this).closest('tr');
+    //         var name = $row.find('label.name').text().trim();
+    //
+    //         var selectedProduct = {
+    //             "name": name,
+    //             "count": 1
+    //         }
+    //         listOfProducts.push(selectedProduct);
+    //     });
+    //     updateList();
+    //     updateOrder();
+    //     window.location = "/profile/orders/" + orderId + "/edit";
+    // });
 
     function loadOrder() {
         url = "/customers/" + customerId + "/orders/" + orderId;
@@ -90,16 +86,16 @@ $(document).ready(function () {
 
     }
 
-    function displayList(responseJson) {
-        $('#productsList tbody').empty();
-        $.each(responseJson, (i, product) => {
-            let productRow = '<tr>' +
-                '<td> <input type="checkbox" class="checkbox"> <label class="name">&emsp;&emsp;' + product.name
-                + '&emsp;&emsp;</label></td>' +
-                '<td> <label class="price">' + product.price + '</label></td></tr>'
-            $('#productsList tbody').append(productRow);
-        });
-    }
+    // function displayList(responseJson) {
+    //     $('#productsList tbody').empty();
+    //     $.each(responseJson, (i, product) => {
+    //         let productRow = '<tr>' +
+    //             '<td> <input type="checkbox" class="checkbox"> <label class="name">&emsp;&emsp;' + product.name
+    //             + '&emsp;&emsp;</label></td>' +
+    //             '<td> <label class="price">' + product.price + '</label></td></tr>'
+    //         $('#productsList tbody').append(productRow);
+    //     });
+    // }
 
     function updateOrder() {
         jsonData = {
@@ -150,26 +146,26 @@ $(document).ready(function () {
         window.location = "/profile/orders/" + orderId + "/edit";
     }
 
-    function createOrder() {
-        jsonData = {
-            "status": "UNPAID",
-            "products": [],
-            "deliveryAddress": "",
-            "description": ""
-        };
-
-        $.ajax({
-            type: "POST",
-            url: "/customers/" + customerId + "/orders",
-            data: JSON.stringify(jsonData),
-            contentType: 'application/json',
-            success: function (responseJson) {
-                orderId = responseJson.id;
-                window.location = "/profile/orders/" + orderId + "/edit";
-            }
-        }).fail(function () {
-            window.location = "/profile/orders";
-        });
-    }
+    // function createOrder() {
+    //     jsonData = {
+    //         "status": "UNPAID",
+    //         "products": [],
+    //         "deliveryAddress": "",
+    //         "description": ""
+    //     };
+    //
+    //     $.ajax({
+    //         type: "POST",
+    //         url: "/customers/" + customerId + "/orders",
+    //         data: JSON.stringify(jsonData),
+    //         contentType: 'application/json',
+    //         success: function (responseJson) {
+    //             orderId = responseJson.id;
+    //             window.location = "/profile/orders/" + orderId + "/edit";
+    //         }
+    //     }).fail(function () {
+    //         window.location = "/profile/orders";
+    //     });
+    // }
 
 });

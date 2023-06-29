@@ -1,7 +1,7 @@
 package kazantseva.project.OnlineStore.service;
 
-import kazantseva.project.OnlineStore.model.mongo.CreateProduct;
-import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
+import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
+import kazantseva.project.OnlineStore.model.mongo.response.ShortProductDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;

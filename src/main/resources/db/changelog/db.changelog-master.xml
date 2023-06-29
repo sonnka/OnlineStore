@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1233" author="admin">
+    <changeSet id="1255" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -28,10 +28,11 @@
             <column name="avatar" type="varchar(250)">
                 <constraints nullable="true"/>
             </column>
+            <column name="basket" type="bigint">
+                <constraints nullable="true"/>
+            </column>
             <column name="enabled" type="boolean">
                 <constraints nullable="false"/>
-            </column>
-            <column name="basket_id" type="bigint">
             </column>
             <column name="granted_admin_by" type="varchar(50)">
                 <constraints nullable="true"/>
@@ -40,32 +41,9 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
-
-        <createTable tableName="baskets">
-            <column name="basket_id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="customer_id" type="bigint">
-            </column>
-            <column name="products" type="text">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <addForeignKeyConstraint constraintName="fk_baskets_customers_basket_id"
-                                 baseTableName="baskets"
-                                 baseColumnNames="customer_id"
-                                 referencedTableName="customers"
-                                 referencedColumnNames="customer_id"/>
-
-        <addForeignKeyConstraint constraintName="fk_customers_baskets_customer_id"
-                                 baseTableName="customers"
-                                 baseColumnNames="basket_id"
-                                 referencedTableName="baskets"
-                                 referencedColumnNames="basket_id"/>
     </changeSet>
 
-    <changeSet id="1234" author="admin">
+    <changeSet id="1256" author="admin">
         <createTable tableName="verification_tokens">
             <column name="token_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -87,12 +65,14 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1235" author="admin">
+    <changeSet id="1257" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="creation_date" type="datetime">
+            </column>
+            <column name="type" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="status" type="varchar(50)">
@@ -103,18 +83,15 @@
                              foreignKeyName="fk_customers_orders_customer_id" references="customers(customer_id)"/>
             </column>
             <column name="delivery_address" type="varchar(200)">
-                <constraints nullable="false"/>
             </column>
             <column name="description" type="varchar(200)">
-                <constraints nullable="false"/>
             </column>
             <column name="price" type="decimal(10,2)">
-                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet id="1236" author="admin">
+    <changeSet id="1258" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -132,7 +109,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1237" author="admin">
+    <changeSet id="1259" author="admin">
         <insert tableName="customers">
             <column name="name" value="Harry"/>
             <column name="surname" value="Potter"/>

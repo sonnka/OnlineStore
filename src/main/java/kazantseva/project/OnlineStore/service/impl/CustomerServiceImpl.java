@@ -1,10 +1,7 @@
 package kazantseva.project.OnlineStore.service.impl;
 
 import jakarta.mail.MessagingException;
-import kazantseva.project.OnlineStore.model.entity.Customer;
-import kazantseva.project.OnlineStore.model.entity.CustomerRole;
-import kazantseva.project.OnlineStore.model.entity.Status;
-import kazantseva.project.OnlineStore.model.entity.VerificationToken;
+import kazantseva.project.OnlineStore.model.entity.*;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.AdminDTO;
@@ -61,13 +58,23 @@ public class CustomerServiceImpl implements CustomerService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, newCustomer.getEmail() + " is already occupied!");
         }
 
-        Customer customer = customerRepository.save(Customer.builder()
+        Customer customer = Customer.builder()
                 .email(newCustomer.getEmail())
                 .password(passwordEncoder.encode(newCustomer.getPassword()))
                 .name(newCustomer.getName())
                 .surname(newCustomer.getSurname())
                 .role(CustomerRole.BUYER)
-                .build());
+                .build();
+
+        Order order = Order.builder()
+                .customer(customer)
+                .type(Type.DRAFT)
+                .status(Status.UNPAID)
+                .build();
+
+        customer.setBasket(orderRepository.save(order).getId());
+
+        customerRepository.save(customer);
 
         generateTokenAndSendMail(customer);
     }
@@ -106,6 +113,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Long getBasketId(String email) {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Customer with email " + email + " not found!"));
+        return customer.getBasket();
+    }
+
+    @Override
     public Page<CustomerDTO> getCustomers(String email, Pageable pageable) {
         checkAdminByEmail(email);
 
@@ -141,6 +156,7 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setRole(CustomerRole.ADMIN);
             customer.setGrantedAdminBy(email);
             customer.setDate(LocalDateTime.now(ZoneOffset.UTC));
+            customer.setBasket(null);
             customerRepository.save(customer);
         } catch (MessagingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
@@ -361,16 +377,14 @@ public class CustomerServiceImpl implements CustomerService {
                 .surname(customer.getSurname())
                 .email(customer.getEmail())
                 .avatar(customer.getAvatar())
-                .totalAmountOfOrders(orderRepository.findAllByCustomerId(customer.getId()).size())
-                .amountOfPaidOrders(orderRepository.findAllByCustomerId(customer.getId())
-                        .stream()
-                        .filter(order -> order.getStatus().equals(Status.PAID))
-                        .toList()
+                .amountOfBasketElem(customer.getOrders().size() - 1)
+                .totalAmountOfOrders(orderRepository.findAllByCustomerIdAndType(customer.getId(), Type.PUBLISHED)
                         .size())
-                .amountOfUnpaidOrders(orderRepository.findAllByCustomerId(customer.getId())
-                        .stream()
-                        .filter(order -> order.getStatus().equals(Status.UNPAID))
-                        .toList()
+                .amountOfPaidOrders(orderRepository.findAllByCustomerIdAndTypeAndStatus(customer.getId(),
+                                Type.PUBLISHED, Status.PAID)
+                        .size())
+                .amountOfUnpaidOrders(orderRepository.findAllByCustomerIdAndTypeAndStatus(customer.getId(),
+                                Type.PUBLISHED, Status.UNPAID)
                         .size())
                 .amountOfAddedAdmins(customerRepository.findAll()
                         .stream().filter(c -> customer.getEmail().equals(c.getGrantedAdminBy()))

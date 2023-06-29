@@ -1,5 +1,6 @@
-package kazantseva.project.OnlineStore.model.mongo;
+package kazantseva.project.OnlineStore.model.mongo.response;
 
+import kazantseva.project.OnlineStore.model.mongo.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

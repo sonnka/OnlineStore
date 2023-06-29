@@ -50,6 +50,16 @@ public class PageController {
         return "editprofile";
     }
 
+    @GetMapping("/profile/basket")
+    public String basket(Principal principal, Model model) {
+        long customerId = customerService.getCustomerId(principal.getName());
+        long basketId = customerService.getBasketId(principal.getName());
+        model.addAttribute("orderId", -2L);
+        model.addAttribute("basketId", basketId);
+        model.addAttribute("customerId", customerId);
+        return "basket";
+    }
+
     @GetMapping("/profile/orders")
     public String orders(Principal principal, Model model) {
         long customerId = customerService.getCustomerId(principal.getName());

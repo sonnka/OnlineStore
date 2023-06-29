@@ -48,6 +48,7 @@ $(document).ready(function () {
         $('#customerSurname').text(responseJson.surname);
         $('#customerEmail').text(responseJson.email);
         $('#customerEmail2').text(responseJson.email);
+        $('#amountOfBasketElem').text(responseJson.amountOfBasketElem)
         $('#totalAmountOfOrders').text(responseJson.totalAmountOfOrders);
         $('#totalAmountOfOrders2').text(responseJson.totalAmountOfOrders);
         $('#amountPaidOrders').text(responseJson.amountOfPaidOrders);

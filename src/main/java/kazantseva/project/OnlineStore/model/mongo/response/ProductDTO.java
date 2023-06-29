@@ -1,4 +1,4 @@
-package kazantseva.project.OnlineStore.model.mongo;
+package kazantseva.project.OnlineStore.model.mongo.response;
 
 import lombok.*;
 

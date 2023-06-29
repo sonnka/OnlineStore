@@ -67,6 +67,9 @@
         <div sec:authorize="hasRole('BUYER')">
             <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
         </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/profile/basket}" th:text="#{basket}"></a>
+        </div>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/logout}" th:text="#{logout}"></a>
         </div>
@@ -171,30 +174,30 @@
                 </div>
             </div>
         </div>
-        <div aria-hidden="true" aria-labelledby="exampleModalLabel"
-             class="modal fade" id="exampleModal1"
-             role="dialog"
-             tabindex="-1">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel" th:text="#{products}">
-                        </h5>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-condensed table-responsive" id="productsList">
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" id="addSelectedProducts" th:text="#{add}"
-                                type="submit"></button>
-                    </div>
-                </div>
+        <!--        <div aria-hidden="true" aria-labelledby="exampleModalLabel"-->
+        <!--             class="modal fade" id="exampleModal1"-->
+        <!--             role="dialog"-->
+        <!--             tabindex="-1">-->
+        <!--            <div class="modal-dialog" role="document">-->
+        <!--                <div class="modal-content">-->
+        <!--                    <div class="modal-header">-->
+        <!--                        <h5 class="modal-title" id="exampleModalLabel" th:text="#{products}">-->
+        <!--                        </h5>-->
+        <!--                    </div>-->
+        <!--                    <div class="modal-body">-->
+        <!--                        <table class="table table-condensed table-responsive" id="productsList">-->
+        <!--                            <tbody>-->
+        <!--                            </tbody>-->
+        <!--                        </table>-->
+        <!--                    </div>-->
+        <!--                    <div class="modal-footer">-->
+        <!--                        <button class="btn btn-secondary" id="addSelectedProducts" th:text="#{add}"-->
+        <!--                                type="submit"></button>-->
+        <!--                    </div>-->
+        <!--                </div>-->
 
-            </div>
-        </div>
+        <!--            </div>-->
+        <!--        </div>-->
     </section>
 </main>
 </body>

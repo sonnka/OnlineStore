@@ -3,9 +3,9 @@ package kazantseva.project.OnlineStore.service.impl;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import kazantseva.project.OnlineStore.model.entity.CustomerRole;
-import kazantseva.project.OnlineStore.model.mongo.CreateProduct;
-import kazantseva.project.OnlineStore.model.mongo.Product;
-import kazantseva.project.OnlineStore.model.mongo.ShortProductDTO;
+import kazantseva.project.OnlineStore.model.mongo.entity.Product;
+import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
+import kazantseva.project.OnlineStore.model.mongo.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.mongo.ProductRepository;
 import kazantseva.project.OnlineStore.service.ProductService;
@@ -42,7 +42,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Cacheable(value = "products", key = "#pageable")
     public Page<ShortProductDTO> getProductsByPage(Pageable pageable) {
-        log.info("caching");
         return productRepository.findAll(pageable)
                 .map(ShortProductDTO::new);
     }

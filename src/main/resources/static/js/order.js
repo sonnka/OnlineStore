@@ -4,6 +4,7 @@ $(document).ready(function () {
 
     var customerId = $('#customerId').val();
     var orderId = $('#orderId').val();
+    var orderStatus = "UNPAID";
 
     loadOrder()
 
@@ -32,6 +33,8 @@ $(document).ready(function () {
         $('#orderStatus').text(responseJson.status);
         $('#orderPrice').text(responseJson.price);
 
+        orderStatus = responseJson.status;
+
         $('#productsTable tbody').empty();
         $.each(responseJson.products, (i, product) => {
             let productRow = '<tr>' +
@@ -51,7 +54,11 @@ $(document).ready(function () {
                 window.location = "/profile/orders";
             },
             error: function () {
-                window.location = "/profile/orders";
+                $('#error').text($('#myElement2').text())
+                if (orderStatus === "UNPAID") {
+                    $('#error').text($('#myElement1').text())
+                }
+                window.location = "/profile/order?error";
             }
         })
     }
