@@ -80,10 +80,11 @@
     </nav>
 </header>
 <main>
-    <div id="myElement1" style="display: none;" th:text="#{unpaidError}"></div>
-    <div id="myElement2" style="display: none;" th:text="#{deleteError}"></div>
     <div th:if="${param.error}">
-        <div class="alert alert-danger" id="error"></div>
+        <div class="alert alert-danger" id="error1" th:text="#{deleteError}"></div>
+    </div>
+    <div th:if="${param.error_unpaid}">
+        <div class="alert alert-danger" id="error2" th:text="#{unpaidError}"></div>
     </div>
     <section class="pt-5 pb-5">
         <div class="container">
@@ -95,11 +96,11 @@
                     <input id="orderId" th:value="${orderId}" type="hidden">
                     <div class="float-right col-md-2">
                         <a id="editOrderButton"><input
-                                class="profile-edit-btn" name="btnAddMore" th:value="#{edit}"
+                                class="profile-edit-btn" id="editbutton" name="btnAddMore" th:value="#{edit}"
                                 type="submit"/></a>
                         <br><br>
                         <a id="deleteOrderButton"><input
-                                class="profile-delete-btn" name="btnAddMore" th:value="#{delete}"
+                                class="profile-delete-btn" id="deletebutton" name="btnAddMore" th:value="#{delete}"
                                 type="submit"/></a>
                     </div>
                     <div class="row">

@@ -6,27 +6,14 @@ $(document).ready(function () {
     var price = $('#price');
     var table = $('#productsTable tbody');
     var publishButton = $('#publishButton')
+    var count = 0;
 
 
     loadBasket();
 
 
     publishButton.click(function () {
-        jsonData = {
-            "products": listOfProducts
-        };
-
-        $.ajax({
-            type: "PATCH",
-            url: "/customers/" + customerId + "/orders/" + basketId,
-            data: JSON.stringify(jsonData),
-            contentType: 'application/json',
-            success: function () {
-                window.location = "/profile/orders/" + basketId + "/edit";
-            }
-        }).fail(function () {
-            window.location = "/profile/basket?error";
-        });
+        window.location = "/profile/orders/" + basketId + "/edit";
     });
 
 
@@ -46,9 +33,9 @@ $(document).ready(function () {
 
         $.each(responseJson.products, (i, product) => {
             var productName = product.name;
-
+            ++count;
             let productRow = '<tr>' +
-                '<td data-th="Id"><div class="col-md-9 text-left mt-sm-2">' + product.id + '</div></td>' +
+                '<td style="display:none;"  data-th="Id"><div class="col-md-9 text-left mt-sm-2">' + product.id + '</div></td>' +
                 '<td data-th="Product"><div class="col-md-9 mt-sm-2">' + productName + '</div></td>' +
                 '<td class="valueAlign" data-th="Price">' + product.price + '</td>' +
                 '<td data-th="Quantity"><input class="form-control form-control-lg text-center input_count" min="1"'
@@ -70,6 +57,12 @@ $(document).ready(function () {
             deleteProduct(productId);
             e.stopImmediatePropagation();
         });
+
+        if (count <= 0) {
+            publishButton.attr("style", "display:none");
+        } else {
+            publishButton.attr("style", "");
+        }
     }
 
 

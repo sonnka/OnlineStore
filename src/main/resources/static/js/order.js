@@ -6,6 +6,7 @@ $(document).ready(function () {
     var orderId = $('#orderId').val();
     var orderStatus = "UNPAID";
 
+
     loadOrder()
 
     editOrderButton.click(function () {
@@ -16,11 +17,13 @@ $(document).ready(function () {
         deleteOrder();
     });
 
+
     function loadOrder() {
         url = "/customers/" + customerId + "/orders/" + orderId;
 
         $.get(url, function (responseJson) {
-            displayData(responseJson)
+            orderStatus = responseJson.status;
+            displayData(responseJson);
         }).fail(function () {
             window.location = "/";
         });
@@ -33,8 +36,6 @@ $(document).ready(function () {
         $('#orderStatus').text(responseJson.status);
         $('#orderPrice').text(responseJson.price);
 
-        orderStatus = responseJson.status;
-
         $('#productsTable tbody').empty();
         $.each(responseJson.products, (i, product) => {
             let productRow = '<tr>' +
@@ -44,6 +45,14 @@ $(document).ready(function () {
                 '</tr>';
             $('#productsTable tbody').append(productRow);
         });
+
+        if (orderStatus === "PAID") {
+            $('#editbutton').attr("type", "hidden");
+            $('#deletebutton').attr("type", "submit");
+        } else {
+            $('#deletebutton').attr("type", "hidden");
+            $('#editbutton').attr("type", "submit")
+        }
     }
 
     function deleteOrder() {
@@ -54,11 +63,11 @@ $(document).ready(function () {
                 window.location = "/profile/orders";
             },
             error: function () {
-                $('#error').text($('#myElement2').text())
                 if (orderStatus === "UNPAID") {
-                    $('#error').text($('#myElement1').text())
+                    window.location = "/profile/orders/" + orderId + "?error_unpaid";
+                } else {
+                    window.location = "/profile/orders/" + orderId + "?error";
                 }
-                window.location = "/profile/order?error";
             }
         })
     }

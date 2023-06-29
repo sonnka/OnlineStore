@@ -21,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,56 +54,6 @@ public class OrderServiceImpl implements OrderService {
         return toOrderDTO(order);
     }
 
-//    @Override
-//    public OrderDTO createOrder(String email, long customerId, RequestOrder order) {
-//        var customer = checkCustomer(customerId, email);
-//
-//        LocalDateTime date = LocalDateTime.now(ZoneOffset.UTC);
-//
-//        Status status = checkStatus(order.getStatus());
-//
-//        List<OrderProduct> products = new ArrayList<>();
-//        List<RequestProduct> inputProducts = order.getProducts();
-//
-//        for (RequestProduct current : inputProducts) {
-//            Product product = productRepository.findByName(current.name());
-//
-//            if (product != null && current.count() > 0) {
-//                products.add(new OrderProduct(new Order(), product.getId(), current.count()));
-//            }
-//        }
-//
-//        BigDecimal price = calculateNewPrice(products);
-//
-//        var createdOrder = orderRepository.save(Order.builder()
-//                .date(date)
-//                .status(status)
-//                .customer(customer)
-//                .deliveryAddress(order.getDeliveryAddress())
-//                .description(order.getDescription())
-//                .price(price)
-//                .build());
-//
-//        for (OrderProduct product : products) {
-//            product.setOrder(createdOrder);
-//        }
-//
-//        createdOrder.setProducts(products);
-//
-//        return toOrderDTO(orderRepository.save(createdOrder));
-//    }
-//
-//    @Override
-//    public List<ShortProductDTO> getProductList(String email, long customerId, long orderId) {
-//        checkCustomer(customerId, email);
-//        var order = checkOrder(orderId, customerId);
-//
-//        var productsId = order.getProducts().stream().map(OrderProduct::getProductId).toList();
-//
-//        return productRepository.findByIdNotIn(productsId).stream()
-//                .map(ShortProductDTO::new).toList();
-//    }
-
     @Override
     public OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
         checkCustomer(customerId, email);
@@ -115,7 +67,6 @@ public class OrderServiceImpl implements OrderService {
 
         var updatedOrder = updateOrder(order, newOrder);
 
-        log.info("Before 2 : ");
         return toOrderDTO(orderRepository.save(updatedOrder));
     }
 
@@ -125,18 +76,21 @@ public class OrderServiceImpl implements OrderService {
 
         var order = checkOrder(orderId, customerId);
 
-        var updatedOrder = updateOrder(order, newOrder);
+        if (newOrder.getProducts().size() > 0) {
+            var updatedOrder = updateOrder(order, newOrder);
 
-        updatedOrder.setType(Type.PUBLISHED);
+            updatedOrder.setType(Type.PUBLISHED);
+            updatedOrder.setDate(LocalDateTime.now(ZoneOffset.UTC));
 
-        customer.setBasket(orderRepository.save(Order.builder()
-                        .customer(customer)
-                        .type(Type.DRAFT)
-                        .status(Status.UNPAID)
-                        .build())
-                .getId());
+            customer.setBasket(orderRepository.save(Order.builder()
+                            .customer(customer)
+                            .type(Type.DRAFT)
+                            .status(Status.UNPAID)
+                            .build())
+                    .getId());
 
-        return toOrderDTO(orderRepository.save(updatedOrder));
+            return toOrderDTO(orderRepository.save(updatedOrder));
+        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can not create order without products!");
     }
 
     @Override
@@ -183,9 +137,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setPrice(calculateNewPrice(order.getProducts()));
 
-        log.info("Before");
         orderRepository.save(order);
-        log.info("After");
     }
 
     private Order updateOrder(Order oldOrder, RequestOrder newOrder) {
@@ -208,13 +160,10 @@ public class OrderServiceImpl implements OrderService {
                     products.add(new OrderProduct(oldOrder, product.getId(), current.count()));
                 }
             }
-//            if (products.size() > 0) {
 
             setNewProductList(oldOrder, products);
 
             oldOrder.setPrice(calculateNewPrice(oldOrder.getProducts()));
-
-//            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must be at least one product");
         }
 
         Optional.ofNullable(newOrder.getDeliveryAddress()).ifPresent(oldOrder::setDeliveryAddress);
@@ -262,8 +211,6 @@ public class OrderServiceImpl implements OrderService {
         order.getProducts().clear();
 
         order.getProducts().addAll(new ArrayList<>());
-
-//        orderRepository.save(order);
 
         order.getProducts().addAll(products);
     }

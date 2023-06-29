@@ -371,13 +371,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private FullCustomerDTO toFullCustomerDTO(Customer customer) {
+        var drafts = orderRepository.findAllByCustomerIdAndType(customer.getId(), Type.DRAFT);
+        int amount = 0;
+        if (drafts.size() > 0) {
+            amount = drafts.get(0).getProducts().size();
+        }
         return FullCustomerDTO.builder()
                 .id(customer.getId())
                 .name(customer.getName())
                 .surname(customer.getSurname())
                 .email(customer.getEmail())
                 .avatar(customer.getAvatar())
-                .amountOfBasketElem(customer.getOrders().size() - 1)
+                .amountOfBasketElem(amount)
                 .totalAmountOfOrders(orderRepository.findAllByCustomerIdAndType(customer.getId(), Type.PUBLISHED)
                         .size())
                 .amountOfPaidOrders(orderRepository.findAllByCustomerIdAndTypeAndStatus(customer.getId(),
