@@ -8,14 +8,11 @@ $(document).ready(function () {
     var publishButton = $('#publishButton')
     var count = 0;
 
-
     loadBasket();
-
 
     publishButton.click(function () {
         window.location = "/profile/orders/" + basketId + "/edit";
     });
-
 
     function loadBasket() {
         url = "/customers/" + customerId + "/orders/" + basketId;
@@ -65,7 +62,6 @@ $(document).ready(function () {
         }
     }
 
-
     function updateBasket() {
         jsonData = {
             "products": listOfProducts
@@ -101,9 +97,7 @@ $(document).ready(function () {
                 "name": productName,
                 "count": productCount
             };
-
             listOfProducts.push(rowData);
-
         });
     }
 
@@ -112,5 +106,4 @@ $(document).ready(function () {
         listOfProducts = listOfProducts.filter(prod => prod.id !== productId);
         updateBasket();
     }
-
 });

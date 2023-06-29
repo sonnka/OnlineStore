@@ -60,13 +60,15 @@ $(document).ready(function () {
                     $('#table tbody').append(productRow);
                 });
 
-                table.on('click', '.editProduct', function () {
+                table.on('click', '.editProduct', function (e) {
                     let productId = $(this).closest('tr').find('.text-left').text();
                     editProduct(productId);
+                    e.stopImmediatePropagation();
                 });
-                table.on('click', '.deleteProduct', function () {
+                table.on('click', '.deleteProduct', function (e) {
                     let productId = $(this).closest('tr').find('.text-left').text();
                     deleteProduct(productId);
+                    e.stopImmediatePropagation();
                 });
 
                 if ($('ul.pagination li').length - 2 !== response.totalPages) {

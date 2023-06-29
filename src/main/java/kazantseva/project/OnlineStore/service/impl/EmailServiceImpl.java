@@ -21,7 +21,6 @@ public class EmailServiceImpl implements EmailService {
     private final TemplateEngine templateEngine;
     private final JavaMailSender emailSender;
     private final Context context = new Context(Locale.US);
-    private final String link = "http://localhost:8080/confirm-email?token=";
 
     public EmailServiceImpl(ResourceBundleMessageSource messageSource, TemplateEngine templateEngine, JavaMailSender emailSender) {
         this.messageSource = messageSource;
@@ -35,6 +34,7 @@ public class EmailServiceImpl implements EmailService {
         Locale locale = new Locale(token.getLocale().split("_")[0], token.getLocale().split("_")[1]);
 
         Context context = new Context(locale);
+        String link = "http://localhost:8080/confirm-email?token=";
         context.setVariable("link", link + token.getToken());
 
         String process = templateEngine.process("letter", context);

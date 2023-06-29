@@ -57,7 +57,6 @@ $(document).ready(function () {
 
                 $('#table tbody').on('click', '.addProduct', function (e) {
                     let productId = $(this).closest('tr').find('.text-left').text();
-                    alert("click");
                     addProductToBasket(productId);
                     e.stopImmediatePropagation();
                 });
@@ -75,7 +74,6 @@ $(document).ready(function () {
     }
 
     function addProductToBasket(productId) {
-        alert("before sending request");
         $.ajax({
             type: "PATCH",
             url: "/basket/" + productId,

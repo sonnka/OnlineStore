@@ -14,7 +14,6 @@ import kazantseva.project.OnlineStore.repository.VerificationTokenRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.EmailService;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +38,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
-@Slf4j
 @AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 

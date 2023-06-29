@@ -39,7 +39,6 @@ $(document).ready(function () {
         });
     }
 
-
     $('#imageForm').submit(function (event) {
         event.preventDefault();
         var formData = new FormData();
@@ -58,7 +57,6 @@ $(document).ready(function () {
             }
         });
     });
-
 
     function createProduct() {
         jsonData = {
@@ -119,5 +117,4 @@ $(document).ready(function () {
             window.location = "/products_html";
         });
     }
-
 });

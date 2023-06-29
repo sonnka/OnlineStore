@@ -152,5 +152,4 @@ $(document).ready(function () {
         listOfProducts = listOfProducts.filter(prod => prod.id !== productId);
         updateOrder();
     }
-
 });

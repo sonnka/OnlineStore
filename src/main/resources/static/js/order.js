@@ -17,7 +17,6 @@ $(document).ready(function () {
         deleteOrder();
     });
 
-
     function loadOrder() {
         url = "/customers/" + customerId + "/orders/" + orderId;
 

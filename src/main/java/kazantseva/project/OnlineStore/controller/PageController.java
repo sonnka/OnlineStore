@@ -67,14 +67,6 @@ public class PageController {
         return "orders";
     }
 
-    @GetMapping("/profile/orders/create")
-    public String createOrder(Principal principal, Model model) {
-        long customerId = customerService.getCustomerId(principal.getName());
-        model.addAttribute("orderId", -1L);
-        model.addAttribute("customerId", customerId);
-        return "editorder";
-    }
-
     @GetMapping("/profile/orders/{order-id}")
     public String order(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
         long customerId = customerService.getCustomerId(principal.getName());
@@ -90,7 +82,6 @@ public class PageController {
         model.addAttribute("customerId", customerId);
         return "editorder";
     }
-
 
     @GetMapping("/confirm-email")
     public String confirm(@RequestParam String token) {

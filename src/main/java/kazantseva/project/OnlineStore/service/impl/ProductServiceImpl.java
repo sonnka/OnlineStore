@@ -11,7 +11,6 @@ import kazantseva.project.OnlineStore.repository.mongo.ProductRepository;
 import kazantseva.project.OnlineStore.service.ProductService;
 import kazantseva.project.OnlineStore.util.Util;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +29,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @Service
-@Slf4j
 @AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
 

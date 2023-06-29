@@ -10,7 +10,6 @@ $(document).ready(function () {
         register();
     });
 
-
     function register() {
         url = "/register";
         urlSuccess = "/register?success";

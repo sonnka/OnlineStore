@@ -11,10 +11,6 @@ public interface OrderService {
 
     OrderDTO getFullOrder(String email, long customerId, long orderId);
 
-//    OrderDTO createOrder(String email, long customerId, RequestOrder order);
-//
-//    List<ShortProductDTO> getProductList(String email, long customerId, long orderId);
-
     OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder);
 
     OrderDTO publishOrder(String email, long customerId, long orderId, RequestOrder newOrder);
