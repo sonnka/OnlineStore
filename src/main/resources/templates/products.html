@@ -97,6 +97,13 @@
             <a class="btn btn-primary" id="createProductButton" th:text="#{createProduct}"></a>
             <br><br>
         </div>
+        <div sec:authorize="isAuthenticated()">
+            <input id="keyword" name="keyword" size="50" style="height: 45px;"
+                   th:placeholder="#{search}" type="text">
+            <button class="btn btn-primary" id="searchButton" th:text="#{searchButton}" type="submit"></button>
+            <button class="btn btn-primary" id="resetButton" th:text="#{resetButton}" type="submit"></button>
+        </div>
+        <br><br>
         <table border="1" class="table table-striped table-responsive-md" id="table">
             <thead>
             <tr>

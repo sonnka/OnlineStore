@@ -11,6 +11,8 @@ import java.io.IOException;
 public interface ProductService {
     Page<ShortProductDTO> getProductsByPage(Pageable pageable);
 
+    Page<ShortProductDTO> getProductsByPageAndKeyword(Pageable pageable, String keyword);
+
     ShortProductDTO getProduct(String email, String productId);
 
     ShortProductDTO updateProduct(String email, String productId, CreateProduct product);

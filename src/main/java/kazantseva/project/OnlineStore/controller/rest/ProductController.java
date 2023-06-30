@@ -25,6 +25,11 @@ public class ProductController implements ProductAPI {
         return productService.getProductsByPage(pageable);
     }
 
+    @GetMapping("/products/search")
+    public Page<ShortProductDTO> getProductsByKeyword(Pageable pageable, String keyword) {
+        return productService.getProductsByPageAndKeyword(pageable, keyword);
+    }
+
     @GetMapping("/admin/products/{product-id}")
     public ShortProductDTO getProduct(@PathVariable("product-id") String productId, Authentication auth) {
         return productService.getProduct(auth.getName(), productId);

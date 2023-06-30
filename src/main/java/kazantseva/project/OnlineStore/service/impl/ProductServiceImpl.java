@@ -45,6 +45,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<ShortProductDTO> getProductsByPageAndKeyword(Pageable pageable, String keyword) {
+        if (keyword == null || keyword.equals("") || keyword.equals("-")) {
+            return getProductsByPage(pageable);
+        }
+        return productRepository.searchAllByNameContainsIgnoreCase(pageable, keyword)
+                .map(ShortProductDTO::new);
+    }
+
+    @Override
     public ShortProductDTO getProduct(String email, String productId) {
         checkAdmin(email);
         return new ShortProductDTO(productRepository.findById(productId).orElseThrow(

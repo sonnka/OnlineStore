@@ -5,35 +5,53 @@ $(document).ready(function () {
     var sortId = $('#sortId');
     var sortName = $('#sortName');
     var sortPrice = $('#sortPrice');
+    var keyword = "";
+    var searchButton = $('#searchButton');
+    var resetButton = $('#resetButton');
+    var inputKeyword = $('#keyword');
 
-    fetchProduct(0);
+    fetchProductSearch(0, keyword);
 
     sortId.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
         sort = "id";
-        fetchProduct(0);
+        fetchProductSearch(0, keyword);
     });
 
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
         sort = "name";
-        fetchProduct(0);
+        fetchProductSearch(0, keyword);
     });
     sortPrice.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
         sort = "price";
-        fetchProduct(0);
+        fetchProductSearch(0, keyword);
     });
 
-    function fetchProduct(startPage) {
+    searchButton.click(function () {
+        keyword = inputKeyword.val();
+        fetchProductSearch(0, keyword);
+        inputKeyword.val(keyword);
+    });
+
+    resetButton.click(function () {
+        keyword = "";
+        inputKeyword.val(keyword);
+        fetchProductSearch(0, keyword);
+    });
+
+
+    function fetchProductSearch(startPage, keyword) {
 
         $.ajax({
             type: "GET",
-            url: "/products",
+            url: "/products/search",
             data: {
                 page: startPage,
                 size: 10,
-                sort: sort + "," + dir
+                sort: sort + "," + dir,
+                keyword: keyword
             },
             success: function (response) {
                 $('#table tbody').empty();
@@ -63,7 +81,7 @@ $(document).ready(function () {
 
                 if ($('ul.pagination li').length - 2 !== response.totalPages) {
                     $('ul.pagination').empty();
-                    buildPagination(response);
+                    buildSearchPagination(response);
                 }
             },
             error: function (e) {
@@ -87,7 +105,7 @@ $(document).ready(function () {
 
     }
 
-    function buildPagination(response) {
+    function buildSearchPagination(response) {
         totalPages = response.totalPages;
 
         var pageNumber = response.pageable.pageNumber;
@@ -143,12 +161,12 @@ $(document).ready(function () {
 
         if (val.toUpperCase() === "«") {
             let currentActive = active;
-            fetchProduct(0);
+            fetchProductSearch(0, keyword);
             active.removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "»") {
-            fetchProduct(totalPages - 1);
+            fetchProductSearch(totalPages - 1, keyword);
             active.removeClass("active");
             currentActive.next().addClass("active");
 
@@ -157,7 +175,7 @@ $(document).ready(function () {
             if (activeValue < totalPages) {
                 let currentActive = active;
                 startPage = activeValue;
-                fetchProduct(startPage);
+                fetchProductSearch(startPage, keyword);
                 active.removeClass("active");
                 currentActive.next().addClass("active");
             }
@@ -165,14 +183,14 @@ $(document).ready(function () {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue > 1) {
                 startPage = activeValue - 2;
-                fetchProduct(startPage);
+                fetchProductSearch(startPage, keyword);
                 let currentActive = active;
                 currentActive.removeClass("active");
                 currentActive.prev().addClass("active");
             }
         } else {
             startPage = parseInt(val - 1);
-            fetchProduct(startPage);
+            fetchProductSearch(startPage, keyword);
             active.removeClass("active");
             $(this).parent().addClass("active");
         }

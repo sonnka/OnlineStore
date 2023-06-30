@@ -7,6 +7,10 @@ $(document).ready(function () {
     var sortPrice = $('#sortPrice');
     var table = $('#table tbody');
     var createProductButton = $('#createProductButton');
+    var keyword = "";
+    var searchButton = $('#searchButton');
+    var resetButton = $('#resetButton');
+    var inputKeyword = $('#keyword');
 
     fetchProduct(0);
 
@@ -31,15 +35,28 @@ $(document).ready(function () {
         createProduct();
     });
 
+    searchButton.click(function () {
+        keyword = inputKeyword.val();
+        fetchProduct(0);
+        inputKeyword.val(keyword);
+    });
+
+    resetButton.click(function () {
+        keyword = "";
+        inputKeyword.val(keyword);
+        fetchProduct(0);
+    });
+
     function fetchProduct(startPage) {
 
         $.ajax({
             type: "GET",
-            url: "/products",
+            url: "/products/search",
             data: {
                 page: startPage,
                 size: 10,
-                sort: sort + "," + dir
+                sort: sort + "," + dir,
+                keyword: keyword
             },
             success: function (response) {
                 table.empty();
