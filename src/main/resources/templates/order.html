@@ -94,6 +94,7 @@
                     <br><br>
                     <input id="customerId" th:value="${customerId}" type="hidden">
                     <input id="orderId" th:value="${orderId}" type="hidden">
+                    <input id="payStatus" th:value="${payStatus}" type="hidden">
                     <div class="float-right col-md-2">
                         <a id="editOrderButton"><input
                                 class="profile-edit-btn" id="editbutton" name="btnAddMore" th:value="#{edit}"
@@ -132,12 +133,31 @@
                     <br><br>
                     <div class="row">
                         <div class="col-md-2">
-                            <span><b th:text="#{status}"></b></span>
+                            <label><b th:text="#{status}"></b></label>
                         </div>
                         <div class="col-md-3">
                             <p id="orderStatus">
                         </div>
                     </div>
+                    <br><br>
+                    <form id='checkout-form' method='POST'
+                          th:action="@{/profile/orders/{orderId}/charge(orderId=${orderId})}">
+                        <input name='amount' th:value='${amount}' type='hidden'/>
+                        <script
+                                class='stripe-button'
+                                data-description='Payment'
+                                data-image
+                                        ='https://img.freepik.com/free-vector/online-shopping-banner-mobile-app-templates-concept-flat-design_1150-34862.jpg'
+                                data-locale='auto'
+                                data-name='OnlineStore'
+                                data-zip-code='false'
+                                src='https://checkout.stripe.com/checkout.js'
+                                th:attr='data-key=${stripePublicKey},
+                                 data-amount=${amount},
+                                 data-currency=${currency}'>
+                        </script>
+                    </form>
+
                     <br><br>
                     <table class="table table-condensed table-responsive" id="productsTable">
                         <thead>

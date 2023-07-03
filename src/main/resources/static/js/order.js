@@ -5,7 +5,7 @@ $(document).ready(function () {
     var customerId = $('#customerId').val();
     var orderId = $('#orderId').val();
     var orderStatus = "UNPAID";
-
+    var status = $('#payStatus').val();
 
     loadOrder()
 
@@ -22,6 +22,11 @@ $(document).ready(function () {
 
         $.get(url, function (responseJson) {
             orderStatus = responseJson.status;
+            if (status === "succeeded") {
+                if (responseJson.status !== "PAID") {
+                    updateStatus();
+                }
+            }
             displayData(responseJson);
         }).fail(function () {
             window.location = "/";
@@ -29,6 +34,7 @@ $(document).ready(function () {
     }
 
     function displayData(responseJson) {
+
         $('#orderDate').text(responseJson.date);
         $('#orderDeliveryAddress').text(responseJson.deliveryAddress);
         $('#orderDescription').text(responseJson.description);
@@ -48,9 +54,13 @@ $(document).ready(function () {
         if (orderStatus === "PAID") {
             $('#editbutton').attr("type", "hidden");
             $('#deletebutton').attr("type", "submit");
+            var form = document.getElementById('checkout-form');
+            form.style.display = 'none';
         } else {
             $('#deletebutton').attr("type", "hidden");
             $('#editbutton').attr("type", "submit")
+            var form = document.getElementById('checkout-form');
+            form.style.display = '';
         }
     }
 
@@ -69,5 +79,24 @@ $(document).ready(function () {
                 }
             }
         })
+    }
+
+    function updateStatus() {
+        jsonData = {
+            "status": "PAID"
+        };
+
+        $.ajax({
+            type: "PATCH",
+            url: "/customers/" + customerId + "/orders/" + orderId,
+            data: JSON.stringify(jsonData),
+            contentType: 'application/json',
+            success: function () {
+                loadOrder();
+            }
+        }).fail(function () {
+            window.location = "/";
+        });
+
     }
 });

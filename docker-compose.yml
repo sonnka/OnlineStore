@@ -3,8 +3,8 @@ services:
   mysql-service:
     image: mysql:latest
     container_name: mysql-db
-    environment:
-      - MYSQL_ROOT_PASSWORD=spring
+    env_file:
+      - api.env
     ports:
       - "3306:3306"
     restart: always
@@ -12,8 +12,8 @@ services:
   mongo-service:
     image: mongo:latest
     container_name: mongo-db
-    environment:
-      - MONGO_INITDB_DATABASE=mongo-db
+    env_file:
+      - api.env
     ports:
       - "27017:27017"
     restart: always
@@ -33,8 +33,6 @@ services:
     depends_on:
       - mysql-service
       - mongo-service
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/property?createDatabaseIfNotExist=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: spring
+    env_file:
+      - api.env
     user: "1000:1000"

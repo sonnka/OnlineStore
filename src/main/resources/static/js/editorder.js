@@ -4,7 +4,7 @@ $(document).ready(function () {
     var orderId = $('#orderId').val();
 
     var date = $('#date');
-    var status = $("#statuses");
+    var status = $("#orderStatus");
     var deliveryAddress = $('#deliveryAddress');
     var description = $('#description');
     var price = $('#price');
@@ -21,47 +21,16 @@ $(document).ready(function () {
 
         $.get(url, function (responseJson) {
             type = responseJson.type;
+            checkType();
             displayData(responseJson);
         }).fail(function () {
             window.location = "/profile/orders/" + orderId;
         });
     }
 
-    if (type === "DRAFT") {
-        saveButton.click(function () {
-            listOfProducts = [];
-            updateList();
-            jsonData = {
-                "status": status.val(),
-                "products": listOfProducts,
-                "deliveryAddress": deliveryAddress.val(),
-                "description": description.val()
-            };
-
-            $.ajax({
-                type: "POST",
-                url: "/customers/" + customerId + "/orders/" + orderId,
-                data: JSON.stringify(jsonData),
-                contentType: 'application/json',
-                success: function () {
-                    window.location = "/profile/orders"
-                }
-            }).fail(function () {
-                window.location = "/profile/orders/" + orderId + "/edit?error";
-            });
-        });
-    } else {
-        saveButton.click(function () {
-            listOfProducts = [];
-            updateList();
-            updateOrder();
-            window.location = "/profile/orders"
-        });
-    }
-
     function displayData(responseJson) {
         date.val(responseJson.date);
-        status.val(responseJson.status);
+        status.text(responseJson.status);
         deliveryAddress.val(responseJson.deliveryAddress);
         description.val(responseJson.description);
         price.text(responseJson.price);
@@ -105,7 +74,6 @@ $(document).ready(function () {
 
     function updateOrder() {
         jsonData = {
-            "status": status.val(),
             "products": listOfProducts,
             "deliveryAddress": deliveryAddress.val(),
             "description": description.val()
@@ -151,5 +119,38 @@ $(document).ready(function () {
         updateList();
         listOfProducts = listOfProducts.filter(prod => prod.id !== productId);
         updateOrder();
+    }
+
+    function checkType() {
+        if (type === "DRAFT") {
+            saveButton.click(function () {
+                listOfProducts = [];
+                updateList();
+                jsonData = {
+                    "products": listOfProducts,
+                    "deliveryAddress": deliveryAddress.val(),
+                    "description": description.val()
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: "/customers/" + customerId + "/orders/" + orderId,
+                    data: JSON.stringify(jsonData),
+                    contentType: 'application/json',
+                    success: function () {
+                        window.location = "/profile/orders"
+                    }
+                }).fail(function () {
+                    window.location = "/profile/orders/" + orderId + "/edit?error";
+                });
+            });
+        } else {
+            saveButton.click(function () {
+                listOfProducts = [];
+                updateList();
+                updateOrder();
+                window.location = "/profile/orders"
+            });
+        }
     }
 });

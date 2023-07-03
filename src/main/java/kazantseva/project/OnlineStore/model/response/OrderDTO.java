@@ -19,6 +19,8 @@ public class OrderDTO {
 
     String status;
 
+    String type;
+
     List<ProductDTO> products;
 
     String deliveryAddress;

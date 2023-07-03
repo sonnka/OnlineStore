@@ -53,6 +53,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order getOrder(String email, long customerId, long orderId) {
+        checkCustomer(customerId, email);
+
+        return checkOrder(orderId, customerId);
+    }
+
+    @Override
     public OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
         checkCustomer(customerId, email);
 
@@ -235,6 +242,7 @@ public class OrderServiceImpl implements OrderService {
         return new OrderDTO(order.getId(),
                 formatDateTime,
                 String.valueOf(order.getStatus()),
+                String.valueOf(order.getType()),
                 toProductList(order.getProducts()),
                 order.getDeliveryAddress(),
                 order.getDescription(),

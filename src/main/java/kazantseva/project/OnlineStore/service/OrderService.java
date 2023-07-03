@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.service;
 
+import kazantseva.project.OnlineStore.model.entity.Order;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
@@ -10,6 +11,8 @@ public interface OrderService {
     Page<ShortOrderDTO> getOrders(String email, long customerId, Pageable pageable);
 
     OrderDTO getFullOrder(String email, long customerId, long orderId);
+
+    Order getOrder(String email, long customerId, long orderId);
 
     OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder);
 

@@ -92,7 +92,7 @@
                     <input id="orderId" th:value="${orderId}" type="hidden">
                     <div class="row">
                         <div class="col-md-2">
-                            <label th:text="#{date}"><b></b></label>
+                            <label><b th:text="#{date}"></b></label>
                         </div>
                         <div class="col-md-3">
                             <input id="date" readonly type="text"/>
@@ -101,7 +101,7 @@
                     <br><br>
                     <div class="row">
                         <div class="col-md-2">
-                            <label th:text="#{delivery}"><b></b></label>
+                            <label><b th:text="#{delivery}"></b></label>
                         </div>
                         <div class="col-md-3">
                             <input
@@ -116,7 +116,7 @@
                     <br><br>
                     <div class="row">
                         <div class="col-md-2">
-                            <label th:text="#{description}"><b></b></label>
+                            <label><b th:text="#{description}"></b></label>
                         </div>
                         <div class="col-md-3">
                             <input
@@ -131,13 +131,10 @@
                     <br><br>
                     <div class="row">
                         <div class="col-md-2">
-                            <span th:text="#{status}"><b></b></span>
+                            <label><b th:text="#{status}"></b></label>
                         </div>
                         <div class="col-md-3">
-                            <select class="form-select" id="statuses">
-                                <option th:text="#{PAID}" value="PAID"></option>
-                                <option th:text="#{UNPAID}" value="UNPAID"></option>
-                            </select>
+                            <p id="orderStatus">
                         </div>
                     </div>
                     <br><br>
