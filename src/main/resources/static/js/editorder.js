@@ -35,28 +35,32 @@ $(document).ready(function () {
         description.val(responseJson.description);
         price.text(responseJson.price);
 
+        count = 0;
+
         table.empty();
         $.each(responseJson.products, (i, product) => {
             var productName = product.name;
-            ++count;
+            count++;
             let productRow = '<tr>' +
                 '<td style="display:none;"  data-th="Id"><div class="col-md-9 text-left mt-sm-2">' + product.id + '</div></td>' +
                 '<td data-th="Product"><div class="col-md-9 mt-sm-2">' + productName + '</div></td>' +
                 '<td class="valueAlign" data-th="Price">' + product.price + '</td>' +
                 '<td data-th="Quantity"><input class="form-control form-control-lg text-center input_count" min="1"'
                 + ' style="height: 25px" value="' + product.count + '" type="number"/></td>' +
-                '<td class="actions" data-th=""> <div class="text-right valueAlign">' +
+                '<td class="actions" data-th="" id="deleteColumn"> <div class="text-right valueAlign">' +
                 '<a type="button" title="delete" class="deleteProduct">' +
                 '<i class="material-icons">&#xE872;</i></a></div></td> ' +
                 '</tr>';
             table.append(productRow);
         });
-
-        if (count <= 0) {
-            saveButton.attr("style", "display:none");
-            loadOrder();
+        if (count <= 1) {
+            // saveButton.attr("style", "display:none");
+            var button = document.getElementById('deleteColumn');
+            button.style.display = 'none';
         } else {
-            saveButton.attr("style", "");
+            // saveButton.attr("style", "");
+            var button = document.getElementById('deleteColumn');
+            button.style.display = '';
         }
 
         table.on('change', '.input_count', function (e) {
@@ -138,7 +142,7 @@ $(document).ready(function () {
                     data: JSON.stringify(jsonData),
                     contentType: 'application/json',
                     success: function () {
-                        window.location = "/profile/orders"
+                        window.location = "/profile/orders/" + orderId;
                     }
                 }).fail(function () {
                     window.location = "/profile/orders/" + orderId + "/edit?error";
@@ -149,7 +153,7 @@ $(document).ready(function () {
                 listOfProducts = [];
                 updateList();
                 updateOrder();
-                window.location = "/profile/orders"
+                window.location = "/profile/orders/" + orderId;
             });
         }
     }

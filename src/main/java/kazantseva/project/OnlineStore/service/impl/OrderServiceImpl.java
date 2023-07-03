@@ -72,6 +72,12 @@ public class OrderServiceImpl implements OrderService {
 
         var updatedOrder = updateOrder(order, newOrder);
 
+        if (updatedOrder.getPrice().compareTo(BigDecimal.valueOf(1.0)) < 0 &&
+                Type.PUBLISHED.equals(updatedOrder.getType())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please note that the minimum " +
+                    "order amount is $1.");
+        }
+
         return toOrderDTO(orderRepository.save(updatedOrder));
     }
 
@@ -83,6 +89,11 @@ public class OrderServiceImpl implements OrderService {
 
         if (newOrder.getProducts().size() > 0) {
             var updatedOrder = updateOrder(order, newOrder);
+
+            if (updatedOrder.getPrice().compareTo(BigDecimal.valueOf(1.0)) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please note that the minimum " +
+                        "order amount is $1.");
+            }
 
             updatedOrder.setType(Type.PUBLISHED);
             updatedOrder.setDate(LocalDateTime.now(ZoneOffset.UTC));
@@ -235,7 +246,7 @@ public class OrderServiceImpl implements OrderService {
             formatDateTime = order.getDate().format(formatter);
         }
         if (order.getPrice() != null) {
-            DecimalFormat df = new DecimalFormat("#,###.00");
+            DecimalFormat df = new DecimalFormat("#,##0.00");
             price = df.format(order.getPrice());
         }
 
@@ -251,7 +262,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public List<ProductDTO> toProductList(List<OrderProduct> list) {
-        DecimalFormat df = new DecimalFormat("#,###.00");
+        DecimalFormat df = new DecimalFormat("#,##0.00");
         List<ProductDTO> products = new ArrayList<>();
         for (OrderProduct orderProduct : list) {
             var product = productRepository.findById(orderProduct.getProductId());

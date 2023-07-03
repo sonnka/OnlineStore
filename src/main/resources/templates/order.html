@@ -86,6 +86,9 @@
     <div th:if="${param.error_unpaid}">
         <div class="alert alert-danger" id="error2" th:text="#{unpaidError}"></div>
     </div>
+    <div th:if="${param.error_payment}">
+        <div class="alert alert-danger" id="errorMessage" th:text="#{errorMessage}"></div>
+    </div>
     <section class="pt-5 pb-5">
         <div class="container">
             <div class="row w-100">

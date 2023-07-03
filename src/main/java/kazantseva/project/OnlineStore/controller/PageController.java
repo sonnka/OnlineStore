@@ -102,7 +102,8 @@ public class PageController {
     }
 
     @PostMapping("/profile/orders/{order-id}/charge")
-    public String charge(@PathVariable(value = "order-id") String orderId, Principal principal, ChargeRequest chargeRequest, Model model)
+    public String charge(@PathVariable(value = "order-id") String orderId, Principal principal,
+                         ChargeRequest chargeRequest, Model model)
             throws StripeException {
 
         chargeRequest.setDescription("Example charge");
@@ -118,6 +119,7 @@ public class PageController {
         model.addAttribute("amount", order.getPrice().multiply(BigDecimal.valueOf(100.0)).intValue());
         model.addAttribute("stripePublicKey", stripePublicKey);
         model.addAttribute("currency", ChargeRequest.Currency.USD);
+
         return "order";
     }
 
