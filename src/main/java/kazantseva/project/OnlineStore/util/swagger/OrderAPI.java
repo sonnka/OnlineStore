@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.OrderException;
 import kazantseva.project.OnlineStore.model.request.RequestOrder;
 import kazantseva.project.OnlineStore.model.response.OrderDTO;
 import kazantseva.project.OnlineStore.model.response.ShortOrderDTO;
@@ -35,7 +37,7 @@ public interface OrderAPI {
             Authentication auth,
             @Parameter(description = "ID of customer", required = true)
             @PathVariable("customer-id") long customerId,
-            @ParameterObject Pageable pageable);
+            @ParameterObject Pageable pageable) throws CustomerException;
 
     @Operation(summary = "Get order", description = "Returns the customer`s order.")
     @ApiResponses(value = {
@@ -53,7 +55,7 @@ public interface OrderAPI {
             @Parameter(description = "ID of customer", required = true)
             @PathVariable("customer-id") long customerId,
             @Parameter(description = "ID of order", required = true)
-            @PathVariable("order-id") long orderId);
+            @PathVariable("order-id") long orderId) throws CustomerException, OrderException;
 
     @Operation(summary = "Update order", description = "Returns the updated order.")
     @ApiResponses(value = {
@@ -73,7 +75,7 @@ public interface OrderAPI {
             @Parameter(description = "ID of order", required = true)
             @PathVariable("order-id") long orderId,
             @Parameter(description = "Changed order", required = true)
-            @RequestBody RequestOrder order);
+            @RequestBody RequestOrder order) throws CustomerException, OrderException;
 
     @Operation(summary = "Delete order", description = "Deletes order by id.")
     @ApiResponses(value = {
@@ -90,5 +92,5 @@ public interface OrderAPI {
             @Parameter(description = "ID of customer", required = true)
             @PathVariable("customer-id") long customerId,
             @Parameter(description = "ID of order", required = true)
-            @PathVariable("order-id") long orderId);
+            @PathVariable("order-id") long orderId) throws CustomerException, OrderException;
 }

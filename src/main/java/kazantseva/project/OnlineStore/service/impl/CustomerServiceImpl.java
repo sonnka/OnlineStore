@@ -1,6 +1,10 @@
 package kazantseva.project.OnlineStore.service.impl;
 
 import jakarta.mail.MessagingException;
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
+import kazantseva.project.OnlineStore.exceptions.SecurityException;
+import kazantseva.project.OnlineStore.exceptions.SecurityException.SecurityExceptionProfile;
 import kazantseva.project.OnlineStore.model.entity.*;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
@@ -17,7 +21,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +28,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,7 +45,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     public static String UPLOAD_DIRECTORY = "tmp/images/customers";
 
-    final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private CustomerRepository customerRepository;
     private OrderRepository orderRepository;
     private VerificationTokenRepository tokenRepository;
@@ -51,9 +53,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public void register(CreateCustomer newCustomer) {
+    public void register(CreateCustomer newCustomer) throws SecurityException {
         if (customerRepository.existsByEmailIgnoreCase(newCustomer.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, newCustomer.getEmail() + " is already occupied!");
+            throw new SecurityException(SecurityExceptionProfile.EMAIL_IS_OCCUPIED);
         }
 
         Customer customer = Customer.builder()
@@ -78,22 +80,28 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public LoginResponse login(Authentication auth) {
+    public LoginResponse login(Authentication auth) throws SecurityException {
         var customer = customerRepository.findByEmailIgnoreCase(auth.getName()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong authentication data!"));
+                () -> new SecurityException(SecurityExceptionProfile.WRONG_AUTHENTICATION_DATA));
 
-        return LoginResponse.builder().id(customer.getId()).email(customer.getEmail()).build();
+        return LoginResponse.builder()
+                .id(customer.getId())
+                .email(customer.getEmail())
+                .build();
     }
 
     @Override
     @Transactional
-    public LoginResponse login(String token) {
+    public LoginResponse login(String token) throws SecurityException, CustomerException {
         var customer = customerRepository.findByVerificationToken(token).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid verification token!"));
+                new SecurityException(SecurityExceptionProfile.INVALID_VERIFICATION_TOKEN));
 
         verifyAccount(customer.getEmail(), token);
 
-        return LoginResponse.builder().id(customer.getId()).email(customer.getEmail()).build();
+        return LoginResponse.builder()
+                .id(customer.getId())
+                .email(customer.getEmail())
+                .build();
     }
 
     @Override
@@ -105,21 +113,30 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public FullCustomerDTO getCustomer(String email, Long customerId) {
+    public FullCustomerDTO getCustomer(String email, Long customerId) throws CustomerException {
         var customer = findByIdAndCheckByEmail(customerId, email);
+
         return toFullCustomerDTO(customer);
     }
 
     @Override
-    public Long getBasketId(String email) {
+    public Long getCustomerId(String email) throws CustomerException {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with email " + email + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        return customer.getId();
+    }
+
+    @Override
+    public Long getBasketId(String email) throws CustomerException {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
         return customer.getBasket();
     }
 
     @Override
-    public Page<CustomerDTO> getCustomers(String email, Pageable pageable) {
+    public Page<CustomerDTO> getCustomers(String email, Pageable pageable) throws CustomerException {
         checkAdminByEmail(email);
 
         return customerRepository.findByRole(CustomerRole.BUYER, pageable)
@@ -127,7 +144,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Page<AdminDTO> getAdmins(String email, Pageable pageable) {
+    public Page<AdminDTO> getAdmins(String email, Pageable pageable) throws CustomerException {
         checkAdminByEmail(email);
 
         return customerRepository.findByRole(CustomerRole.ADMIN, pageable)
@@ -136,59 +153,35 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public void toAdmin(String email, Long customerId) {
+    public void toAdmin(String email, Long customerId) throws CustomerException, SecurityException {
         checkAdminByEmail(email);
 
         var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         if (CustomerRole.ADMIN.equals(customer.getRole())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "This customer is already admin!");
+            throw new CustomerException(CustomerExceptionProfile.CUSTOMER_ALREADY_ADMIN);
         }
 
         try {
             emailService.sendAdminMail(customer.getEmail());
+
             orderRepository.deleteByCustomer(customer);
+
             customer.setRole(CustomerRole.ADMIN);
             customer.setGrantedAdminBy(email);
             customer.setDate(LocalDateTime.now(ZoneOffset.UTC));
             customer.setBasket(null);
+
             customerRepository.save(customer);
         } catch (MessagingException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                    "Failed to send email, please try again!");
+            throw new SecurityException(SecurityExceptionProfile.FAIL_SEND_EMAIL);
         }
     }
 
     @Override
-    @Transactional
-    public void resendEmail(String email, Long customerId) {
-        checkAdminByEmail(email);
-
-        var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
-
-        if (customer.isEnabled()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "This customer's email address has already been successfully confirmed");
-        }
-
-        generateTokenAndSendMail(customer);
-    }
-
-    @Override
-    public Long getCustomerId(String email) {
-        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with email " + email + " not found!"));
-        return customer.getId();
-    }
-
-    @Override
-    public CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer) {
+    public CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer)
+            throws CustomerException {
         var oldCustomer = findByIdAndCheckByEmail(customerId, email);
 
         Optional.of(customer.getName()).ifPresent(oldCustomer::setName);
@@ -201,7 +194,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void uploadAvatar(String email, Long customerId, MultipartFile file) {
+    public void uploadAvatar(String email, Long customerId, MultipartFile file) throws CustomerException {
         var customer = findByIdAndCheckByEmail(customerId, email);
 
         if (file != null && file.getOriginalFilename() != null) {
@@ -214,6 +207,7 @@ public class CustomerServiceImpl implements CustomerService {
 
             customer.setAvatar("");
             customer.setAvatar(generatedFileName);
+
             customerRepository.save(customer);
 
             try {
@@ -221,21 +215,19 @@ public class CustomerServiceImpl implements CustomerService {
 
                 Files.copy(file.getInputStream(), fileNameAndPath, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new CustomerException(CustomerExceptionProfile.FAIL_UPLOAD_AVATAR);
             }
         }
     }
 
     @Override
     @Transactional
-    public void deleteCustomer(String email, long customerId) {
+    public void deleteCustomer(String email, long customerId) throws CustomerException, SecurityException {
         var currentCustomer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with email " + email + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         if (!customer.getEmail().equals(email)) {
             if (CustomerRole.ADMIN.equals(currentCustomer.getRole())) {
@@ -244,15 +236,31 @@ public class CustomerServiceImpl implements CustomerService {
                     return;
                 }
             }
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new CustomerException(CustomerExceptionProfile.CANNOT_DELETE_ADMIN);
         }
 
         deleteYourself(customer);
     }
 
+    @Override
     @Transactional
-    public void generateTokenAndSendMail(Customer customer) {
-        VerificationToken firstToken = tokenRepository.findFirstByCustomerOrderByIdDesc(customer).orElse(null);
+    public void resendEmail(String email, Long customerId) throws CustomerException, SecurityException {
+        checkAdminByEmail(email);
+
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        if (customer.isEnabled()) {
+            throw new SecurityException(SecurityExceptionProfile.EMAIL_ALREADY_CONFIRMED);
+        }
+
+        generateTokenAndSendMail(customer);
+    }
+
+    @Transactional
+    public void generateTokenAndSendMail(Customer customer) throws SecurityException {
+        VerificationToken firstToken = tokenRepository.findFirstByCustomerOrderByIdDesc(customer)
+                .orElse(null);
 
         String locale = LocaleContextHolder.getLocale().toString();
 
@@ -269,8 +277,7 @@ public class CustomerServiceImpl implements CustomerService {
         try {
             emailService.sendConfirmationMail(verificationToken, customer.getEmail());
         } catch (MessagingException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                    "Failed to send confirmation email, please try again in 24 hours!");
+            throw new SecurityException(SecurityExceptionProfile.FAIL_SEND_EMAIL);
         }
     }
 
@@ -280,64 +287,61 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.deleteById(customer.getId());
     }
 
-    private void deleteByAdmin(Customer customer) {
+    private void deleteByAdmin(Customer customer) throws SecurityException {
         try {
             emailService.sendDeletionMail(customer.getEmail());
-            tokenRepository.deleteByCustomer(customer);
-            orderRepository.deleteByCustomer(customer);
-            customerRepository.deleteById(customer.getId());
+
+            deleteYourself(customer);
         } catch (MessagingException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                    "Failed to send email, please try again!");
+            throw new SecurityException(SecurityExceptionProfile.FAIL_SEND_EMAIL);
         }
     }
 
-    private void verifyAccount(String email, String verificationToken) {
+    private void verifyAccount(String email, String verificationToken)
+            throws SecurityException, CustomerException {
         VerificationToken token = tokenRepository.findByToken(verificationToken)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No such verification token!"));
+                .orElseThrow(() -> new SecurityException(SecurityExceptionProfile.VERIFICATION_TOKEN_NOT_FOUND));
 
         if (token != null) {
 
             if (!email.equals(token.getCustomer().getEmail())) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Failed email verification!");
+                throw new SecurityException(SecurityExceptionProfile.BAD_EMAIL);
             }
 
             Customer customer = customerRepository.findByEmailIgnoreCase(email)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Customer with email " + email + " not found!"));
+                    .orElseThrow(() -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
             if (token.getExpiryDate().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
                 tokenRepository.delete(token);
                 customerRepository.delete(customer);
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                        "You token is expired! Please, register again!");
+                throw new SecurityException(SecurityExceptionProfile.EXPIRED_VERIFICATION_TOKEN);
             }
 
             tokenRepository.deleteByCustomerId(customer.getId());
+
             customer.setEnabled(true);
+
             customerRepository.save(customer);
-        } else throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid verification token!");
+        } else throw new SecurityException(SecurityExceptionProfile.INVALID_VERIFICATION_TOKEN);
     }
 
-    private Customer findByIdAndCheckByEmail(Long customerId, String email) {
+    private Customer findByIdAndCheckByEmail(Long customerId, String email) throws CustomerException {
         var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         if (!customer.getEmail().equals(email)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new CustomerException(CustomerExceptionProfile.EMAIL_MISMATCH);
         }
 
         return customer;
     }
 
-    private void checkAdminByEmail(String email) {
+    private void checkAdminByEmail(String email) throws CustomerException {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with email " + email + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
         if (!CustomerRole.ADMIN.equals(customer.getRole())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new CustomerException(CustomerExceptionProfile.NOT_ADMIN);
         }
     }
 
@@ -370,10 +374,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     private FullCustomerDTO toFullCustomerDTO(Customer customer) {
         var drafts = orderRepository.findAllByCustomerIdAndType(customer.getId(), Type.DRAFT);
+
         int amount = 0;
+
         if (drafts.size() > 0) {
             amount = drafts.get(0).getProducts().size();
         }
+
         return FullCustomerDTO.builder()
                 .id(customer.getId())
                 .name(customer.getName())

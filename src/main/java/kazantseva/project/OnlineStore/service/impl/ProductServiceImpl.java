@@ -2,6 +2,10 @@ package kazantseva.project.OnlineStore.service.impl;
 
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
+import kazantseva.project.OnlineStore.exceptions.ProductException;
+import kazantseva.project.OnlineStore.exceptions.ProductException.ProductExceptionProfile;
 import kazantseva.project.OnlineStore.model.entity.CustomerRole;
 import kazantseva.project.OnlineStore.model.mongo.entity.Product;
 import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
@@ -14,10 +18,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,25 +51,26 @@ public class ProductServiceImpl implements ProductService {
         if (keyword == null || keyword.equals("") || keyword.equals("-")) {
             return getProductsByPage(pageable);
         }
+
         return productRepository.searchAllByNameContainsIgnoreCase(pageable, keyword)
                 .map(ShortProductDTO::new);
     }
 
     @Override
-    public ShortProductDTO getProduct(String email, String productId) {
+    public ShortProductDTO getProduct(String email, String productId) throws ProductException, CustomerException {
         checkAdmin(email);
+
         return new ShortProductDTO(productRepository.findById(productId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Product with id " + productId + " not found!")));
+                () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND)));
     }
 
     @Override
-    public ShortProductDTO updateProduct(String email, String productId, CreateProduct newProduct) {
+    public ShortProductDTO updateProduct(String email, String productId, CreateProduct newProduct)
+            throws ProductException, CustomerException {
         checkAdmin(email);
 
         var product = productRepository.findById(productId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Product with id " + productId + " not found!"));
+                () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND));
 
         Optional.ofNullable(newProduct.getName()).ifPresent(product::setName);
         Optional.ofNullable(newProduct.getImage()).ifPresent(product::setImage);
@@ -79,12 +82,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void uploadImage(String email, String productId, MultipartFile file) {
+    public void uploadImage(String email, String productId, MultipartFile file)
+            throws ProductException, CustomerException {
         checkAdmin(email);
 
         var product = productRepository.findById(productId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Product with id " + productId + " not found!"));
+                () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND));
+
         if (file != null && file.getOriginalFilename() != null) {
 
             String fileExtension = file.getOriginalFilename().split("\\.")[1];
@@ -102,32 +106,24 @@ public class ProductServiceImpl implements ProductService {
 
                 Files.copy(file.getInputStream(), fileNameAndPath, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ProductException(ProductExceptionProfile.FAIL_UPLOAD_IMAGE);
             }
         }
     }
 
     @Override
-    public void deleteProduct(String email, String productId) {
+    public void deleteProduct(String email, String productId) throws ProductException, CustomerException {
         checkAdmin(email);
 
         var product = productRepository.findById(productId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Product with id " + productId + " not found!"));
+                () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND));
 
         productRepository.delete(product);
     }
 
     @Override
-    public ShortProductDTO createProduct(String email, CreateProduct product) {
+    public ShortProductDTO createProduct(String email, CreateProduct product) throws CustomerException {
         checkAdmin(email);
-
-        List<Product> sameProducts = productRepository.findAll().stream()
-                .filter(p -> p.getName().equals(product.getName())).toList();
-
-        if (sameProducts.size() > 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product with such name already exists");
-        }
 
         return new ShortProductDTO(
                 productRepository.save(Product.builder()
@@ -171,12 +167,12 @@ public class ProductServiceImpl implements ProductService {
         productRepository.saveAll(products);
     }
 
-    private void checkAdmin(String email) {
+    private void checkAdmin(String email) throws CustomerException {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with email " + email + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
         if (!CustomerRole.ADMIN.equals(customer.getRole())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new CustomerException(CustomerExceptionProfile.NOT_ADMIN);
         }
     }
 }

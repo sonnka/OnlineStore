@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.AdminDTO;
@@ -34,7 +36,7 @@ public interface CustomerAPI {
     @PostMapping("/login")
     LoginResponse login(
             @Parameter(description = "Authentication", required = true)
-            Authentication auth);
+            Authentication auth) throws CustomerException, SecurityException;
 
     @Operation(summary = "Register", description = "Registration")
     @ApiResponses(value = {
@@ -44,7 +46,7 @@ public interface CustomerAPI {
     @ResponseStatus(HttpStatus.CREATED)
     void register(
             @Parameter(description = "New customer", required = true)
-            @RequestBody @Valid CreateCustomer customer);
+            @RequestBody @Valid CreateCustomer customer) throws CustomerException, SecurityException;
 
     @Operation(summary = "Get customer", description = "Returns customer.")
     @ApiResponses(value = {
@@ -60,7 +62,7 @@ public interface CustomerAPI {
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
             @Parameter(description = "ID of customer", required = true)
-            @PathVariable("customer-id") long customerId);
+            @PathVariable("customer-id") long customerId) throws CustomerException;
 
     @Operation(summary = "Update customer", description = "Returns updated customer.")
     @ApiResponses(value = {
@@ -78,7 +80,7 @@ public interface CustomerAPI {
             @Parameter(description = "ID of customer", required = true)
             @PathVariable("customer-id") long customerId,
             @Parameter(description = "Changed customer", required = true)
-            @RequestBody @Valid RequestCustomer customer);
+            @RequestBody @Valid RequestCustomer customer) throws CustomerException;
 
     @Operation(summary = "Update avatar", description = "Updates avatar of customer.")
     @ApiResponses(value = {
@@ -95,7 +97,7 @@ public interface CustomerAPI {
             @Parameter(description = "ID of customer", required = true)
             @PathVariable("customer-id") long customerId,
             @Parameter(description = "Avatar of customer (Multipart file)", required = true)
-            @RequestParam("file") MultipartFile file);
+            @RequestParam("file") MultipartFile file) throws CustomerException;
 
     @Operation(summary = "Delete customer", description = "Deletes customer.")
     @ApiResponses(value = {
@@ -110,7 +112,7 @@ public interface CustomerAPI {
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
             @Parameter(description = "ID of customer", required = true)
-            @PathVariable("customer-id") long customerId);
+            @PathVariable("customer-id") long customerId) throws CustomerException, SecurityException;
 
     @Operation(summary = "Get customers", description = "Returns list of customers.")
     @ApiResponses(value = {
@@ -123,7 +125,7 @@ public interface CustomerAPI {
     Page<CustomerDTO> getCustomers(
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
-            @ParameterObject Pageable pageable);
+            @ParameterObject Pageable pageable) throws CustomerException;
 
     @Operation(summary = "Get admins", description = "Returns list of admins.")
     @ApiResponses(value = {
@@ -136,7 +138,7 @@ public interface CustomerAPI {
     Page<AdminDTO> getAdmins(
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
-            @ParameterObject Pageable pageable);
+            @ParameterObject Pageable pageable) throws CustomerException;
 
     @Operation(summary = "To admin", description = "Turns customer into admin.")
     @ApiResponses(value = {
@@ -151,7 +153,7 @@ public interface CustomerAPI {
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
             @Parameter(description = "ID of customer", required = true)
-            @PathVariable("customer-id") long customerId);
+            @PathVariable("customer-id") long customerId) throws CustomerException, SecurityException;
 
     @Operation(summary = "Resend email", description = "Resends confirmation email.")
     @ApiResponses(value = {
@@ -166,5 +168,5 @@ public interface CustomerAPI {
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
             @Parameter(description = "ID of customer", required = true)
-            @PathVariable("customer-id") long customerId);
+            @PathVariable("customer-id") long customerId) throws CustomerException, SecurityException;
 }

@@ -2,6 +2,9 @@ package kazantseva.project.OnlineStore.controller;
 
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.OrderException;
+import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.entity.ChargeRequest;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.OrderService;
@@ -27,7 +30,8 @@ public class PageController {
     @Value("${STRIPE_PUBLIC_KEY}")
     private String stripePublicKey;
 
-    public PageController(CustomerService customerService, OrderService orderService, StripeService paymentsService) {
+    public PageController(CustomerService customerService, OrderService orderService,
+                          StripeService paymentsService) {
         this.customerService = customerService;
         this.orderService = orderService;
         this.paymentsService = paymentsService;
@@ -54,38 +58,47 @@ public class PageController {
     }
 
     @GetMapping("/profile")
-    public String profile(Principal principal, Model model) {
+    public String profile(Principal principal, Model model) throws CustomerException {
         long customerId = customerService.getCustomerId(principal.getName());
+
         model.addAttribute("customerId", customerId);
+
         return "profile";
     }
 
     @GetMapping("/profile/edit")
-    public String profileEdit(Principal principal, Model model) {
+    public String profileEdit(Principal principal, Model model) throws CustomerException {
         long customerId = customerService.getCustomerId(principal.getName());
+
         model.addAttribute("customerId", customerId);
+
         return "editprofile";
     }
 
     @GetMapping("/profile/basket")
-    public String basket(Principal principal, Model model) {
+    public String basket(Principal principal, Model model) throws CustomerException {
         long customerId = customerService.getCustomerId(principal.getName());
         long basketId = customerService.getBasketId(principal.getName());
+
         model.addAttribute("orderId", -2L);
         model.addAttribute("basketId", basketId);
         model.addAttribute("customerId", customerId);
+
         return "basket";
     }
 
     @GetMapping("/profile/orders")
-    public String orders(Principal principal, Model model) {
+    public String orders(Principal principal, Model model) throws CustomerException {
         long customerId = customerService.getCustomerId(principal.getName());
+
         model.addAttribute("customerId", customerId);
+
         return "orders";
     }
 
     @GetMapping("/profile/orders/{order-id}")
-    public String order(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+    public String order(@PathVariable(value = "order-id") String orderId, Principal principal, Model model)
+            throws CustomerException, OrderException {
         long customerId = customerService.getCustomerId(principal.getName());
         var order = orderService.getOrder(principal.getName(), customerId, Long.parseLong(orderId));
 
@@ -104,11 +117,12 @@ public class PageController {
     @PostMapping("/profile/orders/{order-id}/charge")
     public String charge(@PathVariable(value = "order-id") String orderId, Principal principal,
                          ChargeRequest chargeRequest, Model model)
-            throws StripeException {
+            throws StripeException, CustomerException, OrderException {
 
         chargeRequest.setDescription("Example charge");
         chargeRequest.setCurrency(ChargeRequest.Currency.EUR);
         Charge charge = paymentsService.charge(chargeRequest);
+
         model.addAttribute("payStatus", charge.getStatus());
 
         long customerId = customerService.getCustomerId(principal.getName());
@@ -124,16 +138,19 @@ public class PageController {
     }
 
     @GetMapping("/profile/orders/{order-id}/edit")
-    public String editOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) {
+    public String editOrder(@PathVariable(value = "order-id") String orderId, Principal principal, Model model) throws CustomerException {
         long customerId = customerService.getCustomerId(principal.getName());
+
         model.addAttribute("orderId", Long.valueOf(orderId));
         model.addAttribute("customerId", customerId);
+
         return "editorder";
     }
 
     @GetMapping("/confirm-email")
-    public String confirm(@RequestParam String token) {
+    public String confirm(@RequestParam String token) throws CustomerException, SecurityException {
         customerService.login(token);
+
         return "login";
     }
 
@@ -150,12 +167,14 @@ public class PageController {
     @GetMapping("/admin/products/{product-id}/edit")
     public String editProduct(@PathVariable(value = "product-id") String productId, Model model) {
         model.addAttribute("productId", productId);
+
         return "editproduct";
     }
 
     @GetMapping("/admin/products/create")
     public String addProduct(Model model) {
         model.addAttribute("productId", "-1");
+
         return "editproduct";
     }
 }

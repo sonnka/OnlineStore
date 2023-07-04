@@ -1,5 +1,11 @@
 package kazantseva.project.OnlineStore.service.impl;
 
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
+import kazantseva.project.OnlineStore.exceptions.OrderException;
+import kazantseva.project.OnlineStore.exceptions.OrderException.OrderExceptionProfile;
+import kazantseva.project.OnlineStore.exceptions.ProductException;
+import kazantseva.project.OnlineStore.exceptions.ProductException.ProductExceptionProfile;
 import kazantseva.project.OnlineStore.model.entity.*;
 import kazantseva.project.OnlineStore.model.mongo.entity.Product;
 import kazantseva.project.OnlineStore.model.mongo.request.RequestProduct;
@@ -14,9 +20,7 @@ import kazantseva.project.OnlineStore.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -36,7 +40,7 @@ public class OrderServiceImpl implements OrderService {
     private ProductRepository productRepository;
 
     @Override
-    public Page<ShortOrderDTO> getOrders(String email, long customerId, Pageable pageable) {
+    public Page<ShortOrderDTO> getOrders(String email, long customerId, Pageable pageable) throws CustomerException {
         checkCustomer(customerId, email);
 
         return orderRepository.findByCustomerIdAndType(customerId, Type.PUBLISHED, pageable)
@@ -44,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO getFullOrder(String email, long customerId, long orderId) {
+    public OrderDTO getFullOrder(String email, long customerId, long orderId) throws CustomerException, OrderException {
         checkCustomer(customerId, email);
 
         var order = checkOrder(orderId, customerId);
@@ -53,89 +57,46 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order getOrder(String email, long customerId, long orderId) {
+    public Order getOrder(String email, long customerId, long orderId) throws CustomerException, OrderException {
         checkCustomer(customerId, email);
 
         return checkOrder(orderId, customerId);
     }
 
     @Override
-    public OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
+    public OrderDTO updateOrder(String email, long customerId, long orderId, RequestOrder newOrder)
+            throws OrderException, CustomerException {
         checkCustomer(customerId, email);
 
         var order = checkOrder(orderId, customerId);
 
         if (Status.PAID == order.getStatus()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You can not change the paid order.");
+            throw new OrderException(OrderExceptionProfile.CANNOT_CHANGE_PAID);
         }
 
         var updatedOrder = updateOrder(order, newOrder);
 
         if (updatedOrder.getPrice().compareTo(BigDecimal.valueOf(1.0)) < 0 &&
                 Type.PUBLISHED.equals(updatedOrder.getType())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please note that the minimum " +
-                    "order amount is $1.");
+            throw new OrderException(OrderExceptionProfile.MINIMUM_ORDER_PRICE);
         }
 
         return toOrderDTO(orderRepository.save(updatedOrder));
     }
 
     @Override
-    public OrderDTO publishOrder(String email, long customerId, long orderId, RequestOrder newOrder) {
-        var customer = checkCustomer(customerId, email);
-
-        var order = checkOrder(orderId, customerId);
-
-        if (newOrder.getProducts().size() > 0) {
-            var updatedOrder = updateOrder(order, newOrder);
-
-            if (updatedOrder.getPrice().compareTo(BigDecimal.valueOf(1.0)) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please note that the minimum " +
-                        "order amount is $1.");
-            }
-
-            updatedOrder.setType(Type.PUBLISHED);
-            updatedOrder.setDate(LocalDateTime.now(ZoneOffset.UTC));
-
-            customer.setBasket(orderRepository.save(Order.builder()
-                            .customer(customer)
-                            .type(Type.DRAFT)
-                            .status(Status.UNPAID)
-                            .build())
-                    .getId());
-
-            return toOrderDTO(orderRepository.save(updatedOrder));
-        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can not create order without products!");
-    }
-
-    @Override
-    public void deleteOrder(String email, long customerId, long orderId) {
-        checkCustomer(customerId, email);
-
-        var order = checkOrder(orderId, customerId);
-        if (Status.UNPAID == order.getStatus()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You can not delete the unpaid order!");
-        }
-        orderRepository.delete(order);
-    }
-
-    @Override
-    public void updateBasket(String email, String productId) {
+    public void updateBasket(String email, String productId)
+            throws CustomerException, OrderException, ProductException {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with email " + email + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         var order = orderRepository.findById(customer.getBasket()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Order with id " + customer.getBasket() + " not found!"));
+                () -> new OrderException(OrderExceptionProfile.ORDER_NOT_FOUND));
 
         List<OrderProduct> oldList = new ArrayList<>(order.getProducts());
 
         var product = productRepository.findById(productId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Product with id " + productId + " not found!"));
+                () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND));
 
         if (oldList.stream().map(OrderProduct::getProductId).toList().contains(productId)) {
             for (OrderProduct orderProduct : oldList) {
@@ -154,6 +115,46 @@ public class OrderServiceImpl implements OrderService {
         order.setPrice(calculateNewPrice(order.getProducts()));
 
         orderRepository.save(order);
+    }
+
+    @Override
+    public OrderDTO publishOrder(String email, long customerId, long orderId, RequestOrder newOrder)
+            throws OrderException, CustomerException {
+        var customer = checkCustomer(customerId, email);
+
+        var order = checkOrder(orderId, customerId);
+
+        if (newOrder.getProducts().size() > 0) {
+            var updatedOrder = updateOrder(order, newOrder);
+
+            if (updatedOrder.getPrice().compareTo(BigDecimal.valueOf(1.0)) < 0) {
+                throw new OrderException(OrderExceptionProfile.MINIMUM_ORDER_PRICE);
+            }
+
+            updatedOrder.setType(Type.PUBLISHED);
+            updatedOrder.setDate(LocalDateTime.now(ZoneOffset.UTC));
+
+            customer.setBasket(orderRepository.save(Order.builder()
+                            .customer(customer)
+                            .type(Type.DRAFT)
+                            .status(Status.UNPAID)
+                            .build())
+                    .getId());
+
+            return toOrderDTO(orderRepository.save(updatedOrder));
+        } else throw new OrderException(OrderExceptionProfile.EMPTY_ORDER);
+    }
+
+    @Override
+    public void deleteOrder(String email, long customerId, long orderId)
+            throws OrderException, CustomerException {
+        checkCustomer(customerId, email);
+
+        var order = checkOrder(orderId, customerId);
+        if (Status.UNPAID == order.getStatus()) {
+            throw new OrderException(OrderExceptionProfile.CANNOT_DELETE_UNPAID);
+        }
+        orderRepository.delete(order);
     }
 
     private Order updateOrder(Order oldOrder, RequestOrder newOrder) {
@@ -186,28 +187,25 @@ public class OrderServiceImpl implements OrderService {
         Optional.ofNullable(newOrder.getDescription()).ifPresent(oldOrder::setDescription);
 
         return oldOrder;
-
     }
 
-    private Customer checkCustomer(long customerId, String email) {
+    private Customer checkCustomer(long customerId, String email) throws CustomerException {
         var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         if (!customer.getEmail().equals(email)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new CustomerException(CustomerExceptionProfile.EMAIL_MISMATCH);
         }
 
         return customer;
     }
 
-    private Order checkOrder(long orderId, long customerId) {
+    private Order checkOrder(long orderId, long customerId) throws OrderException, CustomerException {
         var order = orderRepository.findById(orderId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Order with ID " + orderId + " not found!"));
+                () -> new OrderException(OrderExceptionProfile.ORDER_NOT_FOUND));
 
         if (customerId != order.getCustomer().getId()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new CustomerException(CustomerExceptionProfile.ID_MISMATCH);
         }
 
         return order;
@@ -240,11 +238,14 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderDTO toOrderDTO(Order order) {
         String formatDateTime = null;
+
         var price = "0.00";
+
         if (order.getDate() != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
             formatDateTime = order.getDate().format(formatter);
         }
+
         if (order.getPrice() != null) {
             DecimalFormat df = new DecimalFormat("#,##0.00");
             price = df.format(order.getPrice());
@@ -263,11 +264,15 @@ public class OrderServiceImpl implements OrderService {
 
     public List<ProductDTO> toProductList(List<OrderProduct> list) {
         DecimalFormat df = new DecimalFormat("#,##0.00");
+
         List<ProductDTO> products = new ArrayList<>();
+
         for (OrderProduct orderProduct : list) {
             var product = productRepository.findById(orderProduct.getProductId());
+
             if (product.isPresent()) {
                 var price = df.format(product.get().getPrice());
+
                 products.add(ProductDTO.builder()
                         .id(product.get().getId())
                         .name(product.get().getName())

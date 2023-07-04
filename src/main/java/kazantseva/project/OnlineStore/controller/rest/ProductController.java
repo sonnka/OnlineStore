@@ -1,5 +1,8 @@
 package kazantseva.project.OnlineStore.controller.rest;
 
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.ProductException;
+import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
 import kazantseva.project.OnlineStore.model.mongo.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.service.ProductService;
@@ -31,33 +34,34 @@ public class ProductController implements ProductAPI {
     }
 
     @GetMapping("/admin/products/{product-id}")
-    public ShortProductDTO getProduct(@PathVariable("product-id") String productId, Authentication auth) {
+    public ShortProductDTO getProduct(@PathVariable("product-id") String productId, Authentication auth)
+            throws CustomerException, ProductException {
         return productService.getProduct(auth.getName(), productId);
     }
 
     @PatchMapping("/admin/products/{product-id}")
     public ShortProductDTO updateProduct(@PathVariable("product-id") String productId,
                                          @RequestBody CreateProduct product,
-                                         Authentication auth) {
+                                         Authentication auth) throws CustomerException, ProductException {
         return productService.updateProduct(auth.getName(), productId, product);
     }
 
     @DeleteMapping("/admin/products/{product-id}")
     public void deleteProduct(@PathVariable("product-id") String productId,
-                              Authentication auth) {
+                              Authentication auth) throws CustomerException, ProductException {
         productService.deleteProduct(auth.getName(), productId);
     }
 
     @PostMapping("/admin/products")
     public ShortProductDTO createProduct(Authentication auth,
-                                         @RequestBody CreateProduct product) {
+                                         @RequestBody CreateProduct product) throws CustomerException {
         return productService.createProduct(auth.getName(), product);
     }
 
     @PostMapping("/admin/products/{product-id}/upload")
     public void uploadImage(@PathVariable("product-id") String productId,
                             @RequestParam("file") MultipartFile file,
-                            Authentication auth) {
+                            Authentication auth) throws CustomerException, SecurityException, ProductException {
         productService.uploadImage(auth.getName(), productId, file);
     }
 

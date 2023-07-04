@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.ProductException;
+import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
 import kazantseva.project.OnlineStore.model.mongo.response.ShortProductDTO;
 import org.springdoc.core.annotations.ParameterObject;
@@ -39,7 +42,7 @@ public interface ProductAPI {
             @Parameter(description = "ID of product", required = true)
             @PathVariable("product-id") String productId,
             @Parameter(description = "Authentication", required = true)
-            Authentication auth);
+            Authentication auth) throws CustomerException, ProductException;
 
     @Operation(summary = "Update product", description = "Returns updated product.")
     @ApiResponses(value = {
@@ -57,7 +60,7 @@ public interface ProductAPI {
             @Parameter(description = "Product with changes", required = true)
             @RequestBody final CreateProduct product,
             @Parameter(description = "Authentication", required = true)
-            Authentication auth);
+            Authentication auth) throws CustomerException, ProductException;
 
     @Operation(summary = "Delete product", description = "Deletes product by id.")
     @ApiResponses(value = {
@@ -72,7 +75,7 @@ public interface ProductAPI {
             @Parameter(description = "ID of product", required = true)
             @PathVariable("product-id") final String productId,
             @Parameter(description = "Authentication", required = true)
-            Authentication auth);
+            Authentication auth) throws CustomerException, ProductException;
 
     @Operation(summary = "Create product", description = "Returns created product.")
     @ApiResponses(value = {
@@ -86,7 +89,7 @@ public interface ProductAPI {
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
             @Parameter(description = "New product", required = true)
-            @RequestBody final CreateProduct product);
+            @RequestBody final CreateProduct product) throws CustomerException;
 
     @Operation(summary = "Upload image", description = "Uploads and saves image of product.")
     @ApiResponses(value = {
@@ -103,5 +106,5 @@ public interface ProductAPI {
             @Parameter(description = "Image of product (Multipart file)", required = true)
             @RequestParam("file") MultipartFile file,
             @Parameter(description = "Authentication", required = true)
-            Authentication auth);
+            Authentication auth) throws CustomerException, SecurityException, ProductException;
 }

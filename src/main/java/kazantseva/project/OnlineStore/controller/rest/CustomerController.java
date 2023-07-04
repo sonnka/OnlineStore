@@ -1,6 +1,8 @@
 package kazantseva.project.OnlineStore.controller.rest;
 
 import jakarta.validation.Valid;
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.AdminDTO;
@@ -24,61 +26,65 @@ public class CustomerController implements CustomerAPI {
     private CustomerService customerService;
 
     @PostMapping("/login")
-    public LoginResponse login(Authentication auth) {
+    public LoginResponse login(Authentication auth) throws CustomerException, SecurityException {
         return customerService.login(auth);
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void register(@RequestBody @Valid CreateCustomer customer) {
+    public void register(@RequestBody @Valid CreateCustomer customer)
+            throws CustomerException, SecurityException {
         customerService.register(customer);
     }
 
     @GetMapping("/customers/{customer-id}")
     public FullCustomerDTO getCustomer(Authentication auth,
-                                       @PathVariable("customer-id") long customerId) {
+                                       @PathVariable("customer-id") long customerId) throws CustomerException {
         return customerService.getCustomer(auth.getName(), customerId);
     }
 
     @PatchMapping("/customers/{customer-id}")
     public CustomerDTO updateCustomer(Authentication auth,
                                       @PathVariable("customer-id") long customerId,
-                                      @RequestBody @Valid RequestCustomer customer) {
+                                      @RequestBody @Valid RequestCustomer customer) throws CustomerException {
         return customerService.updateCustomer(auth.getName(), customerId, customer);
     }
 
     @PostMapping("/customers/{customer-id}/upload")
     public void uploadAvatar(Authentication auth,
                              @PathVariable("customer-id") long customerId,
-                             @RequestParam("file") MultipartFile file) {
+                             @RequestParam("file") MultipartFile file) throws CustomerException {
         customerService.uploadAvatar(auth.getName(), customerId, file);
     }
 
     @DeleteMapping("/customers/{customer-id}")
     public void deleteCustomer(Authentication auth,
-                               @PathVariable("customer-id") long customerId) {
+                               @PathVariable("customer-id") long customerId)
+            throws CustomerException, SecurityException {
         customerService.deleteCustomer(auth.getName(), customerId);
     }
 
     @GetMapping("/admin/customers")
-    public Page<CustomerDTO> getCustomers(Authentication auth, Pageable pageable) {
+    public Page<CustomerDTO> getCustomers(Authentication auth, Pageable pageable) throws CustomerException {
         return customerService.getCustomers(auth.getName(), pageable);
     }
 
     @GetMapping("/admin/admins")
-    public Page<AdminDTO> getAdmins(Authentication auth, Pageable pageable) {
+    public Page<AdminDTO> getAdmins(Authentication auth, Pageable pageable) throws CustomerException {
         return customerService.getAdmins(auth.getName(), pageable);
     }
 
     @PatchMapping("/admin/customers/{customer-id}/admin")
     public void toAdmin(Authentication auth,
-                        @PathVariable("customer-id") long customerId) {
+                        @PathVariable("customer-id") long customerId)
+            throws CustomerException, SecurityException {
         customerService.toAdmin(auth.getName(), customerId);
     }
 
     @GetMapping("/admin/customers/{customer-id}/resend")
     public void resendEmail(Authentication auth,
-                            @PathVariable("customer-id") long customerId) {
+                            @PathVariable("customer-id") long customerId)
+            throws CustomerException, SecurityException {
         customerService.resendEmail(auth.getName(), customerId);
     }
 }
