@@ -1,23 +1,22 @@
-var listOfProducts = [];
+let listOfProducts = [];
 $(document).ready(function () {
-    var customerId = $('#customerId').val();
-    var orderId = $('#orderId').val();
+    let customerId = $('#customerId').val();
+    let orderId = $('#orderId').val();
 
-    var date = $('#date');
-    var status = $("#orderStatus");
-    var deliveryAddress = $('#deliveryAddress');
-    var description = $('#description');
-    var price = $('#price');
-    var table = $('#productsTable tbody');
-    var type = "DRAFT";
-    var saveButton = $('#saveButton');
-    var count = 0;
-
+    let date = $('#date');
+    let status = $("#orderStatus");
+    let deliveryAddress = $('#deliveryAddress');
+    let description = $('#description');
+    let price = $('#price');
+    let table = $('#productsTable tbody');
+    let type = "DRAFT";
+    let saveButton = $('#saveButton');
+    let count = 0;
 
     loadOrder();
 
     function loadOrder() {
-        url = "/customers/" + customerId + "/orders/" + orderId;
+        let url = "/customers/" + customerId + "/orders/" + orderId;
 
         $.get(url, function (responseJson) {
             type = responseJson.type;
@@ -39,7 +38,7 @@ $(document).ready(function () {
 
         table.empty();
         $.each(responseJson.products, (i, product) => {
-            var productName = product.name;
+            let productName = product.name;
             count++;
             let productRow = '<tr>' +
                 '<td style="display:none;"  data-th="Id"><div class="col-md-9 text-left mt-sm-2">' + product.id + '</div></td>' +
@@ -53,13 +52,12 @@ $(document).ready(function () {
                 '</tr>';
             table.append(productRow);
         });
+
+        let button = document.getElementById('deleteColumn');
+
         if (count <= 1) {
-            // saveButton.attr("style", "display:none");
-            var button = document.getElementById('deleteColumn');
             button.style.display = 'none';
         } else {
-            // saveButton.attr("style", "");
-            var button = document.getElementById('deleteColumn');
             button.style.display = '';
         }
 
@@ -77,7 +75,7 @@ $(document).ready(function () {
     }
 
     function updateOrder() {
-        jsonData = {
+        let jsonData = {
             "products": listOfProducts,
             "deliveryAddress": deliveryAddress.val(),
             "description": description.val()
@@ -99,16 +97,14 @@ $(document).ready(function () {
     }
 
     function updateList() {
-        var tbody = $('#productsTable tbody');
+        table.find('tr').each(function () {
+            let row = $(this);
 
-        tbody.find('tr').each(function () {
-            var row = $(this);
+            let productId = row.find('td[data-th="Id"] .col-md-9').text().trim();
+            let productName = row.find('td[data-th="Product"] .col-md-9').text().trim();
+            let productCount = Number(row.find('td[data-th="Quantity"] .input_count').val().trim());
 
-            var productId = row.find('td[data-th="Id"] .col-md-9').text().trim();
-            var productName = row.find('td[data-th="Product"] .col-md-9').text().trim();
-            var productCount = Number(row.find('td[data-th="Quantity"] .input_count').val().trim());
-
-            var rowData = {
+            let rowData = {
                 "id": productId,
                 "name": productName,
                 "count": productCount
@@ -130,7 +126,7 @@ $(document).ready(function () {
             saveButton.click(function () {
                 listOfProducts = [];
                 updateList();
-                jsonData = {
+                let jsonData = {
                     "products": listOfProducts,
                     "deliveryAddress": deliveryAddress.val(),
                     "description": description.val()

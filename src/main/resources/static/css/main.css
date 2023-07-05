@@ -484,3 +484,27 @@ input.check-toggle-round-flat:checked + label:after {
 .admin {
     color: #009a1e;
 }
+
+.table {
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ffffff;
+    border-top: 0.22ch solid #e0e0e0;
+    border-collapse: collapse;
+}
+
+.table th {
+    font-weight: bold;
+    padding: 5px;
+    background: #ffffff;
+    border: none;
+    border-bottom: 2px solid #ffffff;
+}
+
+.table tr {
+    padding: 25px;
+    border: none;
+    background-color: #f7fafa;
+    border-radius: 25px;
+    border-bottom: 20px solid #ffffff;
+}

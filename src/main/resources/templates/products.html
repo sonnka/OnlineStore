@@ -104,15 +104,16 @@
             <button class="btn btn-primary" id="resetButton" th:text="#{resetButton}" type="submit"></button>
         </div>
         <br><br>
-        <table border="1" class="table table-striped table-responsive-md" id="table">
+        <table border="1" class="table table-condensed table-responsive-md" id="table">
             <thead>
             <tr>
-                <th id="columnId" sec:authorize="isAuthenticated()"><a id="sortId" th:text="#{id}"></a></th>
-                <th><a th:text="#{image}"></a></th>
-                <th><a id="sortName" th:text="#{product}"></a></th>
-                <th><a id="sortPrice" th:text="#{price}"></a></th>
-                <th sec:authorize="hasRole('BUYER')"></th>
-                <th sec:authorize="hasRole('ADMIN')"><a th:text="#{actions}"></a></th>
+                <th id="columnId" sec:authorize="isAuthenticated()" style="width:10%"><a id="sortId"
+                                                                                         th:text="#{id}"></a></th>
+                <th style="width:20%"><a th:text="#{image}"></a></th>
+                <th style="width:40%"><a id="sortName" th:text="#{product}"></a></th>
+                <th style="width:10%"><a id="sortPrice" th:text="#{price}"></a></th>
+                <th sec:authorize="hasRole('BUYER')" style="width:10%"></th>
+                <th sec:authorize="hasRole('ADMIN')" style="width:10%"><a th:text="#{actions}"></a></th>
             </tr>
             </thead>
             <tbody id="productsTable">

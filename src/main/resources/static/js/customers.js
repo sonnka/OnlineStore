@@ -2,11 +2,11 @@ $(document).ready(function () {
     let totalPages = 1;
     let sort = "name"
     let dir = "asc";
-    var sortId = $('#sortId');
-    var sortName = $('#sortName');
-    var sortSurname = $('#sortSurname');
-    var sortEmail = $('#sortEmail');
-    var table = $('#customersTable tbody');
+    let sortId = $('#sortId');
+    let sortName = $('#sortName');
+    let sortSurname = $('#sortSurname');
+    let sortEmail = $('#sortEmail');
+    let table = $('#customersTable tbody');
 
 
     fetchCustomer(0);
@@ -46,7 +46,7 @@ $(document).ready(function () {
             success: function (response) {
                 table.empty();
                 $.each(response.content, (i, customer) => {
-                    var customerId = customer.id;
+                    let customerId = customer.id;
                     let customerRow = '<tr>' +
                         '<td><div class="text-left">' + customerId + '</div></td>' +
                         '<td>' + customer.name + '</td>' +
@@ -126,12 +126,12 @@ $(document).ready(function () {
     function buildPagination(response) {
         totalPages = response.totalPages;
 
-        var pageNumber = response.pageable.pageNumber;
+        let pageNumber = response.pageable.pageNumber;
 
-        var numLinks = 10;
+        let numLinks = 10;
 
-        var first = '';
-        var prev = '';
+        let first = '';
+        let prev = '';
         if (pageNumber > 0) {
             if (pageNumber !== 0) {
                 first = '<li class="page-item"><a class="page-link">«</a></li>';
@@ -142,8 +142,8 @@ $(document).ready(function () {
             first = '';
         }
 
-        var next = '';
-        var last = '';
+        let next = '';
+        let last = '';
         if (pageNumber < totalPages) {
             if (pageNumber !== totalPages - 1) {
                 next = '<li class="page-item"><a class="page-link">›</a></li>';
@@ -154,12 +154,12 @@ $(document).ready(function () {
             last = '';
         }
 
-        var start = pageNumber - (pageNumber % numLinks) + 1;
-        var end = start + numLinks - 1;
+        let start = pageNumber - (pageNumber % numLinks) + 1;
+        let end = start + numLinks - 1;
         end = Math.min(totalPages, end);
-        var pagingLink = '';
+        let pagingLink = '';
 
-        for (var i = start; i <= end; i++) {
+        for (let i = start; i <= end; i++) {
             if (i === (pageNumber + 1)) {
                 pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>';
             } else {
@@ -173,11 +173,11 @@ $(document).ready(function () {
     }
 
     $(document).on("click", "ul.pagination li a", function () {
-        var data = $(this).attr('data');
         let val = $(this).text();
-        var active = $("li.active");
+        let active = $("li.active");
         console.log('val: ' + val);
 
+        let startPage;
         if (val.toUpperCase() === "«") {
             let currentActive = active;
             fetchCustomer(0);
@@ -186,6 +186,7 @@ $(document).ready(function () {
 
         } else if (val.toUpperCase() === "»") {
             fetchCustomer(totalPages - 1);
+            let currentActive = active;
             $("li.active").removeClass("active");
             currentActive.next().addClass("active");
 

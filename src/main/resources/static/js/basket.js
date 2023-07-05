@@ -1,12 +1,12 @@
-var listOfProducts = [];
+let listOfProducts = [];
 $(document).ready(function () {
-    var customerId = $('#customerId').val();
-    var basketId = $('#basketId').val();
+    let customerId = $('#customerId').val();
+    let basketId = $('#basketId').val();
 
-    var price = $('#price');
-    var table = $('#productsTable tbody');
-    var publishButton = $('#publishButton')
-    var count = 0;
+    let price = $('#price');
+    let table = $('#productsTable tbody');
+    let publishButton = $('#publishButton');
+    let count = 0;
 
     loadBasket();
 
@@ -15,7 +15,7 @@ $(document).ready(function () {
     });
 
     function loadBasket() {
-        url = "/customers/" + customerId + "/orders/" + basketId;
+        let url = "/customers/" + customerId + "/orders/" + basketId;
         $.get(url, function (responseJson) {
             displayBasketData(responseJson)
         }).fail(function () {
@@ -29,10 +29,11 @@ $(document).ready(function () {
         table.empty();
 
         $.each(responseJson.products, (i, product) => {
-            var productName = product.name;
+            let productName = product.name;
             ++count;
             let productRow = '<tr>' +
-                '<td style="display:none;"  data-th="Id"><div class="col-md-9 text-left mt-sm-2">' + product.id + '</div></td>' +
+                '<td style="display:none;"  data-th="Id"><div class="col-md-9 text-left mt-sm-2">'
+                + product.id + '</div></td>' +
                 '<td data-th="Product"><div class="col-md-9 mt-sm-2">' + productName + '</div></td>' +
                 '<td class="valueAlign" data-th="Price">' + product.price + '</td>' +
                 '<td data-th="Quantity"><input class="form-control form-control-lg text-center input_count" min="1"'
@@ -63,7 +64,7 @@ $(document).ready(function () {
     }
 
     function updateBasket() {
-        jsonData = {
+        let jsonData = {
             "products": listOfProducts
         };
 
@@ -83,16 +84,14 @@ $(document).ready(function () {
     }
 
     function updateList() {
-        var tbody = $('#productsTable tbody');
+        table.find('tr').each(function () {
+            let row = $(this);
 
-        tbody.find('tr').each(function () {
-            var row = $(this);
+            let productId = row.find('td[data-th="Id"] .col-md-9').text().trim();
+            let productName = row.find('td[data-th="Product"] .col-md-9').text().trim();
+            let productCount = Number(row.find('td[data-th="Quantity"] .input_count').val().trim());
 
-            var productId = row.find('td[data-th="Id"] .col-md-9').text().trim();
-            var productName = row.find('td[data-th="Product"] .col-md-9').text().trim();
-            var productCount = Number(row.find('td[data-th="Quantity"] .input_count').val().trim());
-
-            var rowData = {
+            let rowData = {
                 "id": productId,
                 "name": productName,
                 "count": productCount

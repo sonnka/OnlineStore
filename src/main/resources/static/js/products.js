@@ -2,13 +2,14 @@ $(document).ready(function () {
     let totalPages = 1;
     let sort = "name"
     let dir = "asc";
-    var sortId = $('#sortId');
-    var sortName = $('#sortName');
-    var sortPrice = $('#sortPrice');
-    var keyword = "";
-    var searchButton = $('#searchButton');
-    var resetButton = $('#resetButton');
-    var inputKeyword = $('#keyword');
+    let sortId = $('#sortId');
+    let sortName = $('#sortName');
+    let sortPrice = $('#sortPrice');
+    let keyword = "";
+    let searchButton = $('#searchButton');
+    let resetButton = $('#resetButton');
+    let inputKeyword = $('#keyword');
+    let table = $('#table tbody');
 
     fetchProductSearch(0, keyword);
 
@@ -43,7 +44,6 @@ $(document).ready(function () {
 
 
     function fetchProductSearch(startPage, keyword) {
-
         $.ajax({
             type: "GET",
             url: "/products/search",
@@ -54,9 +54,9 @@ $(document).ready(function () {
                 keyword: keyword
             },
             success: function (response) {
-                $('#table tbody').empty();
+                table.empty();
                 $.each(response.content, (i, product) => {
-                    var productId = product.id;
+                    let productId = product.id;
                     let productRow = '<tr>' +
                         '<td style="display:none;" ><div class="text-left">' + productId + '</div></td>' +
                         '<td><img alt="img" height="60" id="thumbnail" width="60" ' +
@@ -73,7 +73,7 @@ $(document).ready(function () {
 
                 $('#columnId').attr("style", "display:none");
 
-                $('#table tbody').on('click', '.addProduct', function (e) {
+                table.on('click', '.addProduct', function (e) {
                     let productId = $(this).closest('tr').find('.text-left').text();
                     addProductToBasket(productId);
                     e.stopImmediatePropagation();
@@ -108,12 +108,12 @@ $(document).ready(function () {
     function buildSearchPagination(response) {
         totalPages = response.totalPages;
 
-        var pageNumber = response.pageable.pageNumber;
+        let pageNumber = response.pageable.pageNumber;
 
-        var numLinks = 10;
+        let numLinks = 10;
 
-        var first = '';
-        var prev = '';
+        let first = '';
+        let prev = '';
 
         if (pageNumber > 0) {
             first = '<li class="page-item"><a class="page-link">«</a></li>';
@@ -123,8 +123,8 @@ $(document).ready(function () {
             first = '';
         }
 
-        var next = '';
-        var last = '';
+        let next = '';
+        let last = '';
         if (pageNumber < totalPages) {
             if (pageNumber !== totalPages - 1) {
                 next = '<li class="page-item"><a class="page-link">›</a></li>';
@@ -135,12 +135,12 @@ $(document).ready(function () {
             last = '';
         }
 
-        var start = pageNumber - (pageNumber % numLinks) + 1;
-        var end = start + numLinks - 1;
+        let start = pageNumber - (pageNumber % numLinks) + 1;
+        let end = start + numLinks - 1;
         end = Math.min(totalPages, end);
-        var pagingLink = '';
+        let pagingLink = '';
 
-        for (var i = start; i <= end; i++) {
+        for (let i = start; i <= end; i++) {
             if (i === (pageNumber + 1)) {
                 pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>';
             } else {
@@ -154,11 +154,11 @@ $(document).ready(function () {
     }
 
     $(document).on("click", "ul.pagination li a", function () {
-        var data = $(this).attr('data');
         let val = $(this).text();
-        var active = $("li.active");
+        let active = $("li.active");
         console.log('val: ' + val);
 
+        let startPage;
         if (val.toUpperCase() === "«") {
             let currentActive = active;
             fetchProductSearch(0, keyword);
@@ -167,6 +167,7 @@ $(document).ready(function () {
 
         } else if (val.toUpperCase() === "»") {
             fetchProductSearch(totalPages - 1, keyword);
+            let currentActive = active;
             active.removeClass("active");
             currentActive.next().addClass("active");
 

@@ -2,15 +2,15 @@ $(document).ready(function () {
     let totalPages = 1;
     let sort = "name"
     let dir = "asc";
-    var sortId = $('#sortId');
-    var sortName = $('#sortName');
-    var sortPrice = $('#sortPrice');
-    var table = $('#table tbody');
-    var createProductButton = $('#createProductButton');
-    var keyword = "";
-    var searchButton = $('#searchButton');
-    var resetButton = $('#resetButton');
-    var inputKeyword = $('#keyword');
+    let sortId = $('#sortId');
+    let sortName = $('#sortName');
+    let sortPrice = $('#sortPrice');
+    let table = $('#table tbody');
+    let createProductButton = $('#createProductButton');
+    let keyword = "";
+    let searchButton = $('#searchButton');
+    let resetButton = $('#resetButton');
+    let inputKeyword = $('#keyword');
 
     fetchProduct(0);
 
@@ -61,7 +61,7 @@ $(document).ready(function () {
             success: function (response) {
                 table.empty();
                 $.each(response.content, (i, product) => {
-                    var productId = product.id;
+                    let productId = product.id;
                     let productRow = '<tr>' +
                         '<td><div class="text-left">' + productId + '</div></td>' +
                         '<td><img alt="img"  height="60" id="thumbnail" width="60" src="http://images.example.com/products/' + product.image
@@ -123,12 +123,12 @@ $(document).ready(function () {
     function buildPagination(response) {
         totalPages = response.totalPages;
 
-        var pageNumber = response.pageable.pageNumber;
+        let pageNumber = response.pageable.pageNumber;
 
-        var numLinks = 10;
+        let numLinks = 10;
 
-        var first = '';
-        var prev = '';
+        let first = '';
+        let prev = '';
 
         if (pageNumber > 0) {
             first = '<li class="page-item"><a class="page-link">«</a></li>';
@@ -138,8 +138,8 @@ $(document).ready(function () {
             first = '';
         }
 
-        var next = '';
-        var last = '';
+        let next = '';
+        let last = '';
         if (pageNumber < totalPages) {
             if (pageNumber !== totalPages - 1) {
                 next = '<li class="page-item"><a class="page-link">›</a></li>';
@@ -150,12 +150,12 @@ $(document).ready(function () {
             last = '';
         }
 
-        var start = pageNumber - (pageNumber % numLinks) + 1;
-        var end = start + numLinks - 1;
+        let start = pageNumber - (pageNumber % numLinks) + 1;
+        let end = start + numLinks - 1;
         end = Math.min(totalPages, end);
-        var pagingLink = '';
+        let pagingLink = '';
 
-        for (var i = start; i <= end; i++) {
+        for (let i = start; i <= end; i++) {
             if (i === (pageNumber + 1)) {
                 pagingLink += '<li class="page-item active"><a class="page-link"> ' + i + ' </a></li>';
             } else {
@@ -170,9 +170,10 @@ $(document).ready(function () {
 
     $(document).on("click", "ul.pagination li a", function () {
         let val = $(this).text();
-        var active = $("li.active");
+        let active = $("li.active");
         console.log('val: ' + val);
 
+        let startPage;
         if (val.toUpperCase() === "«") {
             let currentActive = active;
             fetchProduct(0);
@@ -181,6 +182,7 @@ $(document).ready(function () {
 
         } else if (val.toUpperCase() === "»") {
             fetchProduct(totalPages - 1);
+            let currentActive = active;
             active.removeClass("active");
             currentActive.next().addClass("active");
 

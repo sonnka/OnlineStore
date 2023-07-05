@@ -1,9 +1,9 @@
 $(document).ready(function () {
-    var registerButton = $('#registerButton');
-    var name = $('#name');
-    var surname = $('#surname');
-    var email = $('#email');
-    var password = $('#password');
+    let registerButton = $('#registerButton');
+    let name = $('#name');
+    let surname = $('#surname');
+    let email = $('#email');
+    let password = $('#password');
 
     registerButton.click(function (event) {
         event.preventDefault();
@@ -11,10 +11,10 @@ $(document).ready(function () {
     });
 
     function register() {
-        url = "/register";
-        urlSuccess = "/register?success";
-        urlError = "/register?error";
-        jsonData = {
+        let url = "/register";
+        let urlSuccess = "/register?success";
+        let urlError = "/register?error";
+        let jsonData = {
             "name": name.val(),
             "surname": surname.val(),
             "email": email.val(),

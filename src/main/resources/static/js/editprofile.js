@@ -1,13 +1,12 @@
 $(document).ready(function () {
-    var customerId = $('#customerId').val();
-    var saveCustomerButton = $('#saveCustomerButton');
-
-    var nameSurname = $('#nameSurname');
-    var name = $('#name');
-    var surname = $('#surname');
-    var email = $('#email');
-    var image = $('#thumbnail');
-    var customerImage = "default.png";
+    let customerId = $('#customerId').val();
+    let saveCustomerButton = $('#saveCustomerButton');
+    let nameSurname = $('#nameSurname');
+    let name = $('#name');
+    let surname = $('#surname');
+    let email = $('#email');
+    let image = $('#thumbnail');
+    let customerImage = "default.png";
 
     loadProfile();
 
@@ -17,7 +16,7 @@ $(document).ready(function () {
 
     $('#imageForm').submit(function (event) {
         event.preventDefault();
-        var formData = new FormData();
+        let formData = new FormData();
         formData.append('file', $('#imageFile')[0].files[0]);
         $.ajax({
             type: 'POST',
@@ -25,17 +24,17 @@ $(document).ready(function () {
             data: formData,
             processData: false,
             contentType: false,
-            success: function (response) {
+            success: function () {
                 loadProfile();
             },
-            error: function (error) {
+            error: function () {
                 loadProfile();
             }
         });
     });
 
     function loadProfile() {
-        url = "/customers/" + customerId;
+        let url = "/customers/" + customerId;
 
         $.get(url, function (responseJson) {
             displayData(responseJson)
@@ -56,7 +55,7 @@ $(document).ready(function () {
     }
 
     function updateCustomer() {
-        jsonData = {
+        let jsonData = {
             "id": customerId,
             "name": name.val(),
             "surname": surname.val(),

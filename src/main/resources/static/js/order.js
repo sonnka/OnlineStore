@@ -1,11 +1,10 @@
 $(document).ready(function () {
-    var editOrderButton = $('#editOrderButton');
-    var deleteOrderButton = $('#deleteOrderButton');
-
-    var customerId = $('#customerId').val();
-    var orderId = $('#orderId').val();
-    var orderStatus = "UNPAID";
-    var status = $('#payStatus').val();
+    let editOrderButton = $('#editOrderButton');
+    let deleteOrderButton = $('#deleteOrderButton');
+    let customerId = $('#customerId').val();
+    let orderId = $('#orderId').val();
+    let orderStatus = "UNPAID";
+    let status = $('#payStatus').val();
 
     loadOrder()
 
@@ -18,7 +17,7 @@ $(document).ready(function () {
     });
 
     function loadOrder() {
-        url = "/customers/" + customerId + "/orders/" + orderId;
+        let url = "/customers/" + customerId + "/orders/" + orderId;
 
         $.get(url, function (responseJson) {
             orderStatus = responseJson.status;
@@ -51,15 +50,15 @@ $(document).ready(function () {
             $('#productsTable tbody').append(productRow);
         });
 
+        let form = document.getElementById('checkout-form');
+
         if (orderStatus === "PAID") {
             $('#editbutton').attr("type", "hidden");
             $('#deletebutton').attr("type", "submit");
-            var form = document.getElementById('checkout-form');
             form.style.display = 'none';
         } else {
             $('#deletebutton').attr("type", "hidden");
             $('#editbutton').attr("type", "submit")
-            var form = document.getElementById('checkout-form');
             form.style.display = '';
         }
     }
@@ -82,7 +81,7 @@ $(document).ready(function () {
     }
 
     function updateStatus() {
-        jsonData = {
+        let jsonData = {
             "status": "PAID"
         };
 
@@ -97,6 +96,5 @@ $(document).ready(function () {
         }).fail(function () {
             window.location = "/";
         });
-
     }
 });

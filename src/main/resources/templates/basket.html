@@ -85,7 +85,7 @@
         </div>
         <div class="container">
             <div class="row w-100">
-                <div class="col-lg-12 col-md-12 col-12">
+                <div>
                     <h3 class="display-5 mb-2 text-center" th:text="#{basket}"></h3>
                     <br><br>
                     <input id="customerId" th:value="${customerId}" type="hidden">
@@ -95,13 +95,13 @@
                     <p>Please note that the minimum order price is $1.</p>
                     <br><br>
                     <br><br>
-                    <table class="table table-condensed table-responsive" id="productsTable">
+                    <table class="table table-condensed table-responsive-md" id="productsTable">
                         <thead>
                         <tr>
                             <th style="width:60%" th:text="#{product}"></th>
-                            <th style="width:12%" th:text="#{price}"></th>
-                            <th id="count" style="width:10%" th:text="#{count}"></th>
-                            <th style="width:16%"></th>
+                            <th style="width:15%" th:text="#{price}"></th>
+                            <th id="count" style="width:15%" th:text="#{count}"></th>
+                            <th style="width:10%"></th>
                         </tr>
                         </thead>
                         <tbody>

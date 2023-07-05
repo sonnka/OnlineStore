@@ -1,10 +1,10 @@
 $(document).ready(function () {
-    var customerId = $('#customerId').val();
+    let customerId = $('#customerId').val();
     loadProfile();
-    var editProfileButton = $('#editProfileButton');
-    var deleteProfileButton = $('#deleteProfileButton');
-    var getOrdersButton = $('#getOrdersButton');
-    var image = $('#thumbnail');
+    let editProfileButton = $('#editProfileButton');
+    let deleteProfileButton = $('#deleteProfileButton');
+    let getOrdersButton = $('#getOrdersButton');
+    let image = $('#thumbnail');
 
     $('#fileImage').change(function () {
         showImageThumbnail(this);
@@ -22,8 +22,8 @@ $(document).ready(function () {
 
 
     function showImageThumbnail(fileInput) {
-        file = fileInput.files[0];
-        reader = new FileReader();
+        let file = fileInput.files[0];
+        let reader = new FileReader();
 
         reader.onload = function (e) {
             $('#thumbnail').attr('src', e.target.result);
@@ -33,7 +33,7 @@ $(document).ready(function () {
     }
 
     function loadProfile() {
-        url = "/customers/" + customerId;
+        let url = "/customers/" + customerId;
 
         $.get(url, function (responseJson) {
             displayData(responseJson)

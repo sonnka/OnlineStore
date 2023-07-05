@@ -1,12 +1,11 @@
 $(document).ready(function () {
-    var productId = $('#productId').val();
-
-    var name = $('#name');
-    var price = $('#price');
-    var image = $('#thumbnail');
-    var saveProductButton = $('#saveProductButton');
-
-    var productImage = "default.png";
+    let productId = $('#productId').val();
+    let name = $('#name');
+    let price = $('#price');
+    let image = $('#thumbnail');
+    let saveProductButton = $('#saveProductButton');
+    let imageForm = $('#imageForm');
+    let productImage = "default.png";
 
     if (productId === "-1") {
         $('#img').attr('style', "display:none");
@@ -19,9 +18,9 @@ $(document).ready(function () {
         saveProductButton.click(function () {
             updateProduct();
         });
-        $('#imageForm').submit(function (event) {
+        imageForm.submit(function (event) {
             event.preventDefault();
-            var formData = new FormData();
+            let formData = new FormData();
             formData.append('file', $('#imageFile')[0].files[0]);
             $.ajax({
                 type: 'POST',
@@ -29,19 +28,19 @@ $(document).ready(function () {
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function (response) {
+                success: function () {
                     loadProduct();
                 },
-                error: function (error) {
+                error: function () {
                     loadProduct();
                 }
             });
         });
     }
 
-    $('#imageForm').submit(function (event) {
+    imageForm.submit(function (event) {
         event.preventDefault();
-        var formData = new FormData();
+        let formData = new FormData();
         formData.append('file', $('#imageFile')[0].files[0]);
         $.ajax({
             type: 'POST',
@@ -49,17 +48,17 @@ $(document).ready(function () {
             data: formData,
             processData: false,
             contentType: false,
-            success: function (response) {
+            success: function () {
                 loadProduct();
             },
-            error: function (error) {
+            error: function () {
                 loadProduct();
             }
         });
     });
 
     function createProduct() {
-        jsonData = {
+        let jsonData = {
             "name": name.val(),
             "price": price.val(),
             "image": productImage
@@ -80,7 +79,7 @@ $(document).ready(function () {
     }
 
     function loadProduct() {
-        url = "/admin/products/" + productId;
+        let url = "/admin/products/" + productId;
 
         $.get(url, function (responseJson) {
             displayData(responseJson)
@@ -99,7 +98,7 @@ $(document).ready(function () {
     }
 
     function updateProduct() {
-        jsonData = {
+        let jsonData = {
             "name": name.val(),
             "price": price.val(),
             "image": productImage
