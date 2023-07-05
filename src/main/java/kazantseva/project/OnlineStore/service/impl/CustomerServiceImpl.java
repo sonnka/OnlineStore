@@ -350,6 +350,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .id(customer.getId())
                 .name(customer.getName())
                 .surname(customer.getSurname())
+                .avatar(customer.getAvatar())
                 .email(customer.getEmail())
                 .build();
     }
@@ -367,6 +368,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .name(customer.getName())
                 .surname(customer.getSurname())
                 .email(customer.getEmail())
+                .avatar(customer.getAvatar())
                 .grantedAdminBy(customer.getGrantedAdminBy())
                 .grantedDate(date)
                 .build();

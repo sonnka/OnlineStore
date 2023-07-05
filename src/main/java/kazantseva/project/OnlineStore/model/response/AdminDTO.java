@@ -8,6 +8,7 @@ public record AdminDTO(
         String name,
         String surname,
         String email,
+        String avatar,
         String grantedAdminBy,
         String grantedDate
 ) {

@@ -38,6 +38,10 @@ $(document).ready(function () {
                 $('#adminsTable tbody').empty();
                 $.each(response.content, (i, admin) => {
                     let adminRow = '<tr>' +
+                        '<td><img alt="img" height="60" id="thumbnail" class="rounded-circle" width="60" ' +
+                        'src="http://images.example.com/customers/' + admin.avatar +
+                        '" onerror="this.onerror=null;this.src=\'http://images.example.com/customers/default.png\'" ' +
+                        '/></td>' +
                         '<td>' + admin.name + '</td>' +
                         '<td>' + admin.surname + '</td>' +
                         '<td>' + admin.email + '</td>' +

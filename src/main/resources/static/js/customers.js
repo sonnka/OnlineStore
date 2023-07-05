@@ -49,6 +49,10 @@ $(document).ready(function () {
                     let customerId = customer.id;
                     let customerRow = '<tr>' +
                         '<td><div class="text-left">' + customerId + '</div></td>' +
+                        '<td><img alt="img" height="60" id="thumbnail" class="rounded-circle" width="60" ' +
+                        'src="http://images.example.com/customers/' + customer.avatar +
+                        '" onerror="this.onerror=null;this.src=\'http://images.example.com/customers/default.png\'" ' +
+                        '/></td>' +
                         '<td>' + customer.name + '</td>' +
                         '<td>' + customer.surname + '</td>' +
                         '<td>' + customer.email + '</td>' +
