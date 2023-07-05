@@ -117,13 +117,7 @@ public class PageController {
     @PostMapping("/profile/orders/{order-id}/charge")
     public String charge(@PathVariable(value = "order-id") String orderId, Principal principal,
                          ChargeRequest chargeRequest, Model model)
-            throws StripeException, CustomerException, OrderException {
-
-        chargeRequest.setDescription("Example charge");
-        chargeRequest.setCurrency(ChargeRequest.Currency.EUR);
-        Charge charge = paymentsService.charge(chargeRequest);
-
-        model.addAttribute("payStatus", charge.getStatus());
+            throws CustomerException, OrderException {
 
         long customerId = customerService.getCustomerId(principal.getName());
         var order = orderService.getOrder(principal.getName(), customerId, Long.parseLong(orderId));
@@ -133,6 +127,18 @@ public class PageController {
         model.addAttribute("amount", order.getPrice().multiply(BigDecimal.valueOf(100.0)).intValue());
         model.addAttribute("stripePublicKey", stripePublicKey);
         model.addAttribute("currency", ChargeRequest.Currency.USD);
+
+        chargeRequest.setDescription("Example charge");
+        chargeRequest.setCurrency(ChargeRequest.Currency.EUR);
+        Charge charge;
+
+        try {
+            charge = paymentsService.charge(chargeRequest);
+        } catch (StripeException e) {
+            return "redirect:/profile/orders/" + orderId + "?error_payment";
+        }
+
+        model.addAttribute("payStatus", charge.getStatus());
 
         return "order";
     }
