@@ -1,6 +1,7 @@
 package kazantseva.project.OnlineStore.model.entity;
 
 import jakarta.persistence.*;
+import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,9 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "customer_id")
     private Long id;
+
+    @Column(name = "stripe_id")
+    private String stripeId;
 
     @Column(name = "name")
     private String name;
@@ -39,6 +43,9 @@ public class Customer {
     @Column(name = "role")
     private CustomerRole role;
 
+    @Column(name = "basket_id")
+    private Long basket;
+
     @Column(name = "enabled")
     private boolean enabled;
 
@@ -53,8 +60,6 @@ public class Customer {
             mappedBy = "customer")
     @Column(name = "orders")
     private List<Order> orders;
-
-    private Long basket;
 
     public Customer() {
         super();

@@ -1,6 +1,6 @@
 package kazantseva.project.OnlineStore.util;
 
-import kazantseva.project.OnlineStore.model.entity.Rating;
+import kazantseva.project.OnlineStore.model.entity.enums.Rating;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

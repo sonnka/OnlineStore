@@ -1,7 +1,7 @@
 package kazantseva.project.OnlineStore.repository;
 
 import kazantseva.project.OnlineStore.model.entity.Customer;
-import kazantseva.project.OnlineStore.model.entity.CustomerRole;
+import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -2,8 +2,8 @@ package kazantseva.project.OnlineStore.repository;
 
 import kazantseva.project.OnlineStore.model.entity.Customer;
 import kazantseva.project.OnlineStore.model.entity.Order;
-import kazantseva.project.OnlineStore.model.entity.Status;
-import kazantseva.project.OnlineStore.model.entity.Type;
+import kazantseva.project.OnlineStore.model.entity.enums.Status;
+import kazantseva.project.OnlineStore.model.entity.enums.Type;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

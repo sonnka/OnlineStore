@@ -3,7 +3,7 @@ package kazantseva.project.OnlineStore.model.mongo.entity;
 import com.opencsv.bean.CsvBindByName;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import kazantseva.project.OnlineStore.model.entity.Rating;
+import kazantseva.project.OnlineStore.model.entity.enums.Rating;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

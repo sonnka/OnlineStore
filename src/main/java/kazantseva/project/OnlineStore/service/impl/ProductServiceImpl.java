@@ -6,7 +6,7 @@ import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
 import kazantseva.project.OnlineStore.exceptions.ProductException;
 import kazantseva.project.OnlineStore.exceptions.ProductException.ProductExceptionProfile;
-import kazantseva.project.OnlineStore.model.entity.CustomerRole;
+import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import kazantseva.project.OnlineStore.model.mongo.entity.Product;
 import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
 import kazantseva.project.OnlineStore.model.mongo.response.ShortProductDTO;

@@ -5,7 +5,8 @@ import com.stripe.model.Charge;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.OrderException;
 import kazantseva.project.OnlineStore.exceptions.SecurityException;
-import kazantseva.project.OnlineStore.model.entity.ChargeRequest;
+import kazantseva.project.OnlineStore.model.entity.enums.Currency;
+import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.OrderService;
 import kazantseva.project.OnlineStore.service.impl.StripeService;
@@ -55,6 +56,11 @@ public class PageController {
     @GetMapping("/products_html")
     public String products() {
         return "products";
+    }
+
+    @GetMapping("/subscriptions_html")
+    public String subscriptions() {
+        return "subscription";
     }
 
     @GetMapping("/profile")
@@ -109,7 +115,7 @@ public class PageController {
 
         model.addAttribute("amount", order.getPrice().multiply(BigDecimal.valueOf(100.0)).intValue());
         model.addAttribute("stripePublicKey", stripePublicKey);
-        model.addAttribute("currency", ChargeRequest.Currency.USD);
+        model.addAttribute("currency", Currency.USD);
 
         return "order";
     }
@@ -126,10 +132,10 @@ public class PageController {
         model.addAttribute("customerId", customerId);
         model.addAttribute("amount", order.getPrice().multiply(BigDecimal.valueOf(100.0)).intValue());
         model.addAttribute("stripePublicKey", stripePublicKey);
-        model.addAttribute("currency", ChargeRequest.Currency.USD);
+        model.addAttribute("currency", Currency.USD);
 
         chargeRequest.setDescription("Example charge");
-        chargeRequest.setCurrency(ChargeRequest.Currency.EUR);
+        chargeRequest.setCurrency(Currency.EUR);
         Charge charge;
 
         try {

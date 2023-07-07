@@ -4,7 +4,7 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Edit order</title>
+    <title>Subscriptions</title>
     <link crossorigin="anonymous"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
@@ -40,7 +40,52 @@
                     "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js">
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:src="@{/js/editorder.js}" type="text/javascript"></script>
+    <!--    <script th:src="@{/js/productsadmin.js}" type="text/javascript"></script>-->
+    <style type="text/css">
+        @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            margin-block: 2rem;
+            gap: 2rem;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            width: clamp(20rem, calc(20rem + 2vw), 22rem);
+            overflow: hidden;
+            box-shadow: 0 .1rem 1rem rgba(0, 0, 0, 0.1);
+            border-radius: 1em;
+            background: #f7fafa;
+        }
+
+        .card__body {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+        }
+
+        .tag + .tag {
+            margin-left: .5em;
+        }
+
+        .card__body h4 {
+            font-size: 1.5rem;
+            text-transform: capitalize;
+        }
+    </style>
 </head>
 <body>
 <header class="header">
@@ -52,6 +97,7 @@
         <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
         <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
     </div>
+
     <nav class="nav-items">
         <a th:href="@{/}" th:text="#{home}"></a>
         <a th:href="@{/products_html}" th:text="#{products}"></a>
@@ -82,92 +128,70 @@
     </nav>
 </header>
 <main>
-    <div th:if="${param.error}">
-        <div class="alert alert-danger" th:text="#{invalidData}"></div>
-    </div>
-    <section class="pt-5 pb-5">
+    <br>
+    <div class="container my-2">
+        <h1 th:text="#{subscriptions}"></h1>
+        <br>
         <div class="container">
-            <div class="row w-100">
-                <div class="col-lg-12 col-md-12 col-12">
-                    <h3 class="display-5 mb-2 text-center" th:text="#{yourOrder}"></h3>
-                    <br><br>
-                    <input id="customerId" th:value="${customerId}" type="hidden">
-                    <input id="orderId" th:value="${orderId}" type="hidden">
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label><b th:text="#{date}"></b></label>
-                        </div>
-                        <div class="col-md-3">
-                            <input id="date" readonly type="text"/>
-                        </div>
-                    </div>
-                    <br><br>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label><b th:text="#{delivery}"></b></label>
-                        </div>
-                        <div class="col-md-3">
-                            <input
-                                    class="form-control"
-                                    id="deliveryAddress"
-                                    name="deliveryAddress"
-                                    th:placeholder="#{enterDeliveryAddress}"
-                                    type="text"
-                            />
-                        </div>
-                    </div>
-                    <br><br>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label><b th:text="#{description}"></b></label>
-                        </div>
-                        <div class="col-md-3">
-                            <input
-                                    class="form-control"
-                                    id="description"
-                                    name="description"
-                                    th:placeholder="#{enterDescription}"
-                                    type="text"
-                            />
-                        </div>
-                    </div>
-                    <br><br>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label><b th:text="#{status}"></b></label>
-                        </div>
-                        <div class="col-md-3">
-                            <p id="orderStatus">
-                        </div>
-                    </div>
-                    <br><br>
-                    <table class="table table-condensed table-responsive-md" id="productsTable">
-                        <thead>
-                        <tr>
-                            <th style="width:70%" th:text="#{product}"></th>
-                            <th style="width:10%" th:text="#{price}"></th>
-                            <th style="width:10%" th:text="#{count}"></th>
-                            <th style="width:10%"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+            <div class="card">
+                <div class="card__header">
+                    <img alt="card__image" class="card__image"
+                         src="https://img.delicious.com.au/bQjDG77i/del/2021/07/spiced-peanut-butter-and-honey-pancakes-with-blackberry-cream-155151-2.jpg"
+                         width="600">
+                </div>
+                <div class="card__body" style="height: 300px">
+                    <h4 th:text="#{title1}"></h4>
+                    <p th:text="#{description1}"></p>
+                    <p th:text="#{products1}"></p>
+                </div>
+                <div class="intro2">
+                    <a id="subscribe1">
+                        <button th:text="#{subscribe}"></button>
+                    </a>
                     <br>
-                    <br>
-                    <div class="float-right text-right">
-                        <h5 th:text="#{total}"></h5>
-                        <h4 id="price"></h4>
-                    </div>
+                    <p style="color: #009a1e"><i>$15/per week</i></p>
                 </div>
             </div>
-            <div class="row mt-4 d-flex align-items-center">
+            <div class="card">
+                <div class="card__header">
+                    <img alt="card__image" class="card__image"
+                         src="https://www.marthastewart.com/thmb/MT871XcDVNlX_xjCIEpsFxxd2Sw=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/soy-honey-glazed-arctic-char-102908120-horiz-0323-2000-e2a4d23cc331484e953db2f0dbf7aa9a.jpg"
+                         width="600">
+                </div>
+                <div class="card__body" style="height: 300px">
+                    <h4 th:text="#{title2}"></h4>
+                    <p th:text="#{description2}"></p>
+                    <p th:text="#{products2}"></p>
+                </div>
                 <div class="intro2">
-                    <button class="btn-primary " id="saveButton" th:text="#{save}"></button>
+                    <a id="subscribe2">
+                        <button th:text="#{subscribe}"></button>
+                    </a>
+                    <br>
+                    <p style="color: #009a1e"><i>$20/per week</i></p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card__header">
+                    <img alt="card__image" class="card__image"
+                         src="https://cloudfront-ap-southeast-2.images.arcpublishing.com/nzme/62VFY3XV44LRBWMTE7HDJNA26Y.jpg"
+                         width="600">
+                </div>
+                <div class="card__body" style="height: 300px">
+                    <h4 th:text="#{title3}"></h4>
+                    <p th:text="#{description3}"></p>
+                    <p th:text="#{products3}"></p>
+                </div>
+                <div class="intro2">
+                    <a id="subscribe3">
+                        <button th:text="#{subscribe}"></button>
+                    </a>
+                    <br>
+                    <p style="color: #009a1e"><i>$25/per week</i></p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 </main>
 </body>
 </html>

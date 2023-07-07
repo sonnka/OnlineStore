@@ -1,6 +1,6 @@
 package kazantseva.project.OnlineStore.config;
 
-import kazantseva.project.OnlineStore.model.entity.CustomerRole;
+import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -43,6 +43,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 .requestMatchers("/login").permitAll()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/admin/**").hasRole(String.valueOf(CustomerRole.ADMIN))
+                .requestMatchers("/subscriptions/**").authenticated()
                 .requestMatchers("/customers/**").authenticated()
                 .requestMatchers("/profile").authenticated()
                 .requestMatchers("/profile/**").authenticated()
