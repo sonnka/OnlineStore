@@ -11,6 +11,8 @@ import com.stripe.param.PriceUpdateParams;
 import com.stripe.param.ProductCreateParams;
 import com.stripe.param.ProductUpdateParams;
 import jakarta.annotation.PostConstruct;
+import kazantseva.project.OnlineStore.exceptions.CustomStripeException;
+import kazantseva.project.OnlineStore.exceptions.CustomStripeException.StripeExceptionProfile;
 import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +38,24 @@ public class StripeService {
 
     public Charge charge(ChargeRequest chargeRequest) throws StripeException {
         Map<String, Object> chargeParams = new HashMap<>();
+
         chargeParams.put("amount", chargeRequest.getAmount());
         chargeParams.put("currency", chargeRequest.getCurrency());
         chargeParams.put("description", chargeRequest.getDescription());
         chargeParams.put("source", chargeRequest.getStripeToken());
+
         return Charge.create(chargeParams);
+    }
+
+    public String getProducts(Integer limit) throws StripeException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("limit", limit);
+
+        return Product.list(params).toJson();
+    }
+
+    public String getProduct(String productId) throws StripeException {
+        return Product.retrieve(productId).toJson();
     }
 
     public String createProduct(StripeProductRequest productRequest) throws StripeException {
@@ -59,16 +74,15 @@ public class StripeService {
         return product.toJson();
     }
 
-    public String updateProduct(String productId, StripeProductRequest productRequest) throws StripeException {
+    public String updateProduct(String productId, StripeProductRequest productRequest) throws StripeException,
+            CustomStripeException {
         Product product = Product.retrieve(productId);
 
-        Map<String, Object> params1 = new HashMap<>();
-        params1.put("product", productId);
-        PriceCollection priceCollection = Price.list(params1);
-        List<Price> prices = priceCollection.getData();
-        if (prices.isEmpty())
-            return null;
-        Price price = prices.get(0);
+        Price price = getPrice(productId);
+
+        if (price == null) {
+            throw new CustomStripeException(StripeExceptionProfile.PRICE_NULL);
+        }
 
         Long newPrice = productRequest.getPrice().multiply(BigDecimal.valueOf(100.0)).longValue();
         String newCurrency = productRequest.getCurrency().toLowerCase();
@@ -89,22 +103,19 @@ public class StripeService {
                     newPrice,
                     newCurrency,
                     productRequest.getRecurring());
-
         }
 
         return product.update(params).toJson();
     }
 
-    public void archiveProduct(String productId) throws StripeException {
+    public void archiveProduct(String productId) throws StripeException, CustomStripeException {
         Product product = Product.retrieve(productId);
 
-        Map<String, Object> params1 = new HashMap<>();
-        params1.put("product", productId);
-        PriceCollection priceCollection = Price.list(params1);
-        List<Price> prices = priceCollection.getData();
-        if (prices.isEmpty())
-            return;
-        Price price = prices.get(0);
+        Price price = getPrice(productId);
+
+        if (price == null) {
+            throw new CustomStripeException(StripeExceptionProfile.PRICE_NULL);
+        }
 
         ProductUpdateParams params;
         PriceUpdateParams priceParams;
@@ -122,16 +133,14 @@ public class StripeService {
         product.update(params);
     }
 
-    public void deleteProduct(String productId) throws StripeException {
+    public void deleteProduct(String productId) throws StripeException, CustomStripeException {
         Product product = Product.retrieve(productId);
 
-        Map<String, Object> params1 = new HashMap<>();
-        params1.put("product", productId);
-        PriceCollection priceCollection = Price.list(params1);
-        List<Price> prices = priceCollection.getData();
-        if (prices.isEmpty())
-            return;
-        Price price = prices.get(0);
+        Price price = getPrice(productId);
+
+        if (price == null) {
+            throw new CustomStripeException(StripeExceptionProfile.PRICE_NULL);
+        }
 
         ProductUpdateParams params;
         PriceUpdateParams priceParams;
@@ -167,5 +176,19 @@ public class StripeService {
             case "year" -> PriceCreateParams.Recurring.Interval.YEAR;
             default -> PriceCreateParams.Recurring.Interval.MONTH;
         };
+    }
+
+    private Price getPrice(String productId) throws StripeException {
+        Map<String, Object> params1 = new HashMap<>();
+        params1.put("product", productId);
+
+        PriceCollection priceCollection = Price.list(params1);
+
+        List<Price> prices = priceCollection.getData();
+
+        if (prices.isEmpty())
+            return null;
+
+        return prices.get(0);
     }
 }

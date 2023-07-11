@@ -1,6 +1,7 @@
 package kazantseva.project.OnlineStore.exceptions.handlers;
 
 import com.stripe.exception.*;
+import kazantseva.project.OnlineStore.exceptions.CustomStripeException;
 import kazantseva.project.OnlineStore.exceptions.dto.ExceptionResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class StripeExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(value = CustomStripeException.class)
+    public ResponseEntity<Object> handleCustomStripeException(CustomStripeException exception,
+                                                              WebRequest webRequest) {
+        var exceptionBody = new ExceptionResponse(exception.getName(), exception.getMessage());
+
+        return handleExceptionInternal(exception, exceptionBody, new HttpHeaders(),
+                exception.getResponseStatus(), webRequest);
+    }
+
     @ExceptionHandler(value = CardException.class)
     public ResponseEntity<Object> handleCardException(CardException exception,
                                                       WebRequest webRequest) {

@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.controller.rest;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import jakarta.validation.Valid;
+import kazantseva.project.OnlineStore.exceptions.CustomStripeException;
 import kazantseva.project.OnlineStore.model.entity.enums.Currency;
 import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
@@ -25,6 +26,16 @@ public class StripeController {
         return stripeService.charge(chargeRequest);
     }
 
+    @GetMapping("/stripe/products")
+    public String getProducts(Integer limit) throws StripeException {
+        return stripeService.getProducts(limit);
+    }
+
+    @GetMapping("/stripe/products/{product-id}")
+    public String getProducts(@PathVariable("product-id") String productId) throws StripeException {
+        return stripeService.getProduct(productId);
+    }
+
     @PostMapping("/stripe/products")
     public String createProduct(@RequestBody @Valid StripeProductRequest productRequest) throws StripeException {
         return stripeService.createProduct(productRequest);
@@ -33,17 +44,19 @@ public class StripeController {
     @PatchMapping("/stripe/products/{product-id}")
     public String updateProduct(@PathVariable("product-id") String productId,
                                 @RequestBody @Valid StripeProductRequest productRequest)
-            throws StripeException {
+            throws StripeException, CustomStripeException {
         return stripeService.updateProduct(productId, productRequest);
     }
 
     @PatchMapping("/stripe/products/{product-id}/archive")
-    public void archiveProduct(@PathVariable("product-id") String productId) throws StripeException {
+    public void archiveProduct(@PathVariable("product-id") String productId)
+            throws StripeException, CustomStripeException {
         stripeService.archiveProduct(productId);
     }
 
     @DeleteMapping("/stripe/products/{product-id}")
-    public void deleteProduct(@PathVariable("product-id") String productId) throws StripeException {
+    public void deleteProduct(@PathVariable("product-id") String productId)
+            throws StripeException, CustomStripeException {
         stripeService.deleteProduct(productId);
     }
 }
