@@ -87,32 +87,4 @@ public class CustomerController implements CustomerAPI {
             throws CustomerException, SecurityException {
         customerService.resendEmail(auth.getName(), customerId);
     }
-
-    @GetMapping("/admin/subscriptions")
-    public void getSubscriptions(Authentication auth) {
-
-    }
-
-    @GetMapping("/admin/subscriptions/{subscription-id}")
-    public void getSubscription(Authentication auth,
-                                @PathVariable("subscription-id") long subId) {
-
-    }
-
-    @PostMapping("/admin/subscriptions")
-    public void createSubscription(Authentication auth) {
-
-    }
-
-    @PatchMapping("/admin/subscriptions/{subscription-id}")
-    public void editSubscription(Authentication auth,
-                                 @PathVariable("subscription-id") long subId) {
-
-    }
-
-    @DeleteMapping("/admin/subscriptions/{subscription-id}")
-    public void deleteSubscription(Authentication auth,
-                                   @PathVariable("subscription-id") long subId) {
-
-    }
 }

@@ -35,6 +35,9 @@ public class CustomerException extends Exception {
         NOT_ADMIN("not_admin",
                 "You are not admin.", HttpStatus.FORBIDDEN),
 
+        NOT_BUYER("not_buyer",
+                "You are not buyer.", HttpStatus.FORBIDDEN),
+
         EMAIL_MISMATCH("email_mismatch",
                 "Email provided does not match the customer's email.", HttpStatus.FORBIDDEN),
 

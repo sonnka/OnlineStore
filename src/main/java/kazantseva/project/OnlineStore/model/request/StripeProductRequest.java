@@ -15,6 +15,8 @@ public class StripeProductRequest {
 
     String description;
 
+    String image;
+
     @NotNull
     BigDecimal price;
 

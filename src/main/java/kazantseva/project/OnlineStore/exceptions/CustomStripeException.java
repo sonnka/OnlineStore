@@ -24,7 +24,11 @@ public class CustomStripeException extends Exception {
     public enum StripeExceptionProfile {
 
         PRICE_NULL("price_is_null",
-                "Product price can not be null.", HttpStatus.BAD_REQUEST);
+                "Product price can not be null.", HttpStatus.BAD_REQUEST),
+
+        FAIL_UPLOAD_IMAGE("fail_upload_image",
+                "Failed to upload image, please try again.",
+                HttpStatus.BAD_GATEWAY);
 
         private final String exceptionName;
         private final String exceptionMessage;
