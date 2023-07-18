@@ -2,14 +2,8 @@ package kazantseva.project.OnlineStore.service.impl;
 
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Charge;
-import com.stripe.model.Price;
-import com.stripe.model.PriceCollection;
-import com.stripe.model.Product;
-import com.stripe.param.PriceCreateParams;
-import com.stripe.param.PriceUpdateParams;
-import com.stripe.param.ProductCreateParams;
-import com.stripe.param.ProductUpdateParams;
+import com.stripe.model.*;
+import com.stripe.param.*;
 import jakarta.annotation.PostConstruct;
 import kazantseva.project.OnlineStore.exceptions.CustomStripeException;
 import kazantseva.project.OnlineStore.exceptions.CustomStripeException.StripeExceptionProfile;
@@ -17,28 +11,30 @@ import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
 import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import kazantseva.project.OnlineStore.model.request.ChargeRequest;
+import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
 import kazantseva.project.OnlineStore.model.response.SubscriptionDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
+import kazantseva.project.OnlineStore.service.StripeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @Slf4j
-public class StripeService {
+public class StripeServiceImpl implements StripeService {
 
     private final CustomerRepository customerRepository;
     @Value("${STRIPE_SECRET_KEY}")
     private String secretKey;
 
-    public StripeService(CustomerRepository customerRepository) {
+    public StripeServiceImpl(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 
@@ -47,7 +43,31 @@ public class StripeService {
         Stripe.apiKey = secretKey;
     }
 
-    public Charge charge(String email, ChargeRequest chargeRequest) throws StripeException, CustomerException {
+    @Override
+    public String createSubscription(String email, String customerId, String productId)
+            throws CustomerException, StripeException {
+        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        Price price = getPrice(productId);
+
+        if (price != null) {
+
+            SubscriptionCreateParams params = SubscriptionCreateParams.builder()
+                    .setCustomer(customerId)
+                    .addItem(SubscriptionCreateParams.Item.builder()
+                            .setPrice(price.getId())
+                            .build())
+                    .build();
+
+            return Subscription.create(params).toJson();
+        }
+        return null;
+    }
+
+    @Override
+    public Charge charge(String email, ChargeRequest chargeRequest)
+            throws StripeException, CustomerException {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElse(null);
 
         if (customer == null) {
@@ -68,30 +88,112 @@ public class StripeService {
         return Charge.create(chargeParams);
     }
 
-    public String getProducts(String email, Integer limit) throws StripeException, CustomerException {
+    @Override
+    public String getCustomer(String email, String customerId)
+            throws CustomerException, StripeException {
         customerRepository.findByEmailIgnoreCase(email).orElseThrow(
                 () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        return Customer.retrieve(customerId).toJson();
+    }
+
+    @Override
+    public String createCustomer(String email, CreateCustomer customer)
+            throws StripeException, CustomerException {
+        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        PaymentMethodCreateParams paymentParams = PaymentMethodCreateParams.builder()
+                .setType(PaymentMethodCreateParams.Type.CARD)
+                .setCard(PaymentMethodCreateParams.Token.builder()
+                        .setToken("tok_visa")
+                        .build())
+                .build();
+
+        PaymentMethod paymentMethod = PaymentMethod.create(paymentParams);
+
+        CustomerCreateParams customerParams = CustomerCreateParams.builder()
+                .setName(customer.getName() + " " + customer.getSurname())
+                .setEmail(customer.getEmail())
+                .setPaymentMethod(paymentMethod.getId())
+                .setInvoiceSettings(CustomerCreateParams.InvoiceSettings.builder()
+                        .setDefaultPaymentMethod(paymentMethod.getId())
+                        .build())
+                .build();
+
+        return Customer.create(customerParams).toJson();
+    }
+
+    @Override
+    public String updateCustomer(String email, String customerId)
+            throws StripeException, CustomerException {
+        Customer customer =
+                Customer.retrieve(customerId);
+
+        var updatedCustomer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", updatedCustomer.getName() + " " + updatedCustomer.getSurname());
+
+        return customer.update(params).toJson();
+    }
+
+    @Override
+    public void deleteCustomer(String email, String customerId)
+            throws StripeException, CustomerException {
+        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        Customer customer = Customer.retrieve(customerId);
+
+        customer.delete();
+    }
+
+    @Override
+    public List<SubscriptionDTO> getProducts(String email, Integer limit)
+            throws StripeException, CustomerException {
+        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         Map<String, Object> params = new HashMap<>();
         params.put("limit", limit);
 
-        return Product.list(params).toJson();
+        List<SubscriptionDTO> subscriptions = new ArrayList<>();
+        var productList = Product.list(params).getData();
+
+        for (Product product : productList) {
+            subscriptions.add(toSubscriptionDTO(product, getPrice(product.getId())));
+        }
+
+        return subscriptions;
     }
 
-    public String getActiveProducts(String email, Integer limit) throws StripeException, CustomerException {
+    @Override
+    public List<SubscriptionDTO> getActiveProducts(String email, Integer limit)
+            throws StripeException, CustomerException {
         customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         Map<String, Object> params = new HashMap<>();
         params.put("limit", limit);
         params.put("active", true);
 
-        return Product.list(params).toJson();
+        List<SubscriptionDTO> subscriptions = new ArrayList<>();
+        var productList = Product.list(params).getData();
+
+        for (Product product : productList) {
+            subscriptions.add(toSubscriptionDTO(product, getPrice(product.getId())));
+        }
+
+        return subscriptions;
     }
 
-    public SubscriptionDTO getProduct(String email, String productId) throws StripeException, CustomerException {
+    @Override
+    public SubscriptionDTO getProduct(String email, String productId)
+            throws StripeException, CustomerException {
         customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         Product product = Product.retrieve(productId);
         Price price = getPrice(productId);
@@ -99,6 +201,7 @@ public class StripeService {
         return toSubscriptionDTO(product, price);
     }
 
+    @Override
     public SubscriptionDTO createProduct(String email, StripeProductRequest productRequest)
             throws StripeException, CustomStripeException, CustomerException {
         checkAdminByEmail(email);
@@ -119,6 +222,7 @@ public class StripeService {
         return toSubscriptionDTO(product, getPrice(product.getId()));
     }
 
+    @Override
     public SubscriptionDTO updateProduct(String email, String productId, StripeProductRequest productRequest)
             throws StripeException, CustomStripeException, CustomerException {
         checkAdminByEmail(email);
@@ -157,6 +261,7 @@ public class StripeService {
         return toSubscriptionDTO(updatedProduct, price);
     }
 
+    @Override
     public void archiveProduct(String email, String productId)
             throws StripeException, CustomStripeException, CustomerException {
         checkAdminByEmail(email);
@@ -185,6 +290,7 @@ public class StripeService {
         product.update(params);
     }
 
+    @Override
     public void deleteProduct(String email, String productId)
             throws StripeException, CustomStripeException, CustomerException {
         checkAdminByEmail(email);
@@ -208,7 +314,8 @@ public class StripeService {
         product.update(params);
     }
 
-    private Price createPrice(String productId, Long price, String currency, String recurring) throws StripeException {
+    private Price createPrice(String productId, Long price, String currency, String recurring)
+            throws StripeException {
         PriceCreateParams newPriceParams =
                 PriceCreateParams.builder()
                         .setProduct(productId)
@@ -261,7 +368,7 @@ public class StripeService {
                 .description(product.getDescription())
                 .active(product.getActive())
                 .currency(price.getCurrency().toUpperCase())
-                .price(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100), RoundingMode.DOWN))
+                .price(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)))
                 .recurring(price.getRecurring().getInterval().toUpperCase())
                 .build();
     }

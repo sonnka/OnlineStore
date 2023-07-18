@@ -6,8 +6,6 @@ import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.entity.enums.Currency;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.OrderService;
-import kazantseva.project.OnlineStore.service.impl.StripeService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,16 +20,10 @@ public class PageController {
 
     private final CustomerService customerService;
     private final OrderService orderService;
-//    private final StripeService paymentsService;
 
-    @Value("${STRIPE_PUBLIC_KEY}")
-    private String stripePublicKey;
-
-    public PageController(CustomerService customerService, OrderService orderService,
-                          StripeService paymentsService) {
+    public PageController(CustomerService customerService, OrderService orderService) {
         this.customerService = customerService;
         this.orderService = orderService;
-//        this.paymentsService = paymentsService;
     }
 
     @GetMapping("/")
