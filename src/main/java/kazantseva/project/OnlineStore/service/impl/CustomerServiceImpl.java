@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.service.impl;
 
+import com.stripe.exception.StripeException;
 import jakarta.mail.MessagingException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
@@ -22,6 +23,7 @@ import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.VerificationTokenRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
 import kazantseva.project.OnlineStore.service.EmailService;
+import kazantseva.project.OnlineStore.service.StripeService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
@@ -55,10 +57,11 @@ public class CustomerServiceImpl implements CustomerService {
     private OrderRepository orderRepository;
     private VerificationTokenRepository tokenRepository;
     private EmailService emailService;
+    private StripeService stripeService;
 
     @Override
     @Transactional
-    public void register(CreateCustomer newCustomer) throws SecurityException {
+    public void register(CreateCustomer newCustomer) throws SecurityException, StripeException {
         if (customerRepository.existsByEmailIgnoreCase(newCustomer.getEmail())) {
             throw new SecurityException(SecurityExceptionProfile.EMAIL_IS_OCCUPIED);
         }
@@ -78,6 +81,8 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
 
         customer.setBasket(orderRepository.save(order).getId());
+
+        customer.setStripeId(stripeService.createCustomer(newCustomer));
 
         customerRepository.save(customer);
 
@@ -158,7 +163,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public void toAdmin(String email, Long customerId) throws CustomerException, SecurityException {
+    public void toAdmin(String email, Long customerId)
+            throws CustomerException, SecurityException, StripeException {
         checkAdminByEmail(email);
 
         var customer = customerRepository.findById(customerId).orElseThrow(
@@ -178,6 +184,9 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setDate(LocalDateTime.now(ZoneOffset.UTC));
             customer.setBasket(null);
 
+            stripeService.deleteCustomer(customer.getStripeId());
+            customer.setStripeId(null);
+
             customerRepository.save(customer);
         } catch (MessagingException e) {
             throw new SecurityException(SecurityExceptionProfile.FAIL_SEND_EMAIL);
@@ -186,14 +195,18 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer)
-            throws CustomerException {
+            throws CustomerException, StripeException {
         var oldCustomer = findByIdAndCheckByEmail(customerId, email);
 
         Optional.of(customer.getName()).ifPresent(oldCustomer::setName);
         Optional.of(customer.getSurname()).ifPresent(oldCustomer::setSurname);
         Optional.ofNullable(customer.getAvatar()).ifPresent(oldCustomer::setAvatar);
 
-        customerRepository.save(oldCustomer);
+        var updatedCustomer = customerRepository.save(oldCustomer);
+
+        if (CustomerRole.ADMIN != oldCustomer.getRole()) {
+            stripeService.updateCustomer(updatedCustomer);
+        }
 
         return toCustomerDTO(oldCustomer);
     }
@@ -227,7 +240,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public void deleteCustomer(String email, long customerId) throws CustomerException, SecurityException {
+    public void deleteCustomer(String email, long customerId)
+            throws CustomerException, SecurityException, StripeException {
         var currentCustomer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
                 () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
@@ -286,13 +300,14 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
-    private void deleteYourself(Customer customer) {
+    private void deleteYourself(Customer customer) throws StripeException {
         tokenRepository.deleteByCustomer(customer);
         orderRepository.deleteByCustomer(customer);
         customerRepository.deleteById(customer.getId());
+        stripeService.deleteCustomer(customer.getStripeId());
     }
 
-    private void deleteByAdmin(Customer customer) throws SecurityException {
+    private void deleteByAdmin(Customer customer) throws SecurityException, StripeException {
         try {
             emailService.sendDeletionMail(customer.getEmail());
 

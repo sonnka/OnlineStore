@@ -2,7 +2,6 @@ package kazantseva.project.OnlineStore.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import kazantseva.project.OnlineStore.model.entity.enums.Currency;
 import kazantseva.project.OnlineStore.model.entity.enums.Status;
 import kazantseva.project.OnlineStore.model.entity.enums.Type;
 import lombok.*;
@@ -46,10 +45,6 @@ public class Order {
     @Column(name = "price")
     private BigDecimal price;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "currency")
-    private Currency currency;
-
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "customer_id")
     private Customer customer;
@@ -59,10 +54,4 @@ public class Order {
     @JsonIgnore
     @Column(name = "products")
     private List<OrderProduct> products;
-
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "order",
-            orphanRemoval = true)
-    @JsonIgnore
-    @Column(name = "payments")
-    private List<PaymentInfo> payments;
 }

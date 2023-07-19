@@ -4,6 +4,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import kazantseva.project.OnlineStore.exceptions.CustomStripeException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.model.entity.Customer;
 import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
@@ -13,23 +14,29 @@ import java.util.List;
 
 public interface StripeService {
 
+    Charge charge(String email, ChargeRequest chargeRequest, String id)
+            throws StripeException, CustomerException;
+
     String createSubscription(String email, String customerId, String productId)
             throws StripeException, CustomerException;
 
-    Charge charge(String email, ChargeRequest chargeRequest)
+    String updateSubscription(String email, String customerId, String subscriptionId)
             throws StripeException, CustomerException;
 
-    String getCustomer(String email, String customerId)
+    void cancelSubscription(String email, String customerId, String subscriptionId)
+            throws StripeException, CustomerException;
+
+    com.stripe.model.Customer getCustomer(String email, String customerId)
             throws CustomerException, StripeException;
 
-    String createCustomer(String email, CreateCustomer customer)
-            throws StripeException, CustomerException;
+    String createCustomer(CreateCustomer customer)
+            throws StripeException;
 
-    String updateCustomer(String email, String customerId)
-            throws StripeException, CustomerException;
+    void updateCustomer(Customer updatedCustomer)
+            throws StripeException;
 
-    void deleteCustomer(String email, String customerId)
-            throws StripeException, CustomerException;
+    void deleteCustomer(String customerId)
+            throws StripeException;
 
     List<SubscriptionDTO> getProducts(String email, Integer limit)
             throws StripeException, CustomerException;

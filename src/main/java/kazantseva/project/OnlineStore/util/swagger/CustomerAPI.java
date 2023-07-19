@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.util.swagger;
 
+import com.stripe.exception.StripeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -46,7 +47,7 @@ public interface CustomerAPI {
     @ResponseStatus(HttpStatus.CREATED)
     void register(
             @Parameter(description = "New customer", required = true)
-            @RequestBody @Valid CreateCustomer customer) throws CustomerException, SecurityException;
+            @RequestBody @Valid CreateCustomer customer) throws CustomerException, SecurityException, StripeException;
 
     @Operation(summary = "Get customer", description = "Returns customer.")
     @ApiResponses(value = {
@@ -80,7 +81,7 @@ public interface CustomerAPI {
             @Parameter(description = "ID of customer", required = true)
             @PathVariable("customer-id") long customerId,
             @Parameter(description = "Changed customer", required = true)
-            @RequestBody @Valid RequestCustomer customer) throws CustomerException;
+            @RequestBody @Valid RequestCustomer customer) throws CustomerException, StripeException;
 
     @Operation(summary = "Update avatar", description = "Updates avatar of customer.")
     @ApiResponses(value = {
@@ -112,7 +113,7 @@ public interface CustomerAPI {
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
             @Parameter(description = "ID of customer", required = true)
-            @PathVariable("customer-id") long customerId) throws CustomerException, SecurityException;
+            @PathVariable("customer-id") long customerId) throws CustomerException, SecurityException, StripeException;
 
     @Operation(summary = "Get customers", description = "Returns list of customers.")
     @ApiResponses(value = {
@@ -153,7 +154,7 @@ public interface CustomerAPI {
             @Parameter(description = "Authentication", required = true)
             Authentication auth,
             @Parameter(description = "ID of customer", required = true)
-            @PathVariable("customer-id") long customerId) throws CustomerException, SecurityException;
+            @PathVariable("customer-id") long customerId) throws CustomerException, SecurityException, StripeException;
 
     @Operation(summary = "Resend email", description = "Resends confirmation email.")
     @ApiResponses(value = {

@@ -11,19 +11,19 @@ import java.math.BigDecimal;
 @ToString
 public class SubscriptionDTO {
 
-    String id;
+    private String id;
 
-    String image;
+    private String image;
 
-    String name;
+    private String name;
 
-    String description;
+    private String description;
 
-    boolean active;
+    private boolean active;
 
-    BigDecimal price;
+    private BigDecimal price;
 
-    String currency;
+    private String currency;
 
-    String recurring;
+    private String recurring;
 }

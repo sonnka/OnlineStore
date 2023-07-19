@@ -1,10 +1,12 @@
 package kazantseva.project.OnlineStore.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -60,6 +62,12 @@ public class Customer {
             mappedBy = "customer")
     @Column(name = "orders")
     private List<Order> orders;
+
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "customer",
+            orphanRemoval = true)
+    @JsonIgnore
+    @Column(name = "payments")
+    private List<PaymentInfo> payments = new ArrayList<>();
 
     public Customer() {
         super();

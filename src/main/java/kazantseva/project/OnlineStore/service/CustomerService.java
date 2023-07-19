@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.service;
 
+import com.stripe.exception.StripeException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.entity.Customer;
@@ -18,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface CustomerService {
     UserDetails toUserDetails(Customer customer);
 
-    void register(CreateCustomer customer) throws CustomerException, SecurityException;
+    void register(CreateCustomer customer) throws CustomerException, SecurityException, StripeException;
 
     LoginResponse login(Authentication auth) throws CustomerException, SecurityException;
 
@@ -32,15 +33,15 @@ public interface CustomerService {
 
     Page<AdminDTO> getAdmins(String email, Pageable pageable) throws CustomerException;
 
-    void toAdmin(String email, Long customerId) throws CustomerException, SecurityException;
+    void toAdmin(String email, Long customerId) throws CustomerException, SecurityException, StripeException;
 
     void resendEmail(String email, Long customerId) throws CustomerException, SecurityException;
 
     Long getCustomerId(String email) throws CustomerException;
 
-    CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer) throws CustomerException;
+    CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer) throws CustomerException, StripeException;
 
     void uploadAvatar(String email, Long customerId, MultipartFile file) throws CustomerException;
 
-    void deleteCustomer(String email, long customerId) throws CustomerException, SecurityException;
+    void deleteCustomer(String email, long customerId) throws CustomerException, SecurityException, StripeException;
 }

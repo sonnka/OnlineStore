@@ -9,38 +9,99 @@ import kazantseva.project.OnlineStore.exceptions.CustomStripeException;
 import kazantseva.project.OnlineStore.exceptions.CustomStripeException.StripeExceptionProfile;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
+import kazantseva.project.OnlineStore.model.entity.PaymentInfo;
 import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
 import kazantseva.project.OnlineStore.model.response.SubscriptionDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
+import kazantseva.project.OnlineStore.repository.PaymentInfoRepository;
 import kazantseva.project.OnlineStore.service.StripeService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
-@Slf4j
 public class StripeServiceImpl implements StripeService {
 
     private final CustomerRepository customerRepository;
+    private final PaymentInfoRepository paymentRepository;
     @Value("${STRIPE_SECRET_KEY}")
     private String secretKey;
 
-    public StripeServiceImpl(CustomerRepository customerRepository) {
+    public StripeServiceImpl(CustomerRepository customerRepository, PaymentInfoRepository paymentRepository) {
         this.customerRepository = customerRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @PostConstruct
     public void init() {
         Stripe.apiKey = secretKey;
+    }
+
+    @Override
+    public Charge charge(String email, ChargeRequest chargeRequest, String id)
+            throws CustomerException, StripeException {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElse(null);
+
+        if (customer == null) {
+            throw new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND);
+        }
+
+        if (customer.getRole() == CustomerRole.ADMIN) {
+            throw new CustomerException(CustomerExceptionProfile.NOT_BUYER);
+        }
+
+        Map<String, Object> chargeParams = new HashMap<>();
+
+        chargeParams.put("amount", chargeRequest.getAmount());
+        chargeParams.put("currency", chargeRequest.getCurrency());
+        chargeParams.put("description", "Payment for order № " + id);
+        chargeParams.put("source", chargeRequest.getStripeToken());
+
+        Charge charge;
+
+        try {
+            charge = Charge.create(chargeParams);
+
+            paymentRepository.save(PaymentInfo.builder()
+                    .customer(customer)
+                    .price(BigDecimal.valueOf(charge.getAmount()).divide(BigDecimal.valueOf(100)))
+                    .currency(charge.getCurrency().toUpperCase())
+                    .description(charge.getDescription())
+                    .date(LocalDateTime.now(ZoneOffset.UTC))
+                    .card("**** **** **** " + charge.getPaymentMethodDetails().getCard().getLast4())
+                    .paymentStatus(charge.getStatus())
+                    .errors(charge.getFailureMessage())
+                    .build()
+            );
+        } catch (StripeException e) {
+            var c = getCustomer(customer.getEmail(), customer.getStripeId());
+            var number = PaymentMethod.retrieve(c.getInvoiceSettings().getDefaultPaymentMethod()).getCard().getLast4();
+
+            paymentRepository.save(PaymentInfo.builder()
+                    .customer(customer)
+                    .price(BigDecimal.valueOf(chargeRequest.getAmount()).divide(BigDecimal.valueOf(100)))
+                    .currency(chargeRequest.getCurrency().toString().toUpperCase())
+                    .description("Payment for order № " + id)
+                    .date(LocalDateTime.now(ZoneOffset.UTC))
+                    .card("**** **** **** " + number)
+                    .paymentStatus(e.getCode())
+                    .errors(e.getUserMessage())
+                    .build()
+            );
+            throw e;
+        }
+
+        return charge;
     }
 
     @Override
@@ -66,42 +127,47 @@ public class StripeServiceImpl implements StripeService {
     }
 
     @Override
-    public Charge charge(String email, ChargeRequest chargeRequest)
-            throws StripeException, CustomerException {
-        var customer = customerRepository.findByEmailIgnoreCase(email).orElse(null);
+    public String updateSubscription(String email, String customerId, String subscriptionId)
+            throws StripeException {
+        Subscription subscription = Subscription.retrieve(subscriptionId);
 
-        if (customer == null) {
-            throw new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND);
+        String productId = subscription.getItems().getData().get(0).getPrice().getProduct();
+
+        Price price = getPrice(productId);
+
+        if (price != null) {
+            SubscriptionUpdateParams params2 = SubscriptionUpdateParams.builder()
+                    .addItem(
+                            SubscriptionUpdateParams.Item.builder()
+                                    .setId(subscription.getItems().getData().get(0).getId())
+                                    .setPrice(price.getId())
+                                    .build())
+                    .build();
+
+            subscription = subscription.update(params2);
         }
-
-        if (customer.getRole() == CustomerRole.ADMIN) {
-            throw new CustomerException(CustomerExceptionProfile.NOT_BUYER);
-        }
-
-        Map<String, Object> chargeParams = new HashMap<>();
-
-        chargeParams.put("amount", chargeRequest.getAmount());
-        chargeParams.put("currency", chargeRequest.getCurrency());
-        chargeParams.put("description", chargeRequest.getDescription());
-        chargeParams.put("source", chargeRequest.getStripeToken());
-
-        return Charge.create(chargeParams);
+        return subscription.toJson();
     }
 
     @Override
-    public String getCustomer(String email, String customerId)
+    public void cancelSubscription(String email, String productId, String subscriptionId)
+            throws StripeException {
+        Subscription subscription = Subscription.retrieve(subscriptionId);
+        subscription.cancel();
+    }
+
+    @Override
+    public Customer getCustomer(String email, String customerId)
             throws CustomerException, StripeException {
         customerRepository.findByEmailIgnoreCase(email).orElseThrow(
                 () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
-        return Customer.retrieve(customerId).toJson();
+        return Customer.retrieve(customerId);
     }
 
     @Override
-    public String createCustomer(String email, CreateCustomer customer)
-            throws StripeException, CustomerException {
-        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+    public String createCustomer(CreateCustomer customer)
+            throws StripeException {
 
         PaymentMethodCreateParams paymentParams = PaymentMethodCreateParams.builder()
                 .setType(PaymentMethodCreateParams.Type.CARD)
@@ -121,30 +187,24 @@ public class StripeServiceImpl implements StripeService {
                         .build())
                 .build();
 
-        return Customer.create(customerParams).toJson();
+        return Customer.create(customerParams).getId();
     }
 
     @Override
-    public String updateCustomer(String email, String customerId)
-            throws StripeException, CustomerException {
+    public void updateCustomer(kazantseva.project.OnlineStore.model.entity.Customer updatedCustomer)
+            throws StripeException {
         Customer customer =
-                Customer.retrieve(customerId);
-
-        var updatedCustomer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+                Customer.retrieve(updatedCustomer.getStripeId());
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", updatedCustomer.getName() + " " + updatedCustomer.getSurname());
 
-        return customer.update(params).toJson();
+        customer.update(params);
     }
 
     @Override
-    public void deleteCustomer(String email, String customerId)
-            throws StripeException, CustomerException {
-        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
-
+    public void deleteCustomer(String customerId)
+            throws StripeException {
         Customer customer = Customer.retrieve(customerId);
 
         customer.delete();

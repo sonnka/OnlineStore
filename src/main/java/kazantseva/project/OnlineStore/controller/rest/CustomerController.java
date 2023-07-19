@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.controller.rest;
 
+import com.stripe.exception.StripeException;
 import jakarta.validation.Valid;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.SecurityException;
@@ -33,7 +34,7 @@ public class CustomerController implements CustomerAPI {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void register(@RequestBody @Valid CreateCustomer customer)
-            throws CustomerException, SecurityException {
+            throws CustomerException, SecurityException, StripeException {
         customerService.register(customer);
     }
 
@@ -46,7 +47,8 @@ public class CustomerController implements CustomerAPI {
     @PatchMapping("/customers/{customer-id}")
     public CustomerDTO updateCustomer(Authentication auth,
                                       @PathVariable("customer-id") long customerId,
-                                      @RequestBody @Valid RequestCustomer customer) throws CustomerException {
+                                      @RequestBody @Valid RequestCustomer customer)
+            throws CustomerException, StripeException {
         return customerService.updateCustomer(auth.getName(), customerId, customer);
     }
 
@@ -60,7 +62,7 @@ public class CustomerController implements CustomerAPI {
     @DeleteMapping("/customers/{customer-id}")
     public void deleteCustomer(Authentication auth,
                                @PathVariable("customer-id") long customerId)
-            throws CustomerException, SecurityException {
+            throws CustomerException, SecurityException, StripeException {
         customerService.deleteCustomer(auth.getName(), customerId);
     }
 
@@ -77,7 +79,7 @@ public class CustomerController implements CustomerAPI {
     @PatchMapping("/admin/customers/{customer-id}/admin")
     public void toAdmin(Authentication auth,
                         @PathVariable("customer-id") long customerId)
-            throws CustomerException, SecurityException {
+            throws CustomerException, SecurityException, StripeException {
         customerService.toAdmin(auth.getName(), customerId);
     }
 
