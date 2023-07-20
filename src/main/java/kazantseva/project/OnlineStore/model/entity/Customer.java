@@ -63,8 +63,7 @@ public class Customer {
     @Column(name = "orders")
     private List<Order> orders;
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "customer",
-            orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "customer")
     @JsonIgnore
     @Column(name = "payments")
     private List<PaymentInfo> payments = new ArrayList<>();

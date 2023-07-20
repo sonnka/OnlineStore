@@ -2,8 +2,6 @@ package kazantseva.project.OnlineStore.model.response;
 
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @AllArgsConstructor
 @Builder
 @Getter
@@ -21,9 +19,7 @@ public class SubscriptionDTO {
 
     private boolean active;
 
-    private BigDecimal price;
-
-    private String currency;
+    private String price;
 
     private String recurring;
 }

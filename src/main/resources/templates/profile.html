@@ -195,6 +195,14 @@
                                 </a>
                             </div>
                         </div>
+                        <br><br>
+                        <div class="col-md-9" sec:authorize="hasRole('BUYER')">
+                            <div class="intro2">
+                                <a th:href="@{/payments_html}">
+                                    <button th:text="#{orders}"></button>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

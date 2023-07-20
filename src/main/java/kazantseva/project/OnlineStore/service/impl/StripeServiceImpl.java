@@ -16,28 +16,26 @@ import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
 import kazantseva.project.OnlineStore.model.response.SubscriptionDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
-import kazantseva.project.OnlineStore.repository.PaymentInfoRepository;
+import kazantseva.project.OnlineStore.repository.PaymentRepository;
 import kazantseva.project.OnlineStore.service.StripeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class StripeServiceImpl implements StripeService {
 
     private final CustomerRepository customerRepository;
-    private final PaymentInfoRepository paymentRepository;
+    private final PaymentRepository paymentRepository;
     @Value("${STRIPE_SECRET_KEY}")
     private String secretKey;
 
-    public StripeServiceImpl(CustomerRepository customerRepository, PaymentInfoRepository paymentRepository) {
+    public StripeServiceImpl(CustomerRepository customerRepository, PaymentRepository paymentRepository) {
         this.customerRepository = customerRepository;
         this.paymentRepository = paymentRepository;
     }
@@ -421,15 +419,20 @@ public class StripeServiceImpl implements StripeService {
             image = product.getImages().get(0);
         }
 
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        var priceFormat = df.format(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)));
+
+        Currency cur = Currency.getInstance(price.getCurrency().toUpperCase());
+        String symbol = cur.getSymbol();
+
         return SubscriptionDTO.builder()
                 .id(product.getId())
                 .image(image)
                 .name(product.getName())
                 .description(product.getDescription())
                 .active(product.getActive())
-                .currency(price.getCurrency().toUpperCase())
-                .price(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)))
-                .recurring(price.getRecurring().getInterval().toUpperCase())
+                .price(symbol + priceFormat)
+                .recurring(price.getRecurring().getInterval().toLowerCase())
                 .build();
     }
 

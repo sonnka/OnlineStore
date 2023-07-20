@@ -6,11 +6,9 @@ import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
-import kazantseva.project.OnlineStore.model.response.AdminDTO;
-import kazantseva.project.OnlineStore.model.response.CustomerDTO;
-import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
-import kazantseva.project.OnlineStore.model.response.LoginResponse;
+import kazantseva.project.OnlineStore.model.response.*;
 import kazantseva.project.OnlineStore.service.CustomerService;
+import kazantseva.project.OnlineStore.service.PaymentService;
 import kazantseva.project.OnlineStore.util.swagger.CustomerAPI;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class CustomerController implements CustomerAPI {
 
     private CustomerService customerService;
+    private PaymentService paymentService;
 
     @PostMapping("/login")
     public LoginResponse login(Authentication auth) throws CustomerException, SecurityException {
@@ -74,6 +73,11 @@ public class CustomerController implements CustomerAPI {
     @GetMapping("/admin/admins")
     public Page<AdminDTO> getAdmins(Authentication auth, Pageable pageable) throws CustomerException {
         return customerService.getAdmins(auth.getName(), pageable);
+    }
+
+    @GetMapping("/payments")
+    public Page<PaymentDTO> getPayments(Authentication auth, Pageable pageable) throws CustomerException {
+        return paymentService.getPayments(auth.getName(), pageable);
     }
 
     @PatchMapping("/admin/customers/{customer-id}/admin")

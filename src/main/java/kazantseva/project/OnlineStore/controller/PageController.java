@@ -57,6 +57,11 @@ public class PageController {
         return "products";
     }
 
+    @GetMapping("/payments_html")
+    public String payments() {
+        return "payments";
+    }
+
     @GetMapping("/subscriptions_html")
     public String subscriptions() {
         return "subscription";
