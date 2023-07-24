@@ -1,6 +1,5 @@
 package kazantseva.project.OnlineStore.controller.rest;
 
-import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import com.stripe.model.Event;
@@ -12,10 +11,7 @@ import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
 import kazantseva.project.OnlineStore.model.response.SubscriptionDTO;
 import kazantseva.project.OnlineStore.service.StripeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,25 +20,22 @@ import java.util.List;
 @RestController
 public class StripeController {
 
-    @Autowired
-    private StripeService stripeService;
+    private final StripeService stripeService;
 
     @Value("${STRIPE_WEBHOOK_SECRET}")
     private String webhookSecret;
 
+    public StripeController(StripeService stripeService) {
+        this.stripeService = stripeService;
+    }
+
     @PostMapping("/webhook")
-    public ResponseEntity<String> handleStripeWebhook(@RequestBody String payload,
-                                                      @RequestHeader("Stripe-Signature") String sigHeader) {
-        try {
-            Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
+    public void handleStripeWebhook(@RequestBody String payload,
+                                    @RequestHeader("Stripe-Signature") String sigHeader)
+            throws StripeException, CustomStripeException {
 
-            String subscriptionId = event.getDataObjectDeserializer().getObject().get().toJson();
-            System.out.println(subscriptionId);
-
-            return ResponseEntity.status(HttpStatus.OK).build();
-        } catch (SignatureVerificationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
+        stripeService.webhook(event);
     }
 
     @PostMapping("/charge/{id}")
@@ -53,36 +46,26 @@ public class StripeController {
         return stripeService.charge(auth.getName(), chargeRequest, id);
     }
 
-    @PostMapping("/stripe/customers/{customer-id}/subscription/{product-id}")
-    public String createSubscription(Authentication auth,
-                                     @PathVariable("customer-id") String customerId,
-                                     @PathVariable("product-id") String productId)
+    @PostMapping("/stripe/subscription/{product-id}")
+    public void createSubscription(Authentication auth,
+                                   @PathVariable("product-id") String productId)
             throws StripeException, CustomerException {
-        return stripeService.createSubscription(auth.getName(), customerId, productId);
+        stripeService.createSubscription(auth.getName(), productId);
     }
 
-    @PatchMapping("/stripe/customers/{customer-id}/subscription/{subscription-id}")
+    @PatchMapping("/stripe/subscription/{subscription-id}")
     public String updateSubscription(Authentication auth,
-                                     @PathVariable("customer-id") String customerId,
                                      @PathVariable("subscription-id") String subscriptionId)
             throws StripeException, CustomerException {
-        return stripeService.updateSubscription(auth.getName(), customerId, subscriptionId);
+        return stripeService.updateSubscription(auth.getName(), subscriptionId);
     }
 
-    @DeleteMapping("/stripe/customers/{customer-id}/subscription/{subscription-id}")
+    @DeleteMapping("/stripe/subscription/{subscription-id}")
     public void deleteSubscription(Authentication auth,
-                                   @PathVariable("customer-id") String customerId,
                                    @PathVariable("subscription-id") String subscriptionId)
             throws StripeException, CustomerException {
-        stripeService.cancelSubscription(auth.getName(), customerId, subscriptionId);
+        stripeService.cancelSubscription(auth.getName(), subscriptionId);
     }
-
-//    @GetMapping("/stripe/customers/{customer-id}")
-//    public String getCustomer(Authentication auth,
-//                              @PathVariable("customer-id") String customerId)
-//            throws StripeException, CustomerException {
-//        return stripeService.getCustomer(auth.getName(), customerId);
-//    }
 
     @GetMapping("/stripe/all/products")
     public List<SubscriptionDTO> getProducts(Authentication auth, Integer limit)

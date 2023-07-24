@@ -188,19 +188,21 @@
                         </div>
 
                         <br><br>
-                        <div class="col-md-9" sec:authorize="hasRole('BUYER')">
-                            <div class="intro2">
+                        <div class="row" sec:authorize="hasRole('BUYER')">
+                            <div class="col-md-3">
+                            </div>
+                            <div class="intro2 col-md-2">
                                 <a id="getOrdersButton">
                                     <button th:text="#{orders}"></button>
                                 </a>
                             </div>
-                        </div>
-                        <br><br>
-                        <div class="col-md-9" sec:authorize="hasRole('BUYER')">
-                            <div class="intro2">
+                            <br><br>
+                            <div class="intro2 col-md-2">
                                 <a th:href="@{/payments_html}">
-                                    <button th:text="#{orders}"></button>
+                                    <button th:text="#{payments}"></button>
                                 </a>
+                            </div>
+                            <div class="col-md-5">
                             </div>
                         </div>
                     </div>

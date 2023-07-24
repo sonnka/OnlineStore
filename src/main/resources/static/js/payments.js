@@ -19,14 +19,14 @@ $(document).ready(function () {
             url: "/payments",
             data: {
                 page: startPage,
-                size: 10,
+                size: 7,
                 sort: sort + "," + dir
             },
             success: function (response) {
                 table.empty();
                 $.each(response.content, (i, payment) => {
 
-                    if (payment.paymentStatus !== "succeeded") {
+                    if (payment.paymentStatus !== "succeeded" && payment.paymentStatus !== "active") {
                         color = "#c21f1f";
                     } else {
                         color = "#158116";

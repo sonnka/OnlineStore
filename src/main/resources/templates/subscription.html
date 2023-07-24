@@ -124,13 +124,19 @@
     </nav>
 </header>
 <main>
+    <div th:if="${param.error}">
+        <div class="alert alert-danger" th:text="#{invalidSubscribe}"></div>
+    </div>
+    <div th:if="${param.success}">
+        <div class="alert alert-info" th:text="#{successSubscribe}">
+        </div>
+    </div>
     <br>
     <h1 align="center" th:text="#{subscriptions}"></h1>
     <br> <br>
-    <div class="container my-2">
+    <div class="container my-2" id="container">
         <br>
-        <div class="container" id="container">
-
+        <div class="container" id="container2">
         </div>
     </div>
 </main>

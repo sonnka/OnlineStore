@@ -2,6 +2,7 @@ package kazantseva.project.OnlineStore.service;
 
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
+import com.stripe.model.Event;
 import kazantseva.project.OnlineStore.exceptions.CustomStripeException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.model.entity.Customer;
@@ -14,16 +15,18 @@ import java.util.List;
 
 public interface StripeService {
 
+    void webhook(Event event) throws StripeException, CustomStripeException;
+
     Charge charge(String email, ChargeRequest chargeRequest, String id)
             throws StripeException, CustomerException;
 
-    String createSubscription(String email, String customerId, String productId)
+    void createSubscription(String email, String productId)
             throws StripeException, CustomerException;
 
-    String updateSubscription(String email, String customerId, String subscriptionId)
+    String updateSubscription(String email, String subscriptionId)
             throws StripeException, CustomerException;
 
-    void cancelSubscription(String email, String customerId, String subscriptionId)
+    void cancelSubscription(String email, String subscriptionId)
             throws StripeException, CustomerException;
 
     com.stripe.model.Customer getCustomer(String email, String customerId)

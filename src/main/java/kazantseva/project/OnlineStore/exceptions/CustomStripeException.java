@@ -26,6 +26,9 @@ public class CustomStripeException extends Exception {
         PRICE_NULL("price_is_null",
                 "Product price can not be null.", HttpStatus.BAD_REQUEST),
 
+        SUBSCRIPTION_NOT_FOUND("subscription_not_found",
+                "Subscription is not found.", HttpStatus.BAD_REQUEST),
+
         FAIL_UPLOAD_IMAGE("fail_upload_image",
                 "Failed to upload image, please try again.",
                 HttpStatus.BAD_GATEWAY);

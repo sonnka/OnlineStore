@@ -23,4 +23,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findByVerificationToken(@Param("token") String token);
 
     Page<Customer> findByRole(CustomerRole role, Pageable pageable);
+
+    Customer findCustomerByStripeId(String stripeId);
 }

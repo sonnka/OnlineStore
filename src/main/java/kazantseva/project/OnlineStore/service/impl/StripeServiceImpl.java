@@ -46,6 +46,58 @@ public class StripeServiceImpl implements StripeService {
     }
 
     @Override
+    public void webhook(Event event) throws StripeException, CustomStripeException {
+
+        Subscription subscription = (Subscription) event.getDataObjectDeserializer().getObject().orElseThrow(
+                () -> new CustomStripeException(StripeExceptionProfile.SUBSCRIPTION_NOT_FOUND));
+
+        var stripeCustomer = Customer.retrieve(subscription.getCustomer());
+        var customer = customerRepository.findCustomerByStripeId(stripeCustomer.getId());
+
+        String number = PaymentMethod.retrieve(stripeCustomer.getInvoiceSettings().getDefaultPaymentMethod())
+                .getCard().getLast4();
+
+        Price priceObject = subscription.getItems().getData().get(0).getPrice();
+        Product product = Product.retrieve(priceObject.getProduct());
+
+        String description = "-";
+        String errors = "-";
+
+        BigDecimal price = priceObject.getUnitAmountDecimal().divide(BigDecimal.valueOf(100));
+        String status = subscription.getStatus();
+
+        switch (event.getType()) {
+            case "customer.subscription.created", "customer.subscription.pending_update_applied" ->
+                    description = "Payment for subscription \""
+                            + product.getName() + "\".";
+            case "customer.subscription.deleted" -> description = "Subscription \""
+                    + product.getName() + "\" was deleted.";
+            case "customer.subscription.paused" -> description = "Subscription \""
+                    + product.getName() + "\" was paused.";
+            case "customer.subscription.pending_update_expired" -> description = "Invalid payment for subscription \""
+                    + product.getName() + "\".";
+            case "customer.subscription.resumed" -> description = "Subscription \""
+                    + product.getName() + "\" was resumed.";
+            case "customer.subscription.trial_will_end" -> description = "Subscription \""
+                    + product.getName() + "\" trial will end.";
+            case "customer.subscription.updated" -> description = "Subscription \""
+                    + product.getName() + "\" was updated.";
+        }
+
+        paymentRepository.save(PaymentInfo.builder()
+                .customer(customer)
+                .date(LocalDateTime.now(ZoneOffset.UTC))
+                .card("**** **** **** " + number)
+                .description(description)
+                .price(price)
+                .currency(priceObject.getCurrency().toUpperCase())
+                .paymentStatus(status)
+                .errors(errors)
+                .build()
+        );
+    }
+
+    @Override
     public Charge charge(String email, ChargeRequest chargeRequest, String id)
             throws CustomerException, StripeException {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElse(null);
@@ -82,8 +134,9 @@ public class StripeServiceImpl implements StripeService {
                     .build()
             );
         } catch (StripeException e) {
-            var c = getCustomer(customer.getEmail(), customer.getStripeId());
-            var number = PaymentMethod.retrieve(c.getInvoiceSettings().getDefaultPaymentMethod()).getCard().getLast4();
+            var stripeCustomer = getCustomer(customer.getEmail(), customer.getStripeId());
+            var number = PaymentMethod.retrieve(stripeCustomer.getInvoiceSettings().getDefaultPaymentMethod())
+                    .getCard().getLast4();
 
             paymentRepository.save(PaymentInfo.builder()
                     .customer(customer)
@@ -98,34 +151,31 @@ public class StripeServiceImpl implements StripeService {
             );
             throw e;
         }
-
         return charge;
     }
 
     @Override
-    public String createSubscription(String email, String customerId, String productId)
+    public void createSubscription(String email, String productId)
             throws CustomerException, StripeException {
-        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
                 () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         Price price = getPrice(productId);
 
         if (price != null) {
-
             SubscriptionCreateParams params = SubscriptionCreateParams.builder()
-                    .setCustomer(customerId)
+                    .setCustomer(customer.getStripeId())
                     .addItem(SubscriptionCreateParams.Item.builder()
                             .setPrice(price.getId())
                             .build())
                     .build();
 
-            return Subscription.create(params).toJson();
+            Subscription.create(params);
         }
-        return null;
     }
 
     @Override
-    public String updateSubscription(String email, String customerId, String subscriptionId)
+    public String updateSubscription(String email, String subscriptionId)
             throws StripeException {
         Subscription subscription = Subscription.retrieve(subscriptionId);
 
@@ -148,9 +198,10 @@ public class StripeServiceImpl implements StripeService {
     }
 
     @Override
-    public void cancelSubscription(String email, String productId, String subscriptionId)
+    public void cancelSubscription(String email, String subscriptionId)
             throws StripeException {
         Subscription subscription = Subscription.retrieve(subscriptionId);
+
         subscription.cancel();
     }
 
@@ -166,7 +217,6 @@ public class StripeServiceImpl implements StripeService {
     @Override
     public String createCustomer(CreateCustomer customer)
             throws StripeException {
-
         PaymentMethodCreateParams paymentParams = PaymentMethodCreateParams.builder()
                 .setType(PaymentMethodCreateParams.Type.CARD)
                 .setCard(PaymentMethodCreateParams.Token.builder()
