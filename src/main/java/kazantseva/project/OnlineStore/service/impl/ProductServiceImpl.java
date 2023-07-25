@@ -34,7 +34,7 @@ import java.util.*;
 @AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    public static String UPLOAD_DIRECTORY = "tmp/images/products";
+    public static final String UPLOAD_DIRECTORY = "tmp/images/products";
 
     private ProductRepository productRepository;
     private CustomerRepository customerRepository;
@@ -89,9 +89,16 @@ public class ProductServiceImpl implements ProductService {
         var product = productRepository.findById(productId).orElseThrow(
                 () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND));
 
-        if (file != null && file.getOriginalFilename() != null) {
+        if (file != null) {
+            String fileExtension = "jpg";
 
-            String fileExtension = file.getOriginalFilename().split("\\.")[1];
+            var originalFileName = file.getOriginalFilename();
+
+            if (originalFileName != null && (originalFileName.split("\\.").length > 1)) {
+                int length = originalFileName.split("\\.").length;
+
+                fileExtension = originalFileName.split("\\.")[length - 1];
+            }
 
             String generatedFileName = "product_" + productId + "." + fileExtension;
 

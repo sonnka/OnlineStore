@@ -62,7 +62,7 @@ public class PageController {
         return "payments";
     }
 
-    @GetMapping("/subscriptions_html")
+    @GetMapping("/subscriptions")
     public String subscriptions() {
         return "subscription";
     }
@@ -193,5 +193,19 @@ public class PageController {
         model.addAttribute("productId", "-1");
 
         return "editproduct";
+    }
+
+    @GetMapping("/admin/subscriptions/{subscription-id}")
+    public String editSubscription(@PathVariable(value = "subscription-id") String subscriptionId, Model model) {
+        model.addAttribute("subscriptionId", subscriptionId);
+
+        return "editsubscription";
+    }
+
+    @GetMapping("/admin/subscriptions")
+    public String createSubscription(Model model) {
+        model.addAttribute("subscriptionId", "-1");
+
+        return "editsubscription";
     }
 }

@@ -50,7 +50,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
-    public static String UPLOAD_DIRECTORY = "tmp/images/customers";
+    public static final String UPLOAD_DIRECTORY = "tmp/images/customers";
 
     private final PasswordEncoder passwordEncoder;
     private CustomerRepository customerRepository;
@@ -215,9 +215,16 @@ public class CustomerServiceImpl implements CustomerService {
     public void uploadAvatar(String email, Long customerId, MultipartFile file) throws CustomerException {
         var customer = findByIdAndCheckByEmail(customerId, email);
 
-        if (file != null && file.getOriginalFilename() != null) {
+        if (file != null) {
+            String fileExtension = "jpg";
 
-            String fileExtension = file.getOriginalFilename().split("\\.")[1];
+            var originalFileName = file.getOriginalFilename();
+
+            if (originalFileName != null && (originalFileName.split("\\.").length > 1)) {
+                int length = originalFileName.split("\\.").length;
+
+                fileExtension = originalFileName.split("\\.")[length - 1];
+            }
 
             String generatedFileName = "avatar_" + customerId + "." + fileExtension;
 
@@ -249,11 +256,10 @@ public class CustomerServiceImpl implements CustomerService {
                 () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         if (!customer.getEmail().equals(email)) {
-            if (CustomerRole.ADMIN.equals(currentCustomer.getRole())) {
-                if (!CustomerRole.ADMIN.equals(customer.getRole())) {
-                    deleteByAdmin(customer);
-                    return;
-                }
+            if (CustomerRole.ADMIN.equals(currentCustomer.getRole())
+                    && (!CustomerRole.ADMIN.equals(customer.getRole()))) {
+                deleteByAdmin(customer);
+                return;
             }
             throw new CustomerException(CustomerExceptionProfile.CANNOT_DELETE_ADMIN);
         }
@@ -399,7 +405,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         int amount = 0;
 
-        if (drafts.size() > 0) {
+        if (!drafts.isEmpty()) {
             amount = drafts.get(0).getProducts().size();
         }
 

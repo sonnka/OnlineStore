@@ -128,7 +128,7 @@ public class OrderServiceImpl implements OrderService {
 
         var order = checkOrder(orderId, customerId);
 
-        if (newOrder.getProducts().size() > 0) {
+        if (!newOrder.getProducts().isEmpty()) {
             var updatedOrder = updateOrder(order, newOrder);
 
             if (updatedOrder.getPrice().compareTo(BigDecimal.valueOf(1.0)) < 0) {

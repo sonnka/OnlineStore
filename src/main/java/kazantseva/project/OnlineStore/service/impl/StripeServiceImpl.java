@@ -30,6 +30,7 @@ import java.util.*;
 @Service
 public class StripeServiceImpl implements StripeService {
 
+    private static final String CARD_TEMPLATE = "**** **** **** ";
     private final CustomerRepository customerRepository;
     private final PaymentRepository paymentRepository;
     @Value("${STRIPE_SECRET_KEY}")
@@ -60,34 +61,31 @@ public class StripeServiceImpl implements StripeService {
         Price priceObject = subscription.getItems().getData().get(0).getPrice();
         Product product = Product.retrieve(priceObject.getProduct());
 
-        String description = "-";
+        String description;
         String errors = "-";
 
         BigDecimal price = priceObject.getUnitAmountDecimal().divide(BigDecimal.valueOf(100));
         String status = subscription.getStatus();
 
+        String beginName = "Subscription \"" + product.getName();
+
         switch (event.getType()) {
-            case "customer.subscription.created", "customer.subscription.pending_update_applied" ->
-                    description = "Payment for subscription \""
-                            + product.getName() + "\".";
-            case "customer.subscription.deleted" -> description = "Subscription \""
-                    + product.getName() + "\" was deleted.";
-            case "customer.subscription.paused" -> description = "Subscription \""
-                    + product.getName() + "\" was paused.";
-            case "customer.subscription.pending_update_expired" -> description = "Invalid payment for subscription \""
-                    + product.getName() + "\".";
-            case "customer.subscription.resumed" -> description = "Subscription \""
-                    + product.getName() + "\" was resumed.";
-            case "customer.subscription.trial_will_end" -> description = "Subscription \""
-                    + product.getName() + "\" trial will end.";
-            case "customer.subscription.updated" -> description = "Subscription \""
-                    + product.getName() + "\" was updated.";
+            case "customer.subscription.created" -> description = beginName + "\" was activated.";
+            case "customer.subscription.pending_update_applied" -> description = beginName + "\" update applied.";
+            case "customer.subscription.deleted" -> description = beginName + "\" was deleted.";
+            case "customer.subscription.paused" -> description = beginName + "\" was paused.";
+            case "customer.subscription.pending_update_expired" ->
+                    description = beginName + "\" pending update expired.";
+            case "customer.subscription.resumed" -> description = beginName + "\" was resumed.";
+            case "customer.subscription.trial_will_end" -> description = beginName + "\" trial will end.";
+            case "customer.subscription.updated" -> description = beginName + "\" was updated.";
+            default -> description = "-";
         }
 
         paymentRepository.save(PaymentInfo.builder()
                 .customer(customer)
                 .date(LocalDateTime.now(ZoneOffset.UTC))
-                .card("**** **** **** " + number)
+                .card(CARD_TEMPLATE + number)
                 .description(description)
                 .price(price)
                 .currency(priceObject.getCurrency().toUpperCase())
@@ -128,7 +126,7 @@ public class StripeServiceImpl implements StripeService {
                     .currency(charge.getCurrency().toUpperCase())
                     .description(charge.getDescription())
                     .date(LocalDateTime.now(ZoneOffset.UTC))
-                    .card("**** **** **** " + charge.getPaymentMethodDetails().getCard().getLast4())
+                    .card(CARD_TEMPLATE + charge.getPaymentMethodDetails().getCard().getLast4())
                     .paymentStatus(charge.getStatus())
                     .errors(charge.getFailureMessage())
                     .build()
@@ -144,7 +142,7 @@ public class StripeServiceImpl implements StripeService {
                     .currency(chargeRequest.getCurrency().toString().toUpperCase())
                     .description("Payment for order № " + id)
                     .date(LocalDateTime.now(ZoneOffset.UTC))
-                    .card("**** **** **** " + number)
+                    .card(CARD_TEMPLATE + number)
                     .paymentStatus(e.getCode())
                     .errors(e.getUserMessage())
                     .build()
@@ -207,10 +205,7 @@ public class StripeServiceImpl implements StripeService {
 
     @Override
     public Customer getCustomer(String email, String customerId)
-            throws CustomerException, StripeException {
-        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
-
+            throws StripeException {
         return Customer.retrieve(customerId);
     }
 
@@ -259,13 +254,11 @@ public class StripeServiceImpl implements StripeService {
     }
 
     @Override
-    public List<SubscriptionDTO> getProducts(String email, Integer limit)
-            throws StripeException, CustomerException {
-        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
-
+    public List<SubscriptionDTO> getArchiveProducts(Integer limit)
+            throws StripeException {
         Map<String, Object> params = new HashMap<>();
         params.put("limit", limit);
+        params.put("active", false);
 
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
         var productList = Product.list(params).getData();
@@ -280,8 +273,8 @@ public class StripeServiceImpl implements StripeService {
     @Override
     public List<SubscriptionDTO> getActiveProducts(String email, Integer limit)
             throws StripeException, CustomerException {
-        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         Map<String, Object> params = new HashMap<>();
         params.put("limit", limit);
@@ -291,18 +284,15 @@ public class StripeServiceImpl implements StripeService {
         var productList = Product.list(params).getData();
 
         for (Product product : productList) {
-            subscriptions.add(toSubscriptionDTO(product, getPrice(product.getId())));
+            subscriptions.add(toSubscriptionDTO(product, getPrice(product.getId()), customer.getStripeId()));
         }
 
         return subscriptions;
     }
 
     @Override
-    public SubscriptionDTO getProduct(String email, String productId)
-            throws StripeException, CustomerException {
-        customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
-
+    public SubscriptionDTO getProduct(String productId)
+            throws StripeException {
         Product product = Product.retrieve(productId);
         Price price = getPrice(productId);
 
@@ -385,7 +375,7 @@ public class StripeServiceImpl implements StripeService {
         ProductUpdateParams params;
         PriceUpdateParams priceParams;
 
-        if (product.getActive()) {
+        if (Boolean.TRUE.equals(product.getActive())) {
             params = ProductUpdateParams.builder().setActive(false).build();
             priceParams = PriceUpdateParams.builder().setActive(false).build();
         } else {
@@ -393,9 +383,9 @@ public class StripeServiceImpl implements StripeService {
             priceParams = PriceUpdateParams.builder().setActive(true).build();
         }
 
-        price.update(priceParams);
-
         product.update(params);
+
+        price.update(priceParams);
     }
 
     @Override
@@ -417,9 +407,9 @@ public class StripeServiceImpl implements StripeService {
         params = ProductUpdateParams.builder().setActive(false).build();
         priceParams = PriceUpdateParams.builder().setActive(false).build();
 
-        price.update(priceParams);
-
         product.update(params);
+
+        price.update(priceParams);
     }
 
     private Price createPrice(String productId, Long price, String currency, String recurring)
@@ -463,27 +453,65 @@ public class StripeServiceImpl implements StripeService {
     }
 
     private SubscriptionDTO toSubscriptionDTO(Product product, Price price) {
-        String image = null;
+        if (product != null && price != null) {
+            String image = null;
 
-        if (product.getImages() != null && product.getImages().size() > 0) {
-            image = product.getImages().get(0);
+            if (product.getImages() != null && !product.getImages().isEmpty()) {
+                image = product.getImages().get(0);
+            }
+
+            DecimalFormat df = new DecimalFormat("#,##0.00");
+            var priceFormat = df.format(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)));
+
+            Currency cur = Currency.getInstance(price.getCurrency().toUpperCase());
+            String symbol = cur.getSymbol();
+
+            return SubscriptionDTO.builder()
+                    .id(product.getId())
+                    .image(image)
+                    .name(product.getName())
+                    .description(product.getDescription())
+                    .active(product.getActive())
+                    .price(symbol + priceFormat)
+                    .recurring(price.getRecurring().getInterval().toLowerCase())
+                    .build();
         }
+        return null;
+    }
 
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        var priceFormat = df.format(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)));
+    private SubscriptionDTO toSubscriptionDTO(Product product, Price price, String customerId)
+            throws StripeException {
+        if (product != null && price != null) {
+            String image = null;
 
-        Currency cur = Currency.getInstance(price.getCurrency().toUpperCase());
-        String symbol = cur.getSymbol();
+            if (product.getImages() != null && !product.getImages().isEmpty()) {
+                image = product.getImages().get(0);
+            }
 
-        return SubscriptionDTO.builder()
-                .id(product.getId())
-                .image(image)
-                .name(product.getName())
-                .description(product.getDescription())
-                .active(product.getActive())
-                .price(symbol + priceFormat)
-                .recurring(price.getRecurring().getInterval().toLowerCase())
-                .build();
+            DecimalFormat df = new DecimalFormat("#,##0.00");
+            var priceFormat = df.format(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)));
+
+            Currency cur = Currency.getInstance(price.getCurrency().toUpperCase());
+            String symbol = cur.getSymbol();
+
+            boolean isCustomers = false;
+
+            if (customerId != null) {
+                isCustomers = checkCustomerSubscription(customerId, product.getId());
+            }
+
+            return SubscriptionDTO.builder()
+                    .id(product.getId())
+                    .image(image)
+                    .name(product.getName())
+                    .description(product.getDescription())
+                    .active(product.getActive())
+                    .price(symbol + priceFormat)
+                    .recurring(price.getRecurring().getInterval().toLowerCase())
+                    .customer(isCustomers)
+                    .build();
+        }
+        return null;
     }
 
     private void checkAdminByEmail(String email) throws CustomerException {
@@ -493,5 +521,29 @@ public class StripeServiceImpl implements StripeService {
         if (!CustomerRole.ADMIN.equals(customer.getRole())) {
             throw new CustomerException(CustomerException.CustomerExceptionProfile.NOT_ADMIN);
         }
+    }
+
+    private boolean checkCustomerSubscription(String customerId, String productId)
+            throws StripeException {
+
+        List<String> expandList = new ArrayList<>();
+        expandList.add("subscriptions");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("expand", expandList);
+
+        Customer stripeCustomer = Customer.retrieve(customerId, params, null);
+
+        var customerSubscriptions = stripeCustomer.getSubscriptions().getData();
+
+        for (Subscription sub : customerSubscriptions) {
+            var listOfSubItems = sub.getItems().getData();
+            for (SubscriptionItem listOfSubItem : listOfSubItems) {
+                if (listOfSubItem.getPrice().getProduct().equals(productId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

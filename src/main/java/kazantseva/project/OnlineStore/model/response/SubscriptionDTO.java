@@ -22,4 +22,6 @@ public class SubscriptionDTO {
     private String price;
 
     private String recurring;
+
+    private boolean customer;
 }

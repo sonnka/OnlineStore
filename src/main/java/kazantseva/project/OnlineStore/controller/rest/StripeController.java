@@ -53,12 +53,12 @@ public class StripeController {
         stripeService.createSubscription(auth.getName(), productId);
     }
 
-    @PatchMapping("/stripe/subscription/{subscription-id}")
-    public String updateSubscription(Authentication auth,
-                                     @PathVariable("subscription-id") String subscriptionId)
-            throws StripeException, CustomerException {
-        return stripeService.updateSubscription(auth.getName(), subscriptionId);
-    }
+//    @PatchMapping("/stripe/subscription/{subscription-id}")
+//    public String updateSubscription(Authentication auth,
+//                                     @PathVariable("subscription-id") String subscriptionId)
+//            throws StripeException, CustomerException {
+//        return stripeService.updateSubscription(auth.getName(), subscriptionId);
+//    }
 
     @DeleteMapping("/stripe/subscription/{subscription-id}")
     public void deleteSubscription(Authentication auth,
@@ -67,23 +67,16 @@ public class StripeController {
         stripeService.cancelSubscription(auth.getName(), subscriptionId);
     }
 
-    @GetMapping("/stripe/all/products")
-    public List<SubscriptionDTO> getProducts(Authentication auth, Integer limit)
-            throws StripeException, CustomerException {
-        return stripeService.getProducts(auth.getName(), limit);
-    }
-
     @GetMapping("/stripe/products")
     public List<SubscriptionDTO> getActiveProducts(Authentication auth, Integer limit)
             throws StripeException, CustomerException {
         return stripeService.getActiveProducts(auth.getName(), limit);
     }
 
-    @GetMapping("/stripe/products/{product-id}")
-    public SubscriptionDTO getProduct(Authentication auth,
-                                      @PathVariable("product-id") String productId)
+    @GetMapping("/stripe/products/archive")
+    public List<SubscriptionDTO> getArchiveProducts(Integer limit)
             throws StripeException, CustomerException {
-        return stripeService.getProduct(auth.getName(), productId);
+        return stripeService.getArchiveProducts(limit);
     }
 
     @PostMapping("/stripe/products")

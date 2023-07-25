@@ -41,13 +41,13 @@ public interface StripeService {
     void deleteCustomer(String customerId)
             throws StripeException;
 
-    List<SubscriptionDTO> getProducts(String email, Integer limit)
+    List<SubscriptionDTO> getArchiveProducts(Integer limit)
             throws StripeException, CustomerException;
 
     List<SubscriptionDTO> getActiveProducts(String email, Integer limit)
             throws StripeException, CustomerException;
 
-    SubscriptionDTO getProduct(String email, String productId)
+    SubscriptionDTO getProduct(String productId)
             throws StripeException, CustomerException;
 
     SubscriptionDTO createProduct(String email, StripeProductRequest productRequest)

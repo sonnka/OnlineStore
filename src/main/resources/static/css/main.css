@@ -485,6 +485,10 @@ input.check-toggle-round-flat:checked + label:after {
     color: #009a1e;
 }
 
+.archive {
+    color: #4d4d4d;
+}
+
 .table {
     width: 100%;
     margin-bottom: 20px;

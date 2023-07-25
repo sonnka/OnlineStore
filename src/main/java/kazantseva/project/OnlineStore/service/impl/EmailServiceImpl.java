@@ -37,11 +37,11 @@ public class EmailServiceImpl implements EmailService {
         Locale locale = new Locale(token.getLocale().split("_")[0],
                 token.getLocale().split("_")[1]);
 
-        Context context = new Context(locale);
+        Context currentContext = new Context(locale);
         String link = "http://localhost:8080/confirm-email?token=";
-        context.setVariable("link", link + token.getToken());
+        currentContext.setVariable("link", link + token.getToken());
 
-        String process = templateEngine.process("letter", context);
+        String process = templateEngine.process("letter", currentContext);
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
