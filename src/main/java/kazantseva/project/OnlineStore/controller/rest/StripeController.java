@@ -50,39 +50,32 @@ public class StripeController {
     @PostMapping("/stripe/subscription/{product-id}")
     public void createSubscription(Authentication auth,
                                    @PathVariable("product-id") String productId)
-            throws StripeException, CustomerException {
+            throws StripeException, CustomerException, CustomStripeException {
         stripeService.createSubscription(auth.getName(), productId);
     }
 
-//    @PatchMapping("/stripe/subscription/{subscription-id}")
-//    public String updateSubscription(Authentication auth,
-//                                     @PathVariable("subscription-id") String subscriptionId)
-//            throws StripeException, CustomerException {
-//        return stripeService.updateSubscription(auth.getName(), subscriptionId);
-//    }
-
-    @DeleteMapping("/stripe/subscription/{subscription-id}")
+    @DeleteMapping("/stripe/subscription/{product-id}")
     public void deleteSubscription(Authentication auth,
-                                   @PathVariable("subscription-id") String subscriptionId)
-            throws StripeException, CustomerException {
-        stripeService.cancelSubscription(auth.getName(), subscriptionId);
+                                   @PathVariable("product-id") String productId)
+            throws StripeException, CustomerException, CustomStripeException {
+        stripeService.cancelSubscription(auth.getName(), productId);
     }
 
     @GetMapping("/stripe/products")
-    public List<SubscriptionDTO> getActiveProducts(Authentication auth, Integer limit)
-            throws StripeException, CustomerException {
-        return stripeService.getActiveProducts(auth.getName(), limit);
+    public List<SubscriptionDTO> getActiveProducts(Authentication auth)
+            throws CustomerException {
+        return stripeService.getActiveProducts(auth.getName());
     }
 
     @GetMapping("/stripe/products/archive")
-    public List<SubscriptionDTO> getArchiveProducts(Integer limit)
-            throws StripeException, CustomerException {
-        return stripeService.getArchiveProducts(limit);
+    public List<SubscriptionDTO> getArchiveProducts(Authentication auth)
+            throws CustomerException {
+        return stripeService.getArchiveProducts(auth.getName());
     }
 
     @GetMapping("/stripe/products/{product-id}")
     public SubscriptionResponse getProduct(@PathVariable("product-id") String productId)
-            throws StripeException, CustomerException {
+            throws CustomStripeException {
         return stripeService.getProduct(productId);
     }
 
@@ -105,12 +98,6 @@ public class StripeController {
     public void archiveProduct(Authentication auth, @PathVariable("product-id") String productId)
             throws StripeException, CustomStripeException, CustomerException {
         stripeService.archiveProduct(auth.getName(), productId);
-    }
-
-    @DeleteMapping("/stripe/products/{product-id}")
-    public void deleteProduct(Authentication auth, @PathVariable("product-id") String productId)
-            throws StripeException, CustomStripeException, CustomerException {
-        stripeService.deleteProduct(auth.getName(), productId);
     }
 }
 

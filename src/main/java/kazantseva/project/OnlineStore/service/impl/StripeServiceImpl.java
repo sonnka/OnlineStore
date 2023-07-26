@@ -13,6 +13,8 @@ import kazantseva.project.OnlineStore.model.entity.PaymentInfo;
 import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import kazantseva.project.OnlineStore.model.entity.enums.MyCurrency;
 import kazantseva.project.OnlineStore.model.entity.enums.Recurring;
+import kazantseva.project.OnlineStore.model.mongo.entity.StripeProduct;
+import kazantseva.project.OnlineStore.model.mongo.entity.StripeSubscription;
 import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
@@ -20,8 +22,11 @@ import kazantseva.project.OnlineStore.model.response.SubscriptionDTO;
 import kazantseva.project.OnlineStore.model.response.SubscriptionResponse;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.PaymentRepository;
+import kazantseva.project.OnlineStore.repository.mongo.StripeProductRepository;
+import kazantseva.project.OnlineStore.repository.mongo.StripeSubscriptionRepository;
 import kazantseva.project.OnlineStore.service.StripeService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,13 +39,22 @@ import java.util.*;
 public class StripeServiceImpl implements StripeService {
 
     private static final String CARD_TEMPLATE = "**** **** **** ";
+    private static final String PRICE_TEMPLATE = "#,##0.00";
     private final CustomerRepository customerRepository;
+    private final StripeProductRepository stripeProductRepository;
+    private final StripeSubscriptionRepository stripeSubscriptionRepository;
     private final PaymentRepository paymentRepository;
+
     @Value("${STRIPE_SECRET_KEY}")
     private String secretKey;
 
-    public StripeServiceImpl(CustomerRepository customerRepository, PaymentRepository paymentRepository) {
+    public StripeServiceImpl(CustomerRepository customerRepository,
+                             StripeProductRepository stripeProductRepository,
+                             StripeSubscriptionRepository stripeSubscriptionRepository,
+                             PaymentRepository paymentRepository) {
         this.customerRepository = customerRepository;
+        this.stripeProductRepository = stripeProductRepository;
+        this.stripeSubscriptionRepository = stripeSubscriptionRepository;
         this.paymentRepository = paymentRepository;
     }
 
@@ -75,7 +89,7 @@ public class StripeServiceImpl implements StripeService {
         switch (event.getType()) {
             case "customer.subscription.created" -> description = beginName + "\" was activated.";
             case "customer.subscription.pending_update_applied" -> description = beginName + "\" update applied.";
-            case "customer.subscription.deleted" -> description = beginName + "\" was deleted.";
+            case "customer.subscription.deleted" -> description = beginName + "\" was canceled.";
             case "customer.subscription.paused" -> description = beginName + "\" was paused.";
             case "customer.subscription.pending_update_expired" ->
                     description = beginName + "\" pending update expired.";
@@ -156,77 +170,6 @@ public class StripeServiceImpl implements StripeService {
     }
 
     @Override
-    public void createSubscription(String email, String productId)
-            throws CustomerException, StripeException {
-        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
-
-        Price price = getPrice(productId);
-
-        if (price != null) {
-            SubscriptionCreateParams params = SubscriptionCreateParams.builder()
-                    .setCustomer(customer.getStripeId())
-                    .addItem(SubscriptionCreateParams.Item.builder()
-                            .setPrice(price.getId())
-                            .build())
-                    .build();
-
-            var subscription = Subscription.create(params);
-
-            List<String> subscriptions = new ArrayList<>();
-
-            if (customer.getSubscriptions() != null) {
-                subscriptions = customer.getSubscriptions();
-            }
-
-            subscriptions.add(subscription.getId());
-
-            customer.setSubscriptions(subscriptions);
-            customerRepository.save(customer);
-        }
-    }
-
-    @Override
-    public String updateSubscription(String email, String subscriptionId)
-            throws StripeException {
-        Subscription subscription = Subscription.retrieve(subscriptionId);
-
-        String productId = subscription.getItems().getData().get(0).getPrice().getProduct();
-
-        Price price = getPrice(productId);
-
-        if (price != null) {
-            SubscriptionUpdateParams params2 = SubscriptionUpdateParams.builder()
-                    .addItem(
-                            SubscriptionUpdateParams.Item.builder()
-                                    .setId(subscription.getItems().getData().get(0).getId())
-                                    .setPrice(price.getId())
-                                    .build())
-                    .build();
-
-            subscription = subscription.update(params2);
-        }
-        return subscription.toJson();
-    }
-
-    @Override
-    public void cancelSubscription(String email, String subscriptionId)
-            throws StripeException, CustomerException {
-        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
-
-        Subscription subscription = Subscription.retrieve(subscriptionId);
-
-        subscription.cancel();
-
-        List<String> subscriptions = customer.getSubscriptions();
-        subscriptions.remove(subscription.getId());
-
-        customer.setSubscriptions(subscriptions);
-        customerRepository.save(customer);
-    }
-
-    @Override
     public Customer getCustomer(String email, String customerId)
             throws StripeException {
         return Customer.retrieve(customerId);
@@ -277,47 +220,45 @@ public class StripeServiceImpl implements StripeService {
     }
 
     @Override
-    public List<SubscriptionDTO> getArchiveProducts(Integer limit)
-            throws StripeException {
-        Map<String, Object> params = new HashMap<>();
-        params.put("limit", limit);
-        params.put("active", false);
+    public List<SubscriptionDTO> getArchiveProducts(String email)
+            throws CustomerException {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        checkAdminByEmail(email);
+
+        List<StripeProduct> products = stripeProductRepository.findAllByActive(false);
 
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
-        var productList = Product.list(params).getData();
 
-        for (Product product : productList) {
-            subscriptions.add(toSubscriptionDTO(product, getPrice(product.getId())));
+        for (StripeProduct product : products) {
+            subscriptions.add(toSubscriptionDTO(product, customer.getStripeId()));
         }
 
         return subscriptions;
     }
 
     @Override
-    public List<SubscriptionDTO> getActiveProducts(String email, Integer limit)
-            throws StripeException, CustomerException {
+    public List<SubscriptionDTO> getActiveProducts(String email)
+            throws CustomerException {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("limit", limit);
-        params.put("active", true);
+        List<StripeProduct> products = stripeProductRepository.findAllByActive(true);
 
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
-        var productList = Product.list(params).getData();
 
-        for (Product product : productList) {
-            subscriptions.add(toSubscriptionDTO(product, getPrice(product.getId()), email));
+        for (StripeProduct product : products) {
+            subscriptions.add(toSubscriptionDTO(product, customer.getStripeId()));
         }
 
         return subscriptions;
     }
 
     @Override
-    public SubscriptionResponse getProduct(String productId)
-            throws StripeException {
-        Product product = Product.retrieve(productId);
-        Price price = getPrice(productId);
-
-        return toSubscriptionResponse(product, price);
+    public SubscriptionResponse getProduct(String productId) throws CustomStripeException {
+        return toSubscriptionResponse(stripeProductRepository.findByProductId(productId)
+                .orElseThrow(() -> new CustomStripeException(StripeExceptionProfile.SUBSCRIPTION_NOT_FOUND)));
     }
 
     @Override
@@ -332,6 +273,7 @@ public class StripeServiceImpl implements StripeService {
 
         Product product = Product.create(params);
 
+
         if (productRequest.getImage() != null && !productRequest.getImage().equals("")) {
             product = updateImage(productRequest.getImage(), product);
         }
@@ -339,12 +281,21 @@ public class StripeServiceImpl implements StripeService {
         String currency = validateCurrency(productRequest.getCurrency());
         String recurring = validateRecurring(productRequest.getRecurring());
 
-        createPrice(product.getId(),
+        var price = createPrice(product.getId(),
                 productRequest.getPrice().multiply(BigDecimal.valueOf(100.0)).longValue(),
                 currency,
                 recurring);
 
-        return toSubscriptionResponse(product, getPrice(product.getId()));
+        return toSubscriptionResponse(stripeProductRepository.save(StripeProduct.builder()
+                .active(product.getActive())
+                .productId(product.getId())
+                .image(getProductImage(product))
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)))
+                .currency(price.getCurrency().toUpperCase())
+                .recurring(recurring)
+                .build()));
     }
 
     @Override
@@ -386,7 +337,26 @@ public class StripeServiceImpl implements StripeService {
             updatedProduct = updateImage(productRequest.getImage(), product);
         }
 
-        return toSubscriptionResponse(updatedProduct, price);
+        StripeProduct stripeProduct = stripeProductRepository.findByProductId(productId)
+                .orElseThrow(() -> new CustomStripeException(StripeExceptionProfile.SUBSCRIPTION_NOT_FOUND));
+
+        BigDecimal oldPrice = stripeProduct.getPrice();
+
+        stripeProduct.setActive(updatedProduct.getActive());
+        stripeProduct.setImage(getProductImage(updatedProduct));
+        stripeProduct.setName(updatedProduct.getName());
+        stripeProduct.setDescription(updatedProduct.getDescription());
+        stripeProduct.setPrice(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)));
+        stripeProduct.setCurrency(price.getCurrency().toUpperCase());
+        stripeProduct.setRecurring(price.getRecurring().getInterval().toUpperCase());
+
+        stripeProduct = stripeProductRepository.save(stripeProduct);
+
+        if (oldPrice.compareTo(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100))) != 0) {
+            updateSubscription(stripeProduct);
+        }
+
+        return toSubscriptionResponse(stripeProduct);
     }
 
     @Override
@@ -413,33 +383,113 @@ public class StripeServiceImpl implements StripeService {
             priceParams = PriceUpdateParams.builder().setActive(true).build();
         }
 
-        product.update(params);
+        product = product.update(params);
 
         price.update(priceParams);
+
+        StripeProduct stripeProduct = stripeProductRepository.findByProductId(productId)
+                .orElseThrow(() -> new CustomStripeException(StripeExceptionProfile.SUBSCRIPTION_NOT_FOUND));
+
+        stripeProduct.setActive(product.getActive());
+
+        stripeProductRepository.save(stripeProduct);
+
+        cancelSubscriptionByProduct(stripeProduct);
     }
 
     @Override
-    public void deleteProduct(String email, String productId)
-            throws StripeException, CustomStripeException, CustomerException {
-        checkAdminByEmail(email);
-
-        Product product = Product.retrieve(productId);
+    public void createSubscription(String email, String productId)
+            throws CustomerException, StripeException, CustomStripeException {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         Price price = getPrice(productId);
 
-        if (price == null) {
-            throw new CustomStripeException(StripeExceptionProfile.PRICE_NULL);
+        if (price != null) {
+            SubscriptionCreateParams params = SubscriptionCreateParams.builder()
+                    .setCustomer(customer.getStripeId())
+                    .addItem(SubscriptionCreateParams.Item.builder()
+                            .setPrice(price.getId())
+                            .build())
+                    .build();
+
+            var subscription = Subscription.create(params);
+
+            StripeProduct product = stripeProductRepository.findByProductId(productId)
+                    .orElseThrow(() -> new CustomStripeException(StripeExceptionProfile.SUBSCRIPTION_NOT_FOUND));
+
+            stripeSubscriptionRepository.save(StripeSubscription.builder()
+                    .customerId(subscription.getCustomer())
+                    .subscriptionId(subscription.getId())
+                    .product(product)
+                    .build());
+        }
+    }
+
+    @Override
+    public void cancelSubscription(String email, String productId)
+            throws StripeException, CustomerException, CustomStripeException {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        StripeProduct product = stripeProductRepository.findByProductId(productId).orElse(null);
+
+        if (product == null) {
+            return;
         }
 
-        ProductUpdateParams params;
-        PriceUpdateParams priceParams;
+        StripeSubscription stripeSub = stripeSubscriptionRepository.findFirstByCustomerIdAndProduct(
+                customer.getStripeId(), product).orElseThrow(
+                () -> new CustomStripeException(StripeExceptionProfile.SUBSCRIPTION_NOT_FOUND));
 
-        params = ProductUpdateParams.builder().setActive(false).build();
-        priceParams = PriceUpdateParams.builder().setActive(false).build();
+        Subscription subscription = Subscription.retrieve(stripeSub.getSubscriptionId());
 
-        product.update(params);
+        subscription.cancel();
 
-        price.update(priceParams);
+        stripeSubscriptionRepository.delete(stripeSub);
+    }
+
+    private void updateSubscription(StripeProduct product)
+            throws StripeException {
+        List<String> subscriptions = stripeSubscriptionRepository.findAllByProduct(product)
+                .stream().map(StripeSubscription::getSubscriptionId).toList();
+
+        for (String id : subscriptions) {
+            Subscription subscription = Subscription.retrieve(id);
+
+            Price price = getPrice(product.getProductId());
+
+            if (price != null) {
+                SubscriptionUpdateParams params2 = SubscriptionUpdateParams.builder()
+                        .addItem(
+                                SubscriptionUpdateParams.Item.builder()
+                                        .setId(subscription.getItems().getData().get(0).getId())
+                                        .setPrice(price.getId())
+                                        .build())
+                        .build();
+
+                subscription.update(params2);
+            }
+        }
+    }
+
+    @Async
+    public void cancelSubscriptionByProduct(StripeProduct product)
+            throws StripeException {
+        if (product == null) {
+            return;
+        }
+
+        List<String> subscriptions = stripeSubscriptionRepository.findAllByProduct(product)
+                .stream().map(StripeSubscription::getSubscriptionId).toList();
+
+        for (String id : subscriptions) {
+            Subscription subscription = Subscription.retrieve(id);
+
+            subscription.cancel();
+        }
+
+        stripeSubscriptionRepository.deleteAllByProduct(product);
     }
 
     private Price createPrice(String productId, Long price, String currency, String recurring)
@@ -482,86 +532,53 @@ public class StripeServiceImpl implements StripeService {
         return prices.get(0);
     }
 
-    private SubscriptionDTO toSubscriptionDTO(Product product, Price price) {
-        if (product != null && price != null) {
-            String image = null;
-
-            if (product.getImages() != null && !product.getImages().isEmpty()) {
-                image = product.getImages().get(0);
-            }
-
-            DecimalFormat df = new DecimalFormat("#,##0.00");
-            var priceFormat = df.format(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)));
-
-            Currency cur = Currency.getInstance(price.getCurrency().toUpperCase());
-            String symbol = cur.getSymbol();
-
-            return SubscriptionDTO.builder()
-                    .id(product.getId())
-                    .image(image)
-                    .name(product.getName())
-                    .description(product.getDescription())
-                    .active(product.getActive())
-                    .price(symbol + priceFormat)
-                    .recurring(price.getRecurring().getInterval().toLowerCase())
-                    .build();
+    private SubscriptionDTO toSubscriptionDTO(StripeProduct product, String customerId) {
+        if (product == null) {
+            return null;
         }
-        return null;
+
+        boolean isCustomer = false;
+
+        if (customerId != null) {
+            isCustomer = stripeSubscriptionRepository.findFirstByCustomerIdAndProduct(customerId, product)
+                    .isPresent();
+        }
+
+        DecimalFormat df = new DecimalFormat(PRICE_TEMPLATE);
+        var priceFormat = df.format(product.getPrice());
+
+        Currency cur = Currency.getInstance(product.getCurrency());
+        String symbol = cur.getSymbol();
+
+        return SubscriptionDTO.builder()
+                .id(product.getProductId())
+                .image(product.getImage())
+                .name(product.getName())
+                .description(product.getDescription())
+                .active(product.isActive())
+                .price(symbol + priceFormat)
+                .recurring(product.getRecurring())
+                .isCustomer(isCustomer)
+                .build();
     }
 
-    private SubscriptionResponse toSubscriptionResponse(Product product, Price price) {
-        if (product != null && price != null) {
-            String image = null;
-
-            if (product.getImages() != null && !product.getImages().isEmpty()) {
-                image = product.getImages().get(0);
-            }
-
-            DecimalFormat df = new DecimalFormat("#,##0.00");
-            var priceFormat = df.format(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)));
-
-            return SubscriptionResponse.builder()
-                    .id(product.getId())
-                    .image(image)
-                    .name(product.getName())
-                    .description(product.getDescription())
-                    .price(priceFormat)
-                    .recurring(price.getRecurring().getInterval().toUpperCase())
-                    .currency(price.getCurrency().toUpperCase())
-                    .build();
+    private SubscriptionResponse toSubscriptionResponse(StripeProduct product) {
+        if (product == null) {
+            return null;
         }
-        return null;
-    }
 
-    private SubscriptionDTO toSubscriptionDTO(Product product, Price price, String email)
-            throws StripeException, CustomerException {
-        if (product != null && price != null) {
-            String image = null;
+        DecimalFormat df = new DecimalFormat(PRICE_TEMPLATE);
+        var priceFormat = df.format(product.getPrice());
 
-            if (product.getImages() != null && !product.getImages().isEmpty()) {
-                image = product.getImages().get(0);
-            }
-
-            DecimalFormat df = new DecimalFormat("#,##0.00");
-            var priceFormat = df.format(price.getUnitAmountDecimal().divide(BigDecimal.valueOf(100)));
-
-            Currency cur = Currency.getInstance(price.getCurrency().toUpperCase());
-            String symbol = cur.getSymbol();
-
-            boolean isCustomers = checkCustomerSubscription(email, product.getId());
-
-            return SubscriptionDTO.builder()
-                    .id(product.getId())
-                    .image(image)
-                    .name(product.getName())
-                    .description(product.getDescription())
-                    .active(product.getActive())
-                    .price(symbol + priceFormat)
-                    .recurring(price.getRecurring().getInterval().toLowerCase())
-                    .customer(isCustomers)
-                    .build();
-        }
-        return null;
+        return SubscriptionResponse.builder()
+                .id(product.getProductId())
+                .image(product.getImage())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(priceFormat)
+                .recurring(product.getRecurring())
+                .currency(product.getCurrency())
+                .build();
     }
 
     private void checkAdminByEmail(String email) throws CustomerException {
@@ -571,33 +588,6 @@ public class StripeServiceImpl implements StripeService {
         if (!CustomerRole.ADMIN.equals(customer.getRole())) {
             throw new CustomerException(CustomerException.CustomerExceptionProfile.NOT_ADMIN);
         }
-    }
-
-    private boolean checkCustomerSubscription(String email, String productId)
-            throws StripeException, CustomerException {
-
-        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new CustomerException(CustomerException.CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
-
-        List<Subscription> customerSubscriptions = new ArrayList<>();
-
-        if (customer.getSubscriptions() != null) {
-            for (String subscriptionId : customer.getSubscriptions()) {
-                customerSubscriptions.add(Subscription.retrieve(subscriptionId));
-            }
-
-            for (Subscription sub : customerSubscriptions) {
-
-                var listOfSubItems = sub.getItems().getData();
-
-                for (SubscriptionItem listOfSubItem : listOfSubItems) {
-                    if (listOfSubItem.getPrice().getProduct().equals(productId)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     private String validateCurrency(String currency) {
@@ -623,5 +613,12 @@ public class StripeServiceImpl implements StripeService {
                         .addAllImage(List.of(image))
                         .build();
         return product.update(params);
+    }
+
+    private String getProductImage(Product product) {
+        if (product.getImages().isEmpty()) {
+            return null;
+        }
+        return product.getImages().get(0);
     }
 }

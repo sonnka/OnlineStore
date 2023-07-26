@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1286" author="admin">
+    <changeSet id="1292" author="admin">
         <createTable tableName="customers">
             <column name="customer_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -28,9 +28,6 @@
             <column name="avatar" type="varchar(250)">
                 <constraints nullable="true"/>
             </column>
-            <column name="subscriptions" type="varchar(250)">
-                <constraints nullable="true"/>
-            </column>
             <column name="stripe_id" type="varchar(200)">
                 <constraints nullable="true"/>
             </column>
@@ -49,7 +46,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1287" author="admin">
+    <changeSet id="1293" author="admin">
         <createTable tableName="verification_tokens">
             <column name="token_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -71,7 +68,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1288" author="admin">
+    <changeSet id="1294" author="admin">
         <createTable tableName="orders">
             <column name="order_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -97,7 +94,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1289" author="admin">
+    <changeSet id="1295" author="admin">
         <createTable tableName="payments">
             <column name="payment_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -129,7 +126,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1290" author="admin">
+    <changeSet id="1296" author="admin">
         <createTable tableName="order_product">
             <column name="order_product_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -147,7 +144,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1291" author="admin">
+    <changeSet id="1297" author="admin">
         <insert tableName="customers">
             <column name="name" value="Harry"/>
             <column name="surname" value="Potter"/>

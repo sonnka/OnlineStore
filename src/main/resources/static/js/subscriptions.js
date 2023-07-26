@@ -41,9 +41,12 @@ $(document).ready(function () {
                 const subscribeButtons = document.getElementsByClassName('button');
                 for (let i = 0; i < subscribeButtons.length; i++) {
                     subscribeButtons[i].addEventListener('click', function (e) {
-                        alert(this.getAttribute('value'));
                         const productId = this.getAttribute('data-product-id');
-                        subscribe(productId)
+                        if (this.textContent === "Subscribe") {
+                            subscribe(productId)
+                        } else {
+                            cancel(productId);
+                        }
                         e.stopImmediatePropagation();
                     });
                 }
@@ -62,6 +65,19 @@ $(document).ready(function () {
             url: "/stripe/subscription/" + productId,
             success: function () {
                 window.location = "/subscriptions?success";
+            },
+            error: function () {
+                window.location = "/subscriptions?error";
+            }
+        });
+    }
+
+    function cancel(productId) {
+        $.ajax({
+            type: "DELETE",
+            url: "/stripe/subscription/" + productId,
+            success: function () {
+                window.location = "/subscriptions";
             },
             error: function () {
                 window.location = "/subscriptions?error";

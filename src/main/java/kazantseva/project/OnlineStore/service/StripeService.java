@@ -22,13 +22,10 @@ public interface StripeService {
             throws StripeException, CustomerException;
 
     void createSubscription(String email, String productId)
-            throws StripeException, CustomerException;
-
-    String updateSubscription(String email, String subscriptionId)
-            throws StripeException, CustomerException;
+            throws StripeException, CustomerException, CustomStripeException;
 
     void cancelSubscription(String email, String subscriptionId)
-            throws StripeException, CustomerException;
+            throws StripeException, CustomerException, CustomStripeException;
 
     com.stripe.model.Customer getCustomer(String email, String customerId)
             throws CustomerException, StripeException;
@@ -42,14 +39,13 @@ public interface StripeService {
     void deleteCustomer(String customerId)
             throws StripeException;
 
-    List<SubscriptionDTO> getArchiveProducts(Integer limit)
-            throws StripeException, CustomerException;
+    List<SubscriptionDTO> getArchiveProducts(String email)
+            throws CustomerException;
 
-    List<SubscriptionDTO> getActiveProducts(String email, Integer limit)
-            throws StripeException, CustomerException;
+    List<SubscriptionDTO> getActiveProducts(String email)
+            throws CustomerException;
 
-    SubscriptionResponse getProduct(String productId)
-            throws StripeException, CustomerException;
+    SubscriptionResponse getProduct(String productId) throws CustomStripeException;
 
     SubscriptionResponse createProduct(String email, StripeProductRequest productRequest)
             throws StripeException, CustomStripeException, CustomerException;
@@ -58,8 +54,5 @@ public interface StripeService {
             throws StripeException, CustomStripeException, CustomerException;
 
     void archiveProduct(String email, String productId)
-            throws StripeException, CustomStripeException, CustomerException;
-
-    void deleteProduct(String email, String productId)
             throws StripeException, CustomStripeException, CustomerException;
 }

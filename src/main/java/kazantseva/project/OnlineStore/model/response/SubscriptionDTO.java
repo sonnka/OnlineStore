@@ -23,5 +23,5 @@ public class SubscriptionDTO {
 
     private String recurring;
 
-    private boolean customer;
+    private boolean isCustomer;
 }
