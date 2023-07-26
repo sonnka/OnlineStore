@@ -3,6 +3,7 @@ package kazantseva.project.OnlineStore.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
+import kazantseva.project.OnlineStore.util.StringListConverter;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -57,6 +58,10 @@ public class Customer {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "granted_date")
     private LocalDateTime date;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "subscriptions")
+    private List<String> subscriptions = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
             mappedBy = "customer")

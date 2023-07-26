@@ -2,6 +2,7 @@ package kazantseva.project.OnlineStore.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -11,20 +12,21 @@ public class StripeProductRequest {
 
     @NotNull
     @NotBlank
-    String name;
+    private String name;
 
-    String description;
+    private String description;
 
-    String image;
-
-    @NotNull
-    BigDecimal price;
+    private String image;
 
     @NotNull
-    @NotBlank
-    String currency;
+    @Positive
+    private BigDecimal price;
 
     @NotNull
     @NotBlank
-    String recurring;
+    private String currency;
+
+    @NotNull
+    @NotBlank
+    private String recurring;
 }

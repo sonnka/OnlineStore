@@ -3,6 +3,7 @@ $(document).ready(function () {
     let text = "Subscribe";
     loadSubscriptions();
 
+
     function loadSubscriptions() {
         $.ajax({
             type: "GET",
@@ -34,12 +35,13 @@ $(document).ready(function () {
                         + '</i></p></div></div>';
                     temp += productRow;
                 });
+
                 document.getElementsByClassName('container')[0].innerHTML = temp;
 
                 const subscribeButtons = document.getElementsByClassName('button');
                 for (let i = 0; i < subscribeButtons.length; i++) {
                     subscribeButtons[i].addEventListener('click', function (e) {
-                        alert(this.getAttribute('text'));
+                        alert(this.getAttribute('value'));
                         const productId = this.getAttribute('data-product-id');
                         subscribe(productId)
                         e.stopImmediatePropagation();
@@ -66,5 +68,4 @@ $(document).ready(function () {
             }
         });
     }
-
 });

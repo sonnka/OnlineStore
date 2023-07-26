@@ -10,6 +10,7 @@ import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
 import kazantseva.project.OnlineStore.model.response.SubscriptionDTO;
+import kazantseva.project.OnlineStore.model.response.SubscriptionResponse;
 
 import java.util.List;
 
@@ -47,13 +48,13 @@ public interface StripeService {
     List<SubscriptionDTO> getActiveProducts(String email, Integer limit)
             throws StripeException, CustomerException;
 
-    SubscriptionDTO getProduct(String productId)
+    SubscriptionResponse getProduct(String productId)
             throws StripeException, CustomerException;
 
-    SubscriptionDTO createProduct(String email, StripeProductRequest productRequest)
+    SubscriptionResponse createProduct(String email, StripeProductRequest productRequest)
             throws StripeException, CustomStripeException, CustomerException;
 
-    SubscriptionDTO updateProduct(String email, String productId, StripeProductRequest productRequest)
+    SubscriptionResponse updateProduct(String email, String productId, StripeProductRequest productRequest)
             throws StripeException, CustomStripeException, CustomerException;
 
     void archiveProduct(String email, String productId)

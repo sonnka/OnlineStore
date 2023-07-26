@@ -10,6 +10,7 @@ import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.model.request.ChargeRequest;
 import kazantseva.project.OnlineStore.model.request.StripeProductRequest;
 import kazantseva.project.OnlineStore.model.response.SubscriptionDTO;
+import kazantseva.project.OnlineStore.model.response.SubscriptionResponse;
 import kazantseva.project.OnlineStore.service.StripeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -79,17 +80,23 @@ public class StripeController {
         return stripeService.getArchiveProducts(limit);
     }
 
+    @GetMapping("/stripe/products/{product-id}")
+    public SubscriptionResponse getProduct(@PathVariable("product-id") String productId)
+            throws StripeException, CustomerException {
+        return stripeService.getProduct(productId);
+    }
+
     @PostMapping("/stripe/products")
-    public SubscriptionDTO createProduct(Authentication auth,
-                                         @RequestBody @Valid StripeProductRequest productRequest)
+    public SubscriptionResponse createProduct(Authentication auth,
+                                              @RequestBody @Valid StripeProductRequest productRequest)
             throws StripeException, CustomStripeException, CustomerException {
         return stripeService.createProduct(auth.getName(), productRequest);
     }
 
     @PatchMapping("/stripe/products/{product-id}")
-    public SubscriptionDTO updateProduct(Authentication auth,
-                                         @PathVariable("product-id") String productId,
-                                         @RequestBody @Valid StripeProductRequest productRequest)
+    public SubscriptionResponse updateProduct(Authentication auth,
+                                              @PathVariable("product-id") String productId,
+                                              @RequestBody @Valid StripeProductRequest productRequest)
             throws StripeException, CustomStripeException, CustomerException {
         return stripeService.updateProduct(auth.getName(), productId, productRequest);
     }

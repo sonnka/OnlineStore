@@ -60,7 +60,9 @@
         <div th:if="${param.error}">
             <div class="alert alert-danger" th:text="#{invalidData}"></div>
         </div>
-        <input id="productId" th:value="${productId}" type="hidden">
+        <h1 align="center" th:text="#{subscription}"></h1>
+        <br>
+        <input id="subscriptionId" th:value="${subscriptionId}" type="hidden">
         <div class="tab-content profile-tab col-md-12" id="myTabContent">
             <div aria-labelledby="home-tab" class="tab-pane fade show active" id="home" role="tabpanel">
                 <br><br>
@@ -163,7 +165,7 @@
                         <span><b th:text="#{enterSubRecurring}"></b></span>
                     </div>
                     <div class="col-md-3">
-                        <select class="form-select" id="statuses" style="width: 100px; height: 30px">
+                        <select class="form-select" id="recurring" style="width: 100px; height: 30px">
                             <option th:text="#{DAY}" value="DAY"></option>
                             <option th:text="#{WEEK}" value="WEEK"></option>
                             <option th:text="#{MONTH}" value="MONTH"></option>
@@ -180,7 +182,7 @@
             <div class="col-md-3">
             </div>
             <div class="col-md-7">
-                <input class="profile-save-btn" id="saveProductButton" name="btnAddMore" th:value="#{save}"
+                <input class="profile-save-btn" id="saveSubButton" name="btnAddMore" th:value="#{save}"
                        type="submit"/>
             </div>
             <div class="col-md-3">
