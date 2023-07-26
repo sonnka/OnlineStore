@@ -57,10 +57,25 @@
         <a th:href="@{/}" th:text="#{home}"></a>
         <a th:href="@{/products_html}" th:text="#{products}"></a>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile}" th:text="#{profile}"></a>
+            <a th:href="@{/subscriptions}" th:text="#{subscriptions}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/customers_list}" th:text="#{customers}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/admins_list}" th:text="#{admins}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
             <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/payments_html}" th:text="#{payments}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/profile/basket}" th:text="#{basket}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/logout}" th:text="#{logout}"></a>
@@ -71,21 +86,32 @@
     </nav>
 </header>
 <main>
+    <div th:if="${param.error}">
+        <div class="alert alert-danger" id="error1" th:text="#{deleteError}"></div>
+    </div>
+    <div th:if="${param.error_unpaid}">
+        <div class="alert alert-danger" id="error2" th:text="#{unpaidError}"></div>
+    </div>
+    <div th:if="${param.error_payment}">
+        <div class="alert alert-danger" id="errorMessage" th:text="#{errorMessage}"></div>
+    </div>
     <section class="pt-5 pb-5">
         <div class="container">
             <div class="row w-100">
                 <div class="col-lg-12 col-md-12 col-12">
+                    <br>
                     <h3 class="display-5 mb-2 text-center" th:text="#{yourOrder}"></h3>
-                    <br><br>
+                    <br><br><br><br><br>
                     <input id="customerId" th:value="${customerId}" type="hidden">
                     <input id="orderId" th:value="${orderId}" type="hidden">
+                    <input id="payStatus" th:value="${payStatus}" type="hidden">
                     <div class="float-right col-md-2">
                         <a id="editOrderButton"><input
-                                class="profile-edit-btn" name="btnAddMore" th:value="#{edit}"
+                                class="profile-edit-btn" id="editbutton" name="btnAddMore" th:value="#{edit}"
                                 type="submit"/></a>
                         <br><br>
                         <a id="deleteOrderButton"><input
-                                class="profile-delete-btn" name="btnAddMore" th:value="#{delete}"
+                                class="profile-delete-btn" id="deletebutton" name="btnAddMore" th:value="#{delete}"
                                 type="submit"/></a>
                     </div>
                     <div class="row">
@@ -117,19 +143,37 @@
                     <br><br>
                     <div class="row">
                         <div class="col-md-2">
-                            <span><b th:text="#{status}"></b></span>
+                            <label><b th:text="#{status}"></b></label>
                         </div>
                         <div class="col-md-3">
                             <p id="orderStatus">
                         </div>
                     </div>
                     <br><br>
-                    <table class="table table-condensed table-responsive" id="productsTable">
+                    <form id='checkout-form' method='POST'
+                          th:action="@{/profile/orders/{orderId}/charge(orderId=${orderId})}">
+                        <input name='amount' th:value='${amount}' type='hidden'/>
+                        <script
+                                class='stripe-button'
+                                data-description='Payment'
+                                data-image
+                                        ='https://img.freepik.com/free-vector/online-shopping-banner-mobile-app-templates-concept-flat-design_1150-34862.jpg'
+                                data-locale='auto'
+                                data-name='OnlineStore'
+                                data-zip-code='false'
+                                src='https://checkout.stripe.com/checkout.js'
+                                th:attr='data-key=${stripePublicKey},
+                                 data-amount=${amount},
+                                 data-currency=${currency}'>
+                        </script>
+                    </form>
+                    <br><br>
+                    <table class="table table-condensed table-responsive-md" id="productsTable">
                         <thead>
                         <tr>
-                            <th style="width:60%" th:text="#{product}"></th>
-                            <th style="width:12%" th:text="#{price}"></th>
-                            <th style="width:10%" th:text="#{count}"></th>
+                            <th style="width:70%" th:text="#{product}"></th>
+                            <th style="width:15%" th:text="#{price}"></th>
+                            <th style="width:15%" th:text="#{count}"></th>
                         </tr>
                         </thead>
                         <tbody>

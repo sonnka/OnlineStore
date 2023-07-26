@@ -2,6 +2,8 @@ package kazantseva.project.OnlineStore.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import kazantseva.project.OnlineStore.model.entity.enums.Status;
+import kazantseva.project.OnlineStore.model.entity.enums.Type;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -27,8 +29,21 @@ public class Order {
     private LocalDateTime date;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private Type type;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;
+
+    @Column(name = "delivery_address")
+    private String deliveryAddress;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "price")
+    private BigDecimal price;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "customer_id")
@@ -39,13 +54,4 @@ public class Order {
     @JsonIgnore
     @Column(name = "products")
     private List<OrderProduct> products;
-
-    @Column(name = "delivery_address")
-    private String deliveryAddress;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "price")
-    private BigDecimal price;
 }

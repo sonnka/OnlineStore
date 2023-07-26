@@ -26,10 +26,25 @@
         <a th:href="@{/}" th:text="#{home}"></a>
         <a th:href="@{/products_html}" th:text="#{products}"></a>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile}" th:text="#{profile}"></a>
+            <a th:href="@{/subscriptions}" th:text="#{subscriptions}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/customers_list}" th:text="#{customers}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/admins_list}" th:text="#{admins}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
             <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/payments_html}" th:text="#{payments}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/profile/basket}" th:text="#{basket}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/logout}" th:text="#{logout}"></a>
@@ -44,21 +59,21 @@
     <div class="row">
         <div class="col-md-6 offset-md-3">
 
-            <div th:if="${param.error}">
-                <div class="alert alert-danger" th:text="#{invalidData}"></div>
-            </div>
-            <div th:if="${param.logout}">
-                <div class="alert alert-success" th:text="#{successLogout}"></div>
-            </div>
-            <div th:if="${param.success}">
-                <div class="alert alert-info" th:text="#{successLogin}">
-                </div>
-            </div>
-
             <div class="card">
                 <div class="card-header">
                     <h2 class="text-center" th:text="#{loginForm}"></h2>
                 </div>
+                <div th:if="${param.error}">
+                    <div class="alert alert-danger" th:text="#{invalidData}"></div>
+                </div>
+                <div th:if="${param.logout}">
+                    <div class="alert alert-success" th:text="#{successLogout}"></div>
+                </div>
+                <div th:if="${param.success}">
+                    <div class="alert alert-info" th:text="#{successLogin}">
+                    </div>
+                </div>
+
                 <div class="card-body">
                     <form
                             class="form-horizontal"
@@ -93,7 +108,6 @@
                             <button class="btn btn-primary" th:text="#{submit}" type="submit"></button>
                             <span th:text="#{notRegistered}"></span>
                             <a th:href="@{/register}" th:text="#{registerHere}"> </a>
-
                         </div>
                     </form>
                 </div>

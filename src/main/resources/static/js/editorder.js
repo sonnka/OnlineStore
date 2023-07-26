@@ -1,60 +1,27 @@
-var listOfProducts = [];
+let listOfProducts = [];
 $(document).ready(function () {
-    var customerId = $('#customerId').val();
-    var orderId = $('#orderId').val();
+    let customerId = $('#customerId').val();
+    let orderId = $('#orderId').val();
 
-    var date = $('#date');
-    var status = $("#statuses");
-    var deliveryAddress = $('#deliveryAddress');
-    var description = $('#description');
-    var price = $('#price');
+    let date = $('#date');
+    let status = $("#orderStatus");
+    let deliveryAddress = $('#deliveryAddress');
+    let description = $('#description');
+    let price = $('#price');
+    let table = $('#productsTable tbody');
+    let type = "DRAFT";
+    let saveButton = $('#saveButton');
+    let count = 0;
 
-    if (orderId === "-1") {
-        createOrder();
-    } else {
-        loadOrder();
-    }
-
-
-    var saveButton = $('#saveButton');
-    var addProductButton = $('#addProductButton');
-    var addSelectedProducts = $('#addSelectedProducts');
-
-    saveButton.click(function () {
-        listOfProducts = [];
-        updateList();
-        updateOrder();
-    });
-
-    addProductButton.click(function () {
-        $.get("/customers/" + customerId + "/orders/" + orderId + "/productList", function (responseJson) {
-            displayList(responseJson)
-        }).fail(function () {
-            window.location = "/profile/orders/" + orderId;
-        });
-    });
-
-    addSelectedProducts.click(function () {
-        $('input[type="checkbox"]:checked').each(function () {
-            var $row = $(this).closest('tr');
-            var name = $row.find('label.name').text().trim();
-
-            var selectedProduct = {
-                "name": name,
-                "count": 1
-            }
-            listOfProducts.push(selectedProduct);
-        });
-        updateList();
-        updateOrder();
-        window.location = "/profile/orders/" + orderId + "/edit";
-    });
+    loadOrder();
 
     function loadOrder() {
-        url = "/customers/" + customerId + "/orders/" + orderId;
+        let url = "/customers/" + customerId + "/orders/" + orderId;
 
         $.get(url, function (responseJson) {
-            displayData(responseJson)
+            type = responseJson.type;
+            checkType();
+            displayData(responseJson);
         }).fail(function () {
             window.location = "/profile/orders/" + orderId;
         });
@@ -62,46 +29,53 @@ $(document).ready(function () {
 
     function displayData(responseJson) {
         date.val(responseJson.date);
-        status.val(responseJson.status);
+        status.text(responseJson.status);
         deliveryAddress.val(responseJson.deliveryAddress);
         description.val(responseJson.description);
         price.text(responseJson.price);
 
-        $('#productsTable tbody').empty();
-        $.each(responseJson.products, (i, product) => {
-            var productName = product.name;
+        count = 0;
 
+        table.empty();
+        $.each(responseJson.products, (i, product) => {
+            let productName = product.name;
+            count++;
             let productRow = '<tr>' +
-                '<td data-th="Product"><div class="col-md-9 text-left mt-sm-2">' + productName + '</div></td>' +
+                '<td style="display:none;"  data-th="Id"><div class="col-md-9 text-left mt-sm-2">' + product.id + '</div></td>' +
+                '<td data-th="Product"><div class="col-md-9 mt-sm-2">' + productName + '</div></td>' +
                 '<td class="valueAlign" data-th="Price">' + product.price + '</td>' +
                 '<td data-th="Quantity"><input class="form-control form-control-lg text-center input_count" min="1"'
                 + ' style="height: 25px" value="' + product.count + '" type="number"/></td>' +
-                '<td class="actions" data-th=""> <div class="text-right valueAlign">' +
+                '<td class="actions" data-th="" id="deleteColumn"> <div class="text-right valueAlign">' +
                 '<a type="button" title="delete" class="deleteProduct">' +
                 '<i class="material-icons">&#xE872;</i></a></div></td> ' +
                 '</tr>';
-            $('#productsTable tbody').append(productRow);
-        });
-        $('#productsTable tbody').on('click', '.deleteProduct', function () {
-            let productName = $(this).closest('tr').find('.text-left').text();
-            deleteProduct(productName);
+            table.append(productRow);
         });
 
-    }
+        let button = document.getElementById('deleteColumn');
 
-    function displayList(responseJson) {
-        $('#productsList tbody').empty();
-        $.each(responseJson, (i, product) => {
-            let productRow = '<tr>' +
-                '<td> <input type="checkbox" class="checkbox"> <label class="name">&emsp;&emsp;' + product.name + '&emsp;&emsp;</label></td>' +
-                '<td> <label class="price">' + product.price + '</label></td></tr>'
-            $('#productsList tbody').append(productRow);
+        if (count <= 1) {
+            button.style.display = 'none';
+        } else {
+            button.style.display = '';
+        }
+
+        table.on('change', '.input_count', function (e) {
+            listOfProducts = [];
+            updateList();
+            updateOrder();
+            e.stopImmediatePropagation();
+        });
+        table.on('click', '.deleteProduct', function (e) {
+            let productId = $(this).closest('tr').find('.text-left').text();
+            deleteProduct(productId);
+            e.stopImmediatePropagation();
         });
     }
 
     function updateOrder() {
-        jsonData = {
-            "status": status.val(),
+        let jsonData = {
             "products": listOfProducts,
             "deliveryAddress": deliveryAddress.val(),
             "description": description.val()
@@ -112,8 +86,8 @@ $(document).ready(function () {
             url: "/customers/" + customerId + "/orders/" + orderId,
             data: JSON.stringify(jsonData),
             contentType: 'application/json',
-            success: function () {
-                window.location = "/profile/orders/" + orderId;
+            success: function (responseJson) {
+                displayData(responseJson);
             }
         }).fail(function () {
             window.location = "/profile/orders/" + orderId + "/edit?error";
@@ -123,15 +97,15 @@ $(document).ready(function () {
     }
 
     function updateList() {
-        var tbody = $('#productsTable tbody');
+        table.find('tr').each(function () {
+            let row = $(this);
 
-        tbody.find('tr').each(function () {
-            var row = $(this);
+            let productId = row.find('td[data-th="Id"] .col-md-9').text().trim();
+            let productName = row.find('td[data-th="Product"] .col-md-9').text().trim();
+            let productCount = Number(row.find('td[data-th="Quantity"] .input_count').val().trim());
 
-            var productName = row.find('td[data-th="Product"] .col-md-9').text().trim();
-            var productCount = Number(row.find('td[data-th="Quantity"] .input_count').val().trim());
-
-            var rowData = {
+            let rowData = {
+                "id": productId,
                 "name": productName,
                 "count": productCount
             };
@@ -141,33 +115,42 @@ $(document).ready(function () {
         });
     }
 
-    function deleteProduct(productName) {
+    function deleteProduct(productId) {
         updateList();
-        listOfProducts = listOfProducts.filter(prod => prod.name !== productName);
+        listOfProducts = listOfProducts.filter(prod => prod.id !== productId);
         updateOrder();
-        window.location = "/profile/orders/" + orderId + "/edit";
     }
 
-    function createOrder() {
-        jsonData = {
-            "status": "UNPAID",
-            "products": [],
-            "deliveryAddress": "",
-            "description": ""
-        };
+    function checkType() {
+        if (type === "DRAFT") {
+            saveButton.click(function () {
+                listOfProducts = [];
+                updateList();
+                let jsonData = {
+                    "products": listOfProducts,
+                    "deliveryAddress": deliveryAddress.val(),
+                    "description": description.val()
+                };
 
-        $.ajax({
-            type: "POST",
-            url: "/customers/" + customerId + "/orders",
-            data: JSON.stringify(jsonData),
-            contentType: 'application/json',
-            success: function (responseJson) {
-                orderId = responseJson.id;
-                window.location = "/profile/orders/" + orderId + "/edit";
-            }
-        }).fail(function () {
-            window.location = "/profile/orders";
-        });
+                $.ajax({
+                    type: "POST",
+                    url: "/customers/" + customerId + "/orders/" + orderId,
+                    data: JSON.stringify(jsonData),
+                    contentType: 'application/json',
+                    success: function () {
+                        window.location = "/profile/orders/" + orderId;
+                    }
+                }).fail(function () {
+                    window.location = "/profile/orders/" + orderId + "/edit?error";
+                });
+            });
+        } else {
+            saveButton.click(function () {
+                listOfProducts = [];
+                updateList();
+                updateOrder();
+                window.location = "/profile/orders/" + orderId;
+            });
+        }
     }
-
 });

@@ -1,9 +1,14 @@
 $(document).ready(function () {
-    var customerId = $('#customerId').val();
+    let customerId = $('#customerId').val();
     loadProfile();
-    var editProfileButton = $('#editProfileButton');
-    var deleteProfileButton = $('#deleteProfileButton');
-    var getOrdersButton = $('#getOrdersButton');
+    let editProfileButton = $('#editProfileButton');
+    let deleteProfileButton = $('#deleteProfileButton');
+    let getOrdersButton = $('#getOrdersButton');
+    let image = $('#thumbnail');
+
+    $('#fileImage').change(function () {
+        showImageThumbnail(this);
+    });
 
     editProfileButton.click(function () {
         window.location = "/profile/edit";
@@ -16,8 +21,19 @@ $(document).ready(function () {
     });
 
 
+    function showImageThumbnail(fileInput) {
+        let file = fileInput.files[0];
+        let reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#thumbnail').attr('src', e.target.result);
+        };
+
+        reader.readAsDataURL(file);
+    }
+
     function loadProfile() {
-        url = "/customers/" + customerId;
+        let url = "/customers/" + customerId;
 
         $.get(url, function (responseJson) {
             displayData(responseJson)
@@ -32,10 +48,15 @@ $(document).ready(function () {
         $('#customerSurname').text(responseJson.surname);
         $('#customerEmail').text(responseJson.email);
         $('#customerEmail2').text(responseJson.email);
+        $('#amountOfBasketElem').text(responseJson.amountOfBasketElem)
         $('#totalAmountOfOrders').text(responseJson.totalAmountOfOrders);
         $('#totalAmountOfOrders2').text(responseJson.totalAmountOfOrders);
         $('#amountPaidOrders').text(responseJson.amountOfPaidOrders);
         $('#amountUnpaidOrders').text(responseJson.amountOfUnpaidOrders);
+        $('#amountGrantedAdmins').text(responseJson.amountOfAddedAdmins);
+        image.attr('src', "http://images.example.com/customers/default.png");
+        image.attr('onerror', "this.onerror=null;this.src='http://images.example.com/customers/default.png'");
+        image.attr('src', "http://images.example.com/customers/" + responseJson.avatar);
     }
 
     function deleteProfile() {
@@ -67,5 +88,4 @@ $(document).ready(function () {
             }
         })
     }
-
 });

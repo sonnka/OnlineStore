@@ -36,6 +36,20 @@ body {
     padding: 35px 20px;
 }
 
+.btn {
+    text-align: center;
+    align-self: center;
+    vertical-align: center;
+    align-content: center;
+    align-items: center;
+    border: 1px solid #ffffff;
+    height: 34px;
+    padding: 0 24px 0 16px;
+    letter-spacing: 0.25px;
+    border-radius: 24px;
+    cursor: pointer;
+}
+
 .intro {
     display: flex;
     flex-direction: column;
@@ -457,4 +471,44 @@ input.check-toggle-round-flat:checked + label {
 
 input.check-toggle-round-flat:checked + label:after {
     margin-left: 44px;
+}
+
+.material-icons {
+    color: #b40000;
+}
+
+.send {
+    color: #1b76d0;
+}
+
+.admin {
+    color: #009a1e;
+}
+
+.archive {
+    color: #4d4d4d;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ffffff;
+    border-top: 0.22ch solid #e0e0e0;
+    border-collapse: collapse;
+}
+
+.table th {
+    font-weight: bold;
+    padding: 5px;
+    background: #ffffff;
+    border: none;
+    border-bottom: 2px solid #ffffff;
+}
+
+.table tr {
+    padding: 25px;
+    border: none;
+    background-color: #f7fafa;
+    border-radius: 25px;
+    border-bottom: 20px solid #ffffff;
 }

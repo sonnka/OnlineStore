@@ -7,6 +7,7 @@ public record CustomerDTO(
         Long id,
         String name,
         String surname,
+        String avatar,
         String email
 ) {
 }

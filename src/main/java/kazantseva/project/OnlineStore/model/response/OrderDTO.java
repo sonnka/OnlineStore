@@ -1,5 +1,6 @@
 package kazantseva.project.OnlineStore.model.response;
 
+import kazantseva.project.OnlineStore.model.mongo.response.ProductDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,8 @@ public class OrderDTO {
     String date;
 
     String status;
+
+    String type;
 
     List<ProductDTO> products;
 

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Subscriptions</title>
+    <link crossorigin="anonymous"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          rel="stylesheet">
+    <link crossorigin="anonymous"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link crossorigin="anonymous" href=
+            "https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity=
+                  "sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script sec:authorize="hasRole('BUYER')" th:src="@{/js/subscriptions.js}" type="text/javascript"></script>
+    <script sec:authorize="hasRole('ADMIN')" th:src="@{/js/subscriptionsadmin.js}" type="text/javascript"></script>
+    <style type="text/css">
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            margin-block: 2rem;
+            gap: 2rem;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            width: clamp(20rem, calc(20rem + 2vw), 22rem);
+            overflow: hidden;
+            box-shadow: 0 .1rem 1rem rgba(0, 0, 0, 0.1);
+            border-radius: 1em;
+            background: #f7fafa;
+        }
+
+        .card__body {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+        }
+
+        .tag + .tag {
+            margin-left: .5em;
+        }
+
+        .intro2 {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .intro2 button {
+            background-color: #5edaf0;
+            text-decoration: none;
+            color: #000;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.4);
+            margin: auto;
+        }
+
+        .card__body h4 {
+            font-size: 1.5rem;
+            text-transform: capitalize;
+        }
+
+        .tab {
+            overflow: hidden;
+            margin-left: 290px;
+        }
+
+        .tab button {
+            background-color: inherit;
+            float: left;
+            margin-left: 20px;
+            border: 0.1mm solid black;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        .tab button:hover {
+            background-color: #ddf5f5;
+        }
+
+        .tab button.active {
+            background-color: #e9f6f6;
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <a class="logo" th:href="@{/}">Online Store</a>
+
+    <div class="switch">
+        <input class="check-toggle check-toggle-round-flat" id="language-toggle" type="checkbox">
+        <label for="language-toggle"></label>
+        <a class="on" href="?lang=en" th:text="#{lang.en}"></a>
+        <a class="off" href="?lang=uk_UA" th:text="#{lang.uk}"></a>
+    </div>
+
+    <nav class="nav-items">
+        <a th:href="@{/}" th:text="#{home}"></a>
+        <a th:href="@{/products_html}" th:text="#{products}"></a>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/subscriptions}" th:text="#{subscriptions}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/customers_list}" th:text="#{customers}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/admins_list}" th:text="#{admins}"></a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/payments_html}" th:text="#{payments}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/profile/basket}" th:text="#{basket}"></a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/logout}" th:text="#{logout}"></a>
+        </div>
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" th:text="#{login}"></a>
+        </div>
+    </nav>
+</header>
+<main>
+    <div th:if="${param.error}">
+        <div class="alert alert-danger" th:text="#{invalidSubscribe}"></div>
+    </div>
+    <div th:if="${param.success}">
+        <div class="alert alert-info" th:text="#{successSubscribe}">
+        </div>
+    </div>
+    <br><br>
+    <h1 align="center" th:text="#{subscriptions}"></h1>
+    <br><br>
+    <div class="intro2" sec:authorize="hasRole('ADMIN')">
+        <a class="subscribe">
+            <button class="button" id="addButton" th:text="#{add}"></button>
+        </a>
+    </div>
+
+    <div class="tab" sec:authorize="hasRole('ADMIN')">
+        <button class="tablinks" id="activeSubList">Active</button>
+        <button class="tablinks" id="archiveSubList">Archive</button>
+    </div>
+
+
+    <br> <br>
+    <div class="container my-2" id="container">
+        <br>
+        <div class="container" id="container2">
+        </div>
+    </div>
+</main>
+</body>
+</html>

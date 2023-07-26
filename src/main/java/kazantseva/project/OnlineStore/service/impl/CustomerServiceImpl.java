@@ -1,12 +1,20 @@
 package kazantseva.project.OnlineStore.service.impl;
 
+import com.stripe.exception.StripeException;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import kazantseva.project.OnlineStore.exceptions.CustomerException;
+import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
+import kazantseva.project.OnlineStore.exceptions.SecurityException;
+import kazantseva.project.OnlineStore.exceptions.SecurityException.SecurityExceptionProfile;
 import kazantseva.project.OnlineStore.model.entity.Customer;
-import kazantseva.project.OnlineStore.model.entity.Status;
+import kazantseva.project.OnlineStore.model.entity.Order;
 import kazantseva.project.OnlineStore.model.entity.VerificationToken;
+import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
+import kazantseva.project.OnlineStore.model.entity.enums.Status;
+import kazantseva.project.OnlineStore.model.entity.enums.Type;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
+import kazantseva.project.OnlineStore.model.response.AdminDTO;
 import kazantseva.project.OnlineStore.model.response.CustomerDTO;
 import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
@@ -14,81 +22,96 @@ import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.OrderRepository;
 import kazantseva.project.OnlineStore.repository.VerificationTokenRepository;
 import kazantseva.project.OnlineStore.service.CustomerService;
+import kazantseva.project.OnlineStore.service.EmailService;
+import kazantseva.project.OnlineStore.service.StripeService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.http.HttpStatus;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Locale;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
-    final ResourceBundleMessageSource messageSource;
-    final PasswordEncoder passwordEncoder;
-    private final TemplateEngine templateEngine;
+    public static final String UPLOAD_DIRECTORY = "tmp/images/customers";
+
+    private final PasswordEncoder passwordEncoder;
     private CustomerRepository customerRepository;
     private OrderRepository orderRepository;
     private VerificationTokenRepository tokenRepository;
-    private JavaMailSender emailSender;
+    private EmailService emailService;
+    private StripeService stripeService;
 
     @Override
-    public void register(CreateCustomer newCustomer) {
+    @Transactional
+    public void register(CreateCustomer newCustomer) throws SecurityException, StripeException {
         if (customerRepository.existsByEmailIgnoreCase(newCustomer.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, newCustomer.getEmail() + " is already occupied!");
+            throw new SecurityException(SecurityExceptionProfile.EMAIL_IS_OCCUPIED);
         }
 
-        Customer customer = customerRepository.save(Customer.builder()
+        Customer customer = Customer.builder()
                 .email(newCustomer.getEmail())
                 .password(passwordEncoder.encode(newCustomer.getPassword()))
                 .name(newCustomer.getName())
                 .surname(newCustomer.getSurname())
-                .build());
+                .role(CustomerRole.BUYER)
+                .build();
 
-        VerificationToken verificationToken = new VerificationToken(customer);
+        Order order = Order.builder()
+                .customer(customer)
+                .type(Type.DRAFT)
+                .status(Status.UNPAID)
+                .build();
 
-        tokenRepository.save(verificationToken);
+        customer.setBasket(orderRepository.save(order).getId());
 
-        try {
-            sendMail(verificationToken.getToken(), customer.getEmail());
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
+        customer.setStripeId(stripeService.createCustomer(newCustomer));
 
+        customerRepository.save(customer);
+
+        generateTokenAndSendMail(customer);
     }
 
     @Override
-    public LoginResponse login(Authentication auth) {
+    public LoginResponse login(Authentication auth) throws SecurityException {
         var customer = customerRepository.findByEmailIgnoreCase(auth.getName()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong authentication data!"));
+                () -> new SecurityException(SecurityExceptionProfile.WRONG_AUTHENTICATION_DATA));
 
-        return LoginResponse.builder().id(customer.getId()).email(customer.getEmail()).build();
+        return LoginResponse.builder()
+                .id(customer.getId())
+                .email(customer.getEmail())
+                .build();
     }
 
     @Override
     @Transactional
-    public LoginResponse login(String token) {
+    public LoginResponse login(String token) throws SecurityException, CustomerException {
         var customer = customerRepository.findByVerificationToken(token).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid verification token!"));
+                new SecurityException(SecurityExceptionProfile.INVALID_VERIFICATION_TOKEN));
 
         verifyAccount(customer.getEmail(), token);
 
-        return LoginResponse.builder().id(customer.getId()).email(customer.getEmail()).build();
+        return LoginResponse.builder()
+                .id(customer.getId())
+                .email(customer.getEmail())
+                .build();
     }
 
     @Override
@@ -96,97 +119,256 @@ public class CustomerServiceImpl implements CustomerService {
         return User.withUsername(customer.getEmail())
                 .password(customer.getPassword())
                 .disabled(!customer.isEnabled())
-                .roles("").build();
+                .roles(String.valueOf(customer.getRole())).build();
     }
 
     @Override
-    public FullCustomerDTO getCustomer(String email, Long customerId) {
+    public FullCustomerDTO getCustomer(String email, Long customerId) throws CustomerException {
         var customer = findByIdAndCheckByEmail(customerId, email);
+
         return toFullCustomerDTO(customer);
     }
 
     @Override
-    public Long getCustomerId(String email) {
+    public Long getCustomerId(String email) throws CustomerException {
         var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with email " + email + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
         return customer.getId();
     }
 
     @Override
-    public CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer) {
+    public Long getBasketId(String email) throws CustomerException {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        return customer.getBasket();
+    }
+
+    @Override
+    public Page<CustomerDTO> getCustomers(String email, Pageable pageable) throws CustomerException {
+        checkAdminByEmail(email);
+
+        return customerRepository.findByRole(CustomerRole.BUYER, pageable)
+                .map(this::toCustomerDTO);
+    }
+
+    @Override
+    public Page<AdminDTO> getAdmins(String email, Pageable pageable) throws CustomerException {
+        checkAdminByEmail(email);
+
+        return customerRepository.findByRole(CustomerRole.ADMIN, pageable)
+                .map(this::toAdminDTO);
+    }
+
+    @Override
+    @Transactional
+    public void toAdmin(String email, Long customerId)
+            throws CustomerException, SecurityException, StripeException {
+        checkAdminByEmail(email);
+
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        if (CustomerRole.ADMIN.equals(customer.getRole())) {
+            throw new CustomerException(CustomerExceptionProfile.CUSTOMER_ALREADY_ADMIN);
+        }
+
+        try {
+            emailService.sendAdminMail(customer.getEmail());
+
+            orderRepository.deleteByCustomer(customer);
+
+            customer.setRole(CustomerRole.ADMIN);
+            customer.setGrantedAdminBy(email);
+            customer.setDate(LocalDateTime.now(ZoneOffset.UTC));
+            customer.setBasket(null);
+
+            stripeService.deleteCustomer(customer.getStripeId());
+            customer.setStripeId(null);
+
+            customerRepository.save(customer);
+        } catch (MessagingException e) {
+            throw new SecurityException(SecurityExceptionProfile.FAIL_SEND_EMAIL);
+        }
+    }
+
+    @Override
+    public CustomerDTO updateCustomer(String email, long customerId, RequestCustomer customer)
+            throws CustomerException, StripeException {
         var oldCustomer = findByIdAndCheckByEmail(customerId, email);
 
-        Optional.ofNullable(customer.getName()).ifPresent(oldCustomer::setName);
-        Optional.ofNullable(customer.getSurname()).ifPresent(oldCustomer::setSurname);
+        Optional.of(customer.getName()).ifPresent(oldCustomer::setName);
+        Optional.of(customer.getSurname()).ifPresent(oldCustomer::setSurname);
+        Optional.ofNullable(customer.getAvatar()).ifPresent(oldCustomer::setAvatar);
 
-        customerRepository.save(oldCustomer);
+        var updatedCustomer = customerRepository.save(oldCustomer);
+
+        if (CustomerRole.ADMIN != oldCustomer.getRole()) {
+            stripeService.updateCustomer(updatedCustomer);
+        }
 
         return toCustomerDTO(oldCustomer);
     }
 
     @Override
-    @Transactional
-    public void deleteCustomer(String email, long customerId) {
+    public void uploadAvatar(String email, Long customerId, MultipartFile file) throws CustomerException {
         var customer = findByIdAndCheckByEmail(customerId, email);
 
-        orderRepository.deleteByCustomer(customer);
-        customerRepository.delete(customer);
+        if (file != null) {
+            String fileExtension = "jpg";
+
+            var originalFileName = file.getOriginalFilename();
+
+            if (originalFileName != null && (originalFileName.split("\\.").length > 1)) {
+                int length = originalFileName.split("\\.").length;
+
+                fileExtension = originalFileName.split("\\.")[length - 1];
+            }
+
+            String generatedFileName = "avatar_" + customerId + "." + fileExtension;
+
+            Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, generatedFileName);
+
+            customer.setAvatar("");
+            customer.setAvatar(generatedFileName);
+
+            customerRepository.save(customer);
+
+            try {
+                Files.createDirectories(Path.of(UPLOAD_DIRECTORY));
+
+                Files.copy(file.getInputStream(), fileNameAndPath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new CustomerException(CustomerExceptionProfile.FAIL_UPLOAD_AVATAR);
+            }
+        }
     }
 
-    public void sendMail(String token, String to) throws MessagingException {
-        Locale locale = LocaleContextHolder.getLocale();
-        Context context = new Context(locale);
-        context.setVariable("link", "http://localhost:8080/confirm-email?token=" + token);
+    @Override
+    @Transactional
+    public void deleteCustomer(String email, long customerId)
+            throws CustomerException, SecurityException, StripeException {
+        var currentCustomer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
-        String process = templateEngine.process("letter", context);
-        MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setSubject(messageSource.getMessage("subject", null, locale));
-        helper.setText(process, true);
-        helper.setTo(to);
-        emailSender.send(mimeMessage);
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        if (!customer.getEmail().equals(email)) {
+            if (CustomerRole.ADMIN.equals(currentCustomer.getRole())
+                    && (!CustomerRole.ADMIN.equals(customer.getRole()))) {
+                deleteByAdmin(customer);
+                return;
+            }
+            throw new CustomerException(CustomerExceptionProfile.CANNOT_DELETE_ADMIN);
+        }
+
+        deleteYourself(customer);
+    }
+
+    @Override
+    @Transactional
+    public void resendEmail(String email, Long customerId) throws CustomerException, SecurityException {
+        checkAdminByEmail(email);
+
+        var customer = customerRepository.findById(customerId).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        if (customer.isEnabled()) {
+            throw new SecurityException(SecurityExceptionProfile.EMAIL_ALREADY_CONFIRMED);
+        }
+
+        generateTokenAndSendMail(customer);
     }
 
     @Transactional
-    public void verifyAccount(String email, String verificationToken) {
+    public void generateTokenAndSendMail(Customer customer) throws SecurityException {
+        VerificationToken firstToken = tokenRepository.findFirstByCustomerOrderByIdDesc(customer)
+                .orElse(null);
+
+        String locale = LocaleContextHolder.getLocale().toString();
+
+        if (firstToken != null) {
+            locale = firstToken.getLocale();
+        }
+
+        tokenRepository.deleteByCustomer(customer);
+
+        VerificationToken verificationToken = new VerificationToken(customer, locale);
+
+        tokenRepository.save(verificationToken);
+
+        try {
+            emailService.sendConfirmationMail(verificationToken, customer.getEmail());
+        } catch (MessagingException e) {
+            throw new SecurityException(SecurityExceptionProfile.FAIL_SEND_EMAIL);
+        }
+    }
+
+    private void deleteYourself(Customer customer) throws StripeException {
+        tokenRepository.deleteByCustomer(customer);
+        orderRepository.deleteByCustomer(customer);
+        customerRepository.deleteById(customer.getId());
+        stripeService.deleteCustomer(customer.getStripeId());
+    }
+
+    private void deleteByAdmin(Customer customer) throws SecurityException, StripeException {
+        try {
+            emailService.sendDeletionMail(customer.getEmail());
+
+            deleteYourself(customer);
+        } catch (MessagingException e) {
+            throw new SecurityException(SecurityExceptionProfile.FAIL_SEND_EMAIL);
+        }
+    }
+
+    private void verifyAccount(String email, String verificationToken)
+            throws SecurityException, CustomerException {
         VerificationToken token = tokenRepository.findByToken(verificationToken)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No such verification token!"));
+                .orElseThrow(() -> new SecurityException(SecurityExceptionProfile.VERIFICATION_TOKEN_NOT_FOUND));
 
         if (token != null) {
 
             if (!email.equals(token.getCustomer().getEmail())) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Failed email verification!");
+                throw new SecurityException(SecurityExceptionProfile.BAD_EMAIL);
             }
 
             Customer customer = customerRepository.findByEmailIgnoreCase(email)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Customer with email " + email + " not found!"));
+                    .orElseThrow(() -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
             if (token.getExpiryDate().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
                 tokenRepository.delete(token);
                 customerRepository.delete(customer);
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                        "You token is expired! Please, register again!");
+                throw new SecurityException(SecurityExceptionProfile.EXPIRED_VERIFICATION_TOKEN);
             }
 
             tokenRepository.deleteByCustomerId(customer.getId());
+
             customer.setEnabled(true);
+
             customerRepository.save(customer);
-        } else throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid verification token!");
+        } else throw new SecurityException(SecurityExceptionProfile.INVALID_VERIFICATION_TOKEN);
     }
 
-    private Customer findByIdAndCheckByEmail(Long customerId, String email) {
+    private Customer findByIdAndCheckByEmail(Long customerId, String email) throws CustomerException {
         var customer = customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Customer with ID " + customerId + " not found!"));
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
 
         if (!customer.getEmail().equals(email)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new CustomerException(CustomerExceptionProfile.EMAIL_MISMATCH);
         }
 
         return customer;
+    }
+
+    private void checkAdminByEmail(String email) throws CustomerException {
+        var customer = customerRepository.findByEmailIgnoreCase(email).orElseThrow(
+                () -> new CustomerException(CustomerExceptionProfile.CUSTOMER_NOT_FOUND));
+
+        if (!CustomerRole.ADMIN.equals(customer.getRole())) {
+            throw new CustomerException(CustomerExceptionProfile.NOT_ADMIN);
+        }
     }
 
     private CustomerDTO toCustomerDTO(Customer customer) {
@@ -194,27 +376,57 @@ public class CustomerServiceImpl implements CustomerService {
                 .id(customer.getId())
                 .name(customer.getName())
                 .surname(customer.getSurname())
+                .avatar(customer.getAvatar())
                 .email(customer.getEmail())
                 .build();
     }
 
+    private AdminDTO toAdminDTO(Customer customer) {
+        String date = "-";
+
+        if (customer.getDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+            date = customer.getDate().format(formatter);
+        }
+
+        return AdminDTO.builder()
+                .id(customer.getId())
+                .name(customer.getName())
+                .surname(customer.getSurname())
+                .email(customer.getEmail())
+                .avatar(customer.getAvatar())
+                .grantedAdminBy(customer.getGrantedAdminBy())
+                .grantedDate(date)
+                .build();
+    }
+
     private FullCustomerDTO toFullCustomerDTO(Customer customer) {
+        var drafts = orderRepository.findAllByCustomerIdAndType(customer.getId(), Type.DRAFT);
+
+        int amount = 0;
+
+        if (!drafts.isEmpty()) {
+            amount = drafts.get(0).getProducts().size();
+        }
+
         return FullCustomerDTO.builder()
                 .id(customer.getId())
                 .name(customer.getName())
                 .surname(customer.getSurname())
                 .email(customer.getEmail())
-                .totalAmountOfOrders(orderRepository.findAllByCustomerId(customer.getId()).size())
-                .amountOfPaidOrders(orderRepository.findAllByCustomerId(customer.getId())
-                        .stream()
-                        .filter(order -> order.getStatus().equals(Status.PAID))
-                        .toList()
+                .avatar(customer.getAvatar())
+                .amountOfBasketElem(amount)
+                .totalAmountOfOrders(orderRepository.findAllByCustomerIdAndType(customer.getId(), Type.PUBLISHED)
                         .size())
-                .amountOfUnpaidOrders(orderRepository.findAllByCustomerId(customer.getId())
-                        .stream()
-                        .filter(order -> order.getStatus().equals(Status.UNPAID))
-                        .toList()
+                .amountOfPaidOrders(orderRepository.findAllByCustomerIdAndTypeAndStatus(customer.getId(),
+                                Type.PUBLISHED, Status.PAID)
                         .size())
+                .amountOfUnpaidOrders(orderRepository.findAllByCustomerIdAndTypeAndStatus(customer.getId(),
+                                Type.PUBLISHED, Status.UNPAID)
+                        .size())
+                .amountOfAddedAdmins(customerRepository.findAll()
+                        .stream().filter(c -> customer.getEmail().equals(c.getGrantedAdminBy()))
+                        .toList().size())
                 .build();
     }
 }

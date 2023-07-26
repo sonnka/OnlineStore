@@ -25,10 +25,25 @@
         <a th:href="@{/}" th:text="#{home}"></a>
         <a th:href="@{/products_html}" th:text="#{products}"></a>
         <div sec:authorize="isAuthenticated()">
-            <a th:href="@{/profile}" th:text="#{profile}"></a>
+            <a th:href="@{/subscriptions}" th:text="#{subscriptions}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/customers_list}" th:text="#{customers}"></a>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/admins_list}" th:text="#{admins}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" th:text="#{profile}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
             <a th:href="@{/profile/orders}" th:text="#{orders}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/payments_html}" th:text="#{payments}"></a>
+        </div>
+        <div sec:authorize="hasRole('BUYER')">
+            <a th:href="@{/profile/basket}" th:text="#{basket}"></a>
         </div>
         <div sec:authorize="isAuthenticated()">
             <a th:href="@{/logout}" th:text="#{logout}"></a>
