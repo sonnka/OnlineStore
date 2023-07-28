@@ -35,4 +35,5 @@ services:
       - mongo-service
     env_file:
       - api.env
+      - prod.env
     user: "1000:1000"

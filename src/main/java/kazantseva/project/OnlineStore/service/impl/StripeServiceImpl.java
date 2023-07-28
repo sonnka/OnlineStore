@@ -274,7 +274,7 @@ public class StripeServiceImpl implements StripeService {
         Product product = Product.create(params);
 
 
-        if (productRequest.getImage() != null && !productRequest.getImage().equals("")) {
+        if (productRequest.getImage() != null && !productRequest.getImage().isEmpty()) {
             product = updateImage(productRequest.getImage(), product);
         }
 
@@ -333,7 +333,7 @@ public class StripeServiceImpl implements StripeService {
         }
         Product updatedProduct = product.update(params);
 
-        if (productRequest.getImage() != null && !productRequest.getImage().equals("")) {
+        if (productRequest.getImage() != null && !productRequest.getImage().isEmpty()) {
             updatedProduct = updateImage(productRequest.getImage(), product);
         }
 
@@ -449,7 +449,8 @@ public class StripeServiceImpl implements StripeService {
         stripeSubscriptionRepository.delete(stripeSub);
     }
 
-    private void updateSubscription(StripeProduct product)
+    @Async
+    public void updateSubscription(StripeProduct product)
             throws StripeException {
         List<String> subscriptions = stripeSubscriptionRepository.findAllByProduct(product)
                 .stream().map(StripeSubscription::getSubscriptionId).toList();

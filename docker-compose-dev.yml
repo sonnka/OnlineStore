@@ -1,0 +1,29 @@
+version: '3.3'
+services:
+  mongo-service:
+    image: mongo:latest
+    container_name: mongo-db
+    env_file:
+      - api.env
+    ports:
+      - "27017:27017"
+    restart: always
+
+  onlinestore:
+    image: online-store
+    container_name: online-store-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
+    volumes:
+      - /var/www/images/customers:/tmp/images/customers
+      - /var/www/images/products:/tmp/images/products
+    depends_on:
+      - mongo-service
+    env_file:
+      - api.env
+      - dev.env
+    user: "1000:1000"
