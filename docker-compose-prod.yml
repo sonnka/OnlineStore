@@ -1,6 +1,20 @@
-version: '3.3'
+version: '3.7'
 services:
-  mysql-service:
+  elastic-service:
+    image: elasticsearch:8.8.1
+    container_name: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: always
+    networks:
+      - "my-net"
+
+  mysql-db:
     image: mysql:latest
     container_name: mysql-db
     env_file:
@@ -8,6 +22,8 @@ services:
     ports:
       - "3306:3306"
     restart: always
+    networks:
+      - "my-net"
 
   mongo-service:
     image: mongo:latest
@@ -17,6 +33,8 @@ services:
     ports:
       - "27017:27017"
     restart: always
+    networks:
+      - "my-net"
 
   onlinestore:
     image: online-store
@@ -31,9 +49,16 @@ services:
       - /var/www/images/customers:/tmp/images/customers
       - /var/www/images/products:/tmp/images/products
     depends_on:
-      - mysql-service
+      - mysql-db
       - mongo-service
+      - elastic-service
     env_file:
       - api.env
       - prod.env
     user: "1000:1000"
+    networks:
+      - "my-net"
+
+networks:
+  my-net:
+    driver: bridge
