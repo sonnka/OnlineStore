@@ -12,6 +12,7 @@ import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
 import kazantseva.project.OnlineStore.model.mongo.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
 import kazantseva.project.OnlineStore.repository.mongo.ProductRepository;
+import kazantseva.project.OnlineStore.service.ElasticProductService;
 import kazantseva.project.OnlineStore.service.ProductService;
 import kazantseva.project.OnlineStore.util.Util;
 import lombok.AllArgsConstructor;
@@ -38,17 +39,18 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductRepository productRepository;
     private CustomerRepository customerRepository;
+    private ElasticProductService elasticProductService;
 
     @Override
     @Cacheable(value = "products", key = "#pageable")
     public Page<ShortProductDTO> getProductsByPage(Pageable pageable) {
-        return productRepository.findAll(pageable)
+        return elasticProductService.findAll(pageable).map(p -> productRepository.findById(p.getId()).get())
                 .map(ShortProductDTO::new);
     }
 
     @Override
     public Page<ShortProductDTO> getProductsByPageAndKeyword(Pageable pageable, String keyword) {
-        if (keyword == null || keyword.equals("") || keyword.equals("-")) {
+        if (keyword == null || keyword.isEmpty() || keyword.equals("-")) {
             return getProductsByPage(pageable);
         }
 
@@ -78,7 +80,11 @@ public class ProductServiceImpl implements ProductService {
         Optional.ofNullable(newProduct.getDescription()).ifPresent(product::setDescription);
         Optional.ofNullable(newProduct.getPrice()).ifPresent(product::setPrice);
 
-        return new ShortProductDTO(productRepository.save(product));
+        Product updatedProduct = productRepository.save(product);
+
+        elasticProductService.updateProduct(updatedProduct);
+
+        return new ShortProductDTO(updatedProduct);
     }
 
     @Override
@@ -125,6 +131,8 @@ public class ProductServiceImpl implements ProductService {
         var product = productRepository.findById(productId).orElseThrow(
                 () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND));
 
+        elasticProductService.deleteProduct(productId);
+
         productRepository.delete(product);
     }
 
@@ -132,15 +140,17 @@ public class ProductServiceImpl implements ProductService {
     public ShortProductDTO createProduct(String email, CreateProduct product) throws CustomerException {
         checkAdmin(email);
 
-        return new ShortProductDTO(
-                productRepository.save(Product.builder()
-                        .name(product.getName())
-                        .category(product.getCategory())
-                        .description(product.getDescription())
-                        .image(product.getImage())
-                        .price(product.getPrice())
-                        .build())
-        );
+        Product createdProduct = productRepository.save(Product.builder()
+                .name(product.getName())
+                .category(product.getCategory())
+                .description(product.getDescription())
+                .image(product.getImage())
+                .price(product.getPrice())
+                .build());
+
+        elasticProductService.addProduct(createdProduct);
+
+        return new ShortProductDTO(createdProduct);
     }
 
     @Override
@@ -159,6 +169,7 @@ public class ProductServiceImpl implements ProductService {
 
         for (Product product : products) {
             product.setPrice(Util.formatPrice(product.getStringPrice()));
+            product.setName(product.getName().trim());
             if (BigDecimal.ZERO.compareTo(product.getPrice()) >= 0) {
                 removeList.add(product);
             } else {
@@ -172,6 +183,8 @@ public class ProductServiceImpl implements ProductService {
         products.removeAll(new HashSet<>(removeList));
 
         productRepository.saveAll(products);
+
+        elasticProductService.transferAllProducts();
     }
 
     private void checkAdmin(String email) throws CustomerException {

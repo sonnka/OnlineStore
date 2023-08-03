@@ -1,6 +1,6 @@
 $(document).ready(function () {
     let totalPages = 1;
-    let sort = "name"
+    let sort = "name.keyword"
     let dir = "asc";
     let sortId = $('#sortId');
     let sortName = $('#sortName');
@@ -15,13 +15,13 @@ $(document).ready(function () {
 
     sortId.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
-        sort = "id";
+        sort = "id.keyword";
         fetchProductSearch(0, keyword);
     });
 
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
-        sort = "name";
+        sort = "name.keyword";
         fetchProductSearch(0, keyword);
     });
     sortPrice.click(function () {

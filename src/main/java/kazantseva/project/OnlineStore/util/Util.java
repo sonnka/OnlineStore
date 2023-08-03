@@ -26,14 +26,14 @@ public class Util {
     }
 
     public static LocalDate randomManufacturingDate() {
-        LocalDate start = LocalDate.of(2022, Month.NOVEMBER, 30);
+        LocalDate start = LocalDate.of(2020, Month.NOVEMBER, 30);
         long days = ChronoUnit.DAYS.between(start, LocalDate.now());
         return start.plusDays(random.nextInt((int) days + 1));
     }
 
     public static LocalDate randomExpiryDate() {
         LocalDate start = LocalDate.now();
-        LocalDate end = LocalDate.of(2024, Month.NOVEMBER, 30);
+        LocalDate end = LocalDate.of(2027, Month.NOVEMBER, 30);
         long days = ChronoUnit.DAYS.between(start, end);
         return start.plusDays(random.nextInt((int) days + 1));
     }
