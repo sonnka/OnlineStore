@@ -103,11 +103,46 @@
             <a class="btn btn-primary" id="createProductButton" th:text="#{createProduct}"></a>
             <br><br>
         </div>
+        <br>
         <div sec:authorize="isAuthenticated()">
-            <input id="keyword" name="keyword" size="50" style="height: 45px;"
-                   th:placeholder="#{search}" type="text">
-            <button class="btn btn-primary" id="searchButton" th:text="#{searchButton}" type="submit"></button>
-            <button class="btn btn-primary" id="resetButton" th:text="#{resetButton}" type="submit"></button>
+            <div class="row">
+                <label class="col-md-3" for="minDateFilter" style="height: 45px;">Date of manufacturing :
+                    from </label>
+                <input class="form-control col-md-4" id="minDateFilter" style="width: 400px; height: 45px;" type="date">
+                <label class="col-md-1" for="maxDateFilter" style="height: 45px;"> to </label>
+                <input class="form-control col-md-4" id="maxDateFilter" style="width: 400px; height: 45px;" type="date">
+            </div>
+            <br>
+            <div class="row">
+                <label class="col-md-3" for="minPriceFilter" style="height: 45px;">Price : from </label>
+                <input class="form-control col-md-4" id="minPriceFilter" placeholder="Min Price"
+                       style="width: 400px; height: 45px;"
+                       type="number">
+                <label class="col-md-1" for="maxPriceFilter" style="height: 45px;"> to </label>
+                <input class="form-control col-md-4" id="maxPriceFilter" placeholder="Max Price"
+                       style="width: 400px; height: 45px;"
+                       type="number">
+            </div>
+            <br>
+            <div class="row">
+                <label class="col-md-1" for="keyword" style="height: 45px;">Name : </label>
+                <input class="col-md-5" id="keyword" name="keyword" size="50" style="width: 400px; height: 45px;"
+                       th:placeholder="#{search}" type="text">
+                <label class="col-md-1" for="textFilter" style="height: 45px;"> Rating : </label>
+                <select class="form-select col-md-5" id="textFilter" style="width: 200px; height: 45px">
+                    <option value="">Select rating</option>
+                    <option value="EXCELLENT">excellent</option>
+                    <option value="GOOD">good</option>
+                    <option value="SATISFACTORY">satisfactory</option>
+                    <option value="BAD">bad</option>
+                    <option value="TERRIBLE">terrible</option>
+                </select>
+            </div>
+            <br>
+            <div>
+                <button class="btn btn-primary" id="searchButton" th:text="#{searchButton}" type="submit"></button>
+                <button class="btn btn-primary" id="resetButton" th:text="#{resetButton}" type="submit"></button>
+            </div>
         </div>
         <br><br>
         <table border="1" class="table table-condensed table-responsive-md" id="table">

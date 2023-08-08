@@ -1,6 +1,6 @@
 $(document).ready(function () {
     let totalPages = 1;
-    let sort = "name"
+    let sort = "name.keyword"
     let dir = "asc";
     let sortId = $('#sortId');
     let sortName = $('#sortName');
@@ -11,17 +11,29 @@ $(document).ready(function () {
     let inputKeyword = $('#keyword');
     let table = $('#table tbody');
 
+    let minDateField = $('#minDateFilter');
+    let maxDateField = $('#maxDateFilter');
+    let minPriceField = $('#minPriceFilter');
+    let maxPriceField = $('#maxPriceFilter');
+    let ratingField = $('#textFilter');
+
+    let minDate = "";
+    let maxDate = "";
+    let minPrice = "";
+    let maxPrice = "";
+    let rating = "";
+
     fetchProductSearch(0, keyword);
 
     sortId.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
-        sort = "id";
+        sort = "id.keyword";
         fetchProductSearch(0, keyword);
     });
 
     sortName.click(function () {
         dir = dir === "asc" ? "desc" : "asc";
-        sort = "name";
+        sort = "name.keyword";
         fetchProductSearch(0, keyword);
     });
     sortPrice.click(function () {
@@ -32,18 +44,38 @@ $(document).ready(function () {
 
     searchButton.click(function () {
         keyword = inputKeyword.val();
+        minDate = minDateField.val();
+        maxDate = maxDateField.val();
+        minPrice = minPriceField.val();
+        maxPrice = maxPriceField.val();
+        rating = ratingField.val();
         fetchProductSearch(0, keyword);
         inputKeyword.val(keyword);
     });
 
     resetButton.click(function () {
         keyword = "";
+        minDate = "";
+        maxDate = "";
+        minPrice = "";
+        maxPrice = "";
+        rating = "";
+
         inputKeyword.val(keyword);
-        fetchProductSearch(0, keyword);
+        minDateField.val(minDate);
+        maxDateField.val(maxDate);
+        minPriceField.val(minPrice);
+        maxPriceField.val(maxPrice);
+        ratingField.val(rating);
+
+        dir = "asc";
+        sort = "name.keyword"
+
+        fetchProductSearch(0);
     });
 
 
-    function fetchProductSearch(startPage, keyword) {
+    function fetchProductSearch(startPage) {
         $.ajax({
             type: "GET",
             url: "/products/search",
@@ -51,7 +83,12 @@ $(document).ready(function () {
                 page: startPage,
                 size: 10,
                 sort: sort + "," + dir,
-                keyword: keyword
+                keyword: keyword,
+                rating: rating,
+                from: minPrice,
+                to: maxPrice,
+                dateFrom: minDate,
+                dateTo: maxDate
             },
             success: function (response) {
                 table.empty();
@@ -161,12 +198,12 @@ $(document).ready(function () {
         let startPage;
         if (val.toUpperCase() === "«") {
             let currentActive = active;
-            fetchProductSearch(0, keyword);
+            fetchProductSearch(0);
             active.removeClass("active");
             currentActive.next().addClass("active");
 
         } else if (val.toUpperCase() === "»") {
-            fetchProductSearch(totalPages - 1, keyword);
+            fetchProductSearch(totalPages - 1);
             let currentActive = active;
             active.removeClass("active");
             currentActive.next().addClass("active");
@@ -176,7 +213,7 @@ $(document).ready(function () {
             if (activeValue < totalPages) {
                 let currentActive = active;
                 startPage = activeValue;
-                fetchProductSearch(startPage, keyword);
+                fetchProductSearch(startPage);
                 active.removeClass("active");
                 currentActive.next().addClass("active");
             }
@@ -184,14 +221,14 @@ $(document).ready(function () {
             let activeValue = parseInt($("ul.pagination li.active").text());
             if (activeValue > 1) {
                 startPage = activeValue - 2;
-                fetchProductSearch(startPage, keyword);
+                fetchProductSearch(startPage);
                 let currentActive = active;
                 currentActive.removeClass("active");
                 currentActive.prev().addClass("active");
             }
         } else {
             startPage = parseInt(val - 1);
-            fetchProductSearch(startPage, keyword);
+            fetchProductSearch(startPage);
             active.removeClass("active");
             $(this).parent().addClass("active");
         }
