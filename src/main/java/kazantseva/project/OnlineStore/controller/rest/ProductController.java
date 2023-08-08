@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 
 @RestController
@@ -29,8 +31,10 @@ public class ProductController implements ProductAPI {
     }
 
     @GetMapping("/products/search")
-    public Page<ShortProductDTO> getProductsByKeyword(Pageable pageable, String keyword) {
-        return productService.getProductsByPageAndKeyword(pageable, keyword);
+    public Page<ShortProductDTO> getFilteredProducts(Pageable pageable, String keyword, String rating,
+                                                     BigDecimal from, BigDecimal to,
+                                                     LocalDate dateFrom, LocalDate dateTo) {
+        return productService.getFilteredProducts(pageable, keyword, rating, from, to, dateFrom, dateTo);
     }
 
     @GetMapping("/admin/products/{product-id}")

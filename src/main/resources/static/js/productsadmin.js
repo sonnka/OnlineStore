@@ -12,6 +12,18 @@ $(document).ready(function () {
     let resetButton = $('#resetButton');
     let inputKeyword = $('#keyword');
 
+    let minDateField = $('#minDateFilter');
+    let maxDateField = $('#maxDateFilter');
+    let minPriceField = $('#minPriceFilter');
+    let maxPriceField = $('#maxPriceFilter');
+    let ratingField = $('#textFilter');
+
+    let minDate = "";
+    let maxDate = "";
+    let minPrice = "";
+    let maxPrice = "";
+    let rating = "";
+
     fetchProduct(0);
 
     sortId.click(function () {
@@ -37,18 +49,37 @@ $(document).ready(function () {
 
     searchButton.click(function () {
         keyword = inputKeyword.val();
+        minDate = minDateField.val();
+        maxDate = maxDateField.val();
+        minPrice = minPriceField.val();
+        maxPrice = maxPriceField.val();
+        rating = ratingField.val();
         fetchProduct(0);
         inputKeyword.val(keyword);
     });
 
     resetButton.click(function () {
         keyword = "";
+        minDate = "";
+        maxDate = "";
+        minPrice = "";
+        maxPrice = "";
+        rating = "";
+
         inputKeyword.val(keyword);
+        minDateField.val(minDate);
+        maxDateField.val(maxDate);
+        minPriceField.val(minPrice);
+        maxPriceField.val(maxPrice);
+        ratingField.val(rating);
+
+        dir = "asc";
+        sort = "name.keyword"
+
         fetchProduct(0);
     });
 
     function fetchProduct(startPage) {
-
         $.ajax({
             type: "GET",
             url: "/products/search",
@@ -56,7 +87,12 @@ $(document).ready(function () {
                 page: startPage,
                 size: 10,
                 sort: sort + "," + dir,
-                keyword: keyword
+                keyword: keyword,
+                rating: rating,
+                from: minPrice,
+                to: maxPrice,
+                dateFrom: minDate,
+                dateTo: maxDate
             },
             success: function (response) {
                 table.empty();

@@ -9,8 +9,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -24,6 +27,41 @@ public class ElasticProductServiceImpl implements ElasticProductService {
     @Override
     public Page<ElasticProduct> findAll(Pageable pageable) {
         return elasticProductRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<ElasticProduct> search(Pageable pageable, Criteria criteria) {
+        return elasticProductRepository.search(pageable, criteria);
+    }
+
+    @Override
+    public Criteria searchByName(String name) {
+        return elasticProductRepository.searchByName(name);
+    }
+
+    @Override
+    public Criteria searchByRating(String rating) {
+        return elasticProductRepository.searchByRating(rating);
+    }
+
+    @Override
+    public Criteria searchByMinPrice(BigDecimal from) {
+        return elasticProductRepository.searchByMinPrice(from);
+    }
+
+    @Override
+    public Criteria searchByMaxPrice(BigDecimal to) {
+        return elasticProductRepository.searchByMaxPrice(to);
+    }
+
+    @Override
+    public Criteria searchByMinDate(LocalDate dateFrom) {
+        return elasticProductRepository.searchByMinDate(dateFrom);
+    }
+
+    @Override
+    public Criteria searchByMaxDate(LocalDate dateTo) {
+        return elasticProductRepository.searchByMaxDate(dateTo);
     }
 
     @Override

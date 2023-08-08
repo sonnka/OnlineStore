@@ -16,9 +16,9 @@ import kazantseva.project.OnlineStore.service.ElasticProductService;
 import kazantseva.project.OnlineStore.service.ProductService;
 import kazantseva.project.OnlineStore.util.Util;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -42,19 +43,68 @@ public class ProductServiceImpl implements ProductService {
     private ElasticProductService elasticProductService;
 
     @Override
-    @Cacheable(value = "products", key = "#pageable")
+//    @Cacheable(value = "products", key = "#pageable")
     public Page<ShortProductDTO> getProductsByPage(Pageable pageable) {
         return elasticProductService.findAll(pageable).map(p -> productRepository.findById(p.getId()).get())
                 .map(ShortProductDTO::new);
     }
 
     @Override
-    public Page<ShortProductDTO> getProductsByPageAndKeyword(Pageable pageable, String keyword) {
-        if (keyword == null || keyword.isEmpty() || keyword.equals("-")) {
+    public Page<ShortProductDTO> getFilteredProducts(Pageable pageable, String keyword, String rating,
+                                                     BigDecimal from, BigDecimal to,
+                                                     LocalDate dateFrom, LocalDate dateTo) {
+        Criteria criteria = null;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            criteria = elasticProductService.searchByName(keyword);
+        }
+
+        if (Util.isValidRating(rating)) {
+            if (criteria == null) {
+                criteria = elasticProductService.searchByRating(rating);
+            } else {
+                criteria.and(elasticProductService.searchByRating(rating));
+            }
+        }
+
+        if (Util.isValidMinPrice(from)) {
+            if (criteria == null) {
+                criteria = elasticProductService.searchByMinPrice(from);
+            } else {
+                criteria.and(elasticProductService.searchByMinPrice(from));
+            }
+        }
+
+        if (Util.isValidMaxPrice(to)) {
+            if (criteria == null) {
+                criteria = elasticProductService.searchByMaxPrice(to);
+            } else {
+                criteria.and(elasticProductService.searchByMaxPrice(to));
+            }
+        }
+
+        if (Util.isValidMinDate(dateFrom)) {
+            if (criteria == null) {
+                criteria = elasticProductService.searchByMinDate(dateFrom);
+            } else {
+                criteria.and(elasticProductService.searchByMinDate(dateFrom));
+            }
+        }
+
+        if (Util.isValidMaxDate(dateTo)) {
+            if (criteria == null) {
+                criteria = elasticProductService.searchByMaxDate(dateTo);
+            } else {
+                criteria.and(elasticProductService.searchByMaxDate(dateTo));
+            }
+        }
+
+        if (criteria == null) {
             return getProductsByPage(pageable);
         }
 
-        return productRepository.searchAllByNameContainsIgnoreCase(pageable, keyword)
+        return elasticProductService.search(pageable, criteria)
+                .map(p -> productRepository.findById(p.getId()).get())
                 .map(ShortProductDTO::new);
     }
 

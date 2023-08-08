@@ -10,11 +10,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public interface ProductService {
     Page<ShortProductDTO> getProductsByPage(Pageable pageable);
 
-    Page<ShortProductDTO> getProductsByPageAndKeyword(Pageable pageable, String keyword);
+    Page<ShortProductDTO> getFilteredProducts(Pageable pageable, String keyword, String rating,
+                                              BigDecimal from, BigDecimal to,
+                                              LocalDate dateFrom, LocalDate dateTo);
 
     ShortProductDTO getProduct(String email, String productId) throws ProductException, CustomerException;
 
