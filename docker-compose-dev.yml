@@ -1,5 +1,19 @@
 version: '3.3'
 services:
+  elastic-service:
+    image: elasticsearch:8.8.1
+    container_name: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: always
+    networks:
+      - "my-net"
+
   mongo-service:
     image: mongo:latest
     container_name: mongo-db
@@ -8,6 +22,8 @@ services:
     ports:
       - "27017:27017"
     restart: always
+    networks:
+      - "my-net"
 
   onlinestore:
     image: online-store
@@ -23,7 +39,14 @@ services:
       - /var/www/images/products:/tmp/images/products
     depends_on:
       - mongo-service
+      - elastic-service
     env_file:
       - api.env
       - dev.env
     user: "1000:1000"
+    networks:
+      - "my-net"
+
+networks:
+  my-net:
+    driver: bridge
