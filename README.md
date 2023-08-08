@@ -34,7 +34,7 @@ The OnlineStore project incorporates a range of technologies to deliver its func
 
 - Front-end: HTML, CSS, JavaScript, JQuery, Bootstrap;
 
-- Back-end: Java 17, Spring Framework (3.0.6), JPA/Hibernate;
+- Back-end: Java 17, Spring Boot (3.0.6), JPA/Hibernate;
 
 - Database: MySQL, MongoDB;
 
