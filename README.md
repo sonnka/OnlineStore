@@ -6,7 +6,7 @@ The project focuses on providing a user-friendly interface that allows customers
 - Products
 
    OnlineStore has an extensive collection of products. 
-   Customers can easily browse through the product catalog, search by name, and effortlessly sort products based on price or name.
+   Customers can easily browse through the product catalog, search/filter by name and other fields, and effortlessly sort products based on price or name.
    With CSV import feature, adding multiple products to the store becomes a breeze, streamlining the process for extensive product lists. 
    To ensure optimal performance, service has  backend caching for the product list. 
 
@@ -44,4 +44,4 @@ The OnlineStore project incorporates a range of technologies to deliver its func
 
 - Caching: Spring Cache
 
-- Others: AJAX, Liquibase, Thymeleaf , Docker, Docker Compose, Apache Server, OpenCSV, SonarLint.
+- Others: AJAX, Liquibase, Thymeleaf , ElasticSearch, Docker, Docker Compose, Apache Server, OpenCSV, SonarLint.
