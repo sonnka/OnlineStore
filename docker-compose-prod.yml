@@ -36,6 +36,20 @@ services:
     networks:
       - "my-net"
 
+  keycloak-service:
+    image: keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - "8080:8080"
+    command:
+      - start-dev
+    restart: always
+    networks:
+      - "my-net"
+
   onlinestore:
     image: online-store
     container_name: online-store-app
@@ -43,7 +57,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8081:8081"
     restart: always
     volumes:
       - /var/www/images/customers:/tmp/images/customers
@@ -52,6 +66,7 @@ services:
       - mysql-db
       - mongo-service
       - elastic-service
+      - keycloak-service
     env_file:
       - api.env
       - prod.env
