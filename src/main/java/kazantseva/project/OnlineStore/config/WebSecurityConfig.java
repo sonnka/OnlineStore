@@ -35,7 +35,6 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/webhook").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
