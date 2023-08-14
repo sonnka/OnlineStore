@@ -39,9 +39,8 @@ services:
   keycloak-service:
     image: keycloak/keycloak:latest
     container_name: keycloak
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
+    env_file:
+      - api.env
     ports:
       - "8080:8080"
     command:
