@@ -11,6 +11,7 @@ import kazantseva.project.OnlineStore.model.mongo.entity.Product;
 import kazantseva.project.OnlineStore.model.mongo.request.CreateProduct;
 import kazantseva.project.OnlineStore.model.mongo.response.ShortProductDTO;
 import kazantseva.project.OnlineStore.repository.CustomerRepository;
+import kazantseva.project.OnlineStore.repository.elasticSearch.ElasticProductRepository;
 import kazantseva.project.OnlineStore.repository.mongo.ProductRepository;
 import kazantseva.project.OnlineStore.service.ElasticProductService;
 import kazantseva.project.OnlineStore.service.ProductService;
@@ -41,11 +42,12 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
     private CustomerRepository customerRepository;
     private ElasticProductService elasticProductService;
+    private ElasticProductRepository elasticProductRepository;
 
     @Override
 //    @Cacheable(value = "products", key = "#pageable")
     public Page<ShortProductDTO> getProductsByPage(Pageable pageable) {
-        return elasticProductService.findAll(pageable).map(p -> productRepository.findById(p.getId()).get())
+        return elasticProductRepository.findAllProducts(pageable).map(p -> productRepository.findById(p.getId()).get())
                 .map(ShortProductDTO::new);
     }
 
@@ -56,46 +58,46 @@ public class ProductServiceImpl implements ProductService {
         Criteria criteria = null;
 
         if (keyword != null && !keyword.isEmpty()) {
-            criteria = elasticProductService.searchByName(keyword);
+            criteria = elasticProductRepository.searchByName(keyword);
         }
 
         if (Util.isValidRating(rating)) {
             if (criteria == null) {
-                criteria = elasticProductService.searchByRating(rating);
+                criteria = elasticProductRepository.searchByRating(rating);
             } else {
-                criteria.and(elasticProductService.searchByRating(rating));
+                criteria.and(elasticProductRepository.searchByRating(rating));
             }
         }
 
         if (Util.isValidMinPrice(from)) {
             if (criteria == null) {
-                criteria = elasticProductService.searchByMinPrice(from);
+                criteria = elasticProductRepository.searchByMinPrice(from);
             } else {
-                criteria.and(elasticProductService.searchByMinPrice(from));
+                criteria.and(elasticProductRepository.searchByMinPrice(from));
             }
         }
 
         if (Util.isValidMaxPrice(to)) {
             if (criteria == null) {
-                criteria = elasticProductService.searchByMaxPrice(to);
+                criteria = elasticProductRepository.searchByMaxPrice(to);
             } else {
-                criteria.and(elasticProductService.searchByMaxPrice(to));
+                criteria.and(elasticProductRepository.searchByMaxPrice(to));
             }
         }
 
         if (Util.isValidMinDate(dateFrom)) {
             if (criteria == null) {
-                criteria = elasticProductService.searchByMinDate(dateFrom);
+                criteria = elasticProductRepository.searchByMinDate(dateFrom);
             } else {
-                criteria.and(elasticProductService.searchByMinDate(dateFrom));
+                criteria.and(elasticProductRepository.searchByMinDate(dateFrom));
             }
         }
 
         if (Util.isValidMaxDate(dateTo)) {
             if (criteria == null) {
-                criteria = elasticProductService.searchByMaxDate(dateTo);
+                criteria = elasticProductRepository.searchByMaxDate(dateTo);
             } else {
-                criteria.and(elasticProductService.searchByMaxDate(dateTo));
+                criteria.and(elasticProductRepository.searchByMaxDate(dateTo));
             }
         }
 
@@ -103,7 +105,7 @@ public class ProductServiceImpl implements ProductService {
             return getProductsByPage(pageable);
         }
 
-        return elasticProductService.search(pageable, criteria)
+        return elasticProductRepository.search(pageable, criteria)
                 .map(p -> productRepository.findById(p.getId()).get())
                 .map(ShortProductDTO::new);
     }
@@ -181,7 +183,7 @@ public class ProductServiceImpl implements ProductService {
         var product = productRepository.findById(productId).orElseThrow(
                 () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND));
 
-        elasticProductService.deleteById(productId);
+        elasticProductRepository.deleteById(productId);
 
         productRepository.delete(product);
     }

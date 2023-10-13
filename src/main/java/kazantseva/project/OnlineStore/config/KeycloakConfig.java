@@ -94,7 +94,7 @@ public class KeycloakConfig {
         ClientRepresentation clientRepresentation = new ClientRepresentation();
         clientRepresentation.setClientId(clientId);
         clientRepresentation.setName(clientId);
-        clientRepresentation.setRootUrl("http://localhost:8081");
+        clientRepresentation.setRootUrl("http://localhost:8080");
         clientRepresentation.setWebOrigins(List.of("*"));
         clientRepresentation.setStandardFlowEnabled(Boolean.TRUE);
         clientRepresentation.setPublicClient(Boolean.TRUE);

@@ -12,16 +12,14 @@ $(document).ready(function () {
 
         let formData = new URLSearchParams();
 
-        // formData.append('client_id', "online-store-app");
         formData.append('username', emailField.val());
         formData.append('password', passwordFiled.val());
-        //  formData.append('grant_type', "password");
 
         formData.forEach(p => console.log(p));
 
         $.ajax({
             type: 'POST',
-            url: "http://localhost:8081/login",
+            url: "http://localhost:8080/login",
             data: formData.toString(),
             processData: false,
             contentType: "application/x-www-form-urlencoded",
