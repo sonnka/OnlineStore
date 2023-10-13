@@ -8,8 +8,10 @@ import org.springframework.data.elasticsearch.core.query.Criteria;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public interface ElasticProductService {
+
     Page<ElasticProduct> findAll(Pageable pageable);
 
     Page<ElasticProduct> search(Pageable pageable, Criteria criteria);
@@ -30,7 +32,13 @@ public interface ElasticProductService {
 
     void updateProduct(Product product);
 
-    void deleteProduct(String productId);
+    ElasticProduct save(ElasticProduct product);
+
+    void saveAll(List<ElasticProduct> products);
+
+    void deleteById(String productId);
+
+    void deleteAll();
 
     void transferAllProducts();
 }

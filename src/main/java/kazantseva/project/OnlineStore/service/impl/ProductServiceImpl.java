@@ -181,7 +181,7 @@ public class ProductServiceImpl implements ProductService {
         var product = productRepository.findById(productId).orElseThrow(
                 () -> new ProductException(ProductExceptionProfile.PRODUCT_NOT_FOUND));
 
-        elasticProductService.deleteProduct(productId);
+        elasticProductService.deleteById(productId);
 
         productRepository.delete(product);
     }

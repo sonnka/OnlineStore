@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.SecurityException;
+import kazantseva.project.OnlineStore.model.request.AuthRequest;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.AdminDTO;
@@ -37,7 +38,7 @@ public interface CustomerAPI {
     @PostMapping("/login")
     LoginResponse login(
             @Parameter(description = "Authentication", required = true)
-            Authentication auth) throws CustomerException, SecurityException;
+            AuthRequest auth) throws CustomerException, SecurityException;
 
     @Operation(summary = "Register", description = "Registration")
     @ApiResponses(value = {

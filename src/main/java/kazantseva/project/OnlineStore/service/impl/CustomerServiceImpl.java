@@ -2,6 +2,7 @@ package kazantseva.project.OnlineStore.service.impl;
 
 import com.stripe.exception.StripeException;
 import jakarta.mail.MessagingException;
+import kazantseva.project.OnlineStore.config.KeycloakClient;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException.CustomerExceptionProfile;
 import kazantseva.project.OnlineStore.exceptions.SecurityException;
@@ -12,6 +13,7 @@ import kazantseva.project.OnlineStore.model.entity.VerificationToken;
 import kazantseva.project.OnlineStore.model.entity.enums.CustomerRole;
 import kazantseva.project.OnlineStore.model.entity.enums.Status;
 import kazantseva.project.OnlineStore.model.entity.enums.Type;
+import kazantseva.project.OnlineStore.model.request.AuthRequest;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.AdminDTO;
@@ -28,7 +30,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,6 +54,7 @@ public class CustomerServiceImpl implements CustomerService {
     public static final String UPLOAD_DIRECTORY = "tmp/images/customers";
 
     private final PasswordEncoder passwordEncoder;
+    private final KeycloakClient keyCloakClient;
     private CustomerRepository customerRepository;
     private OrderRepository orderRepository;
     private VerificationTokenRepository tokenRepository;
@@ -90,8 +92,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public LoginResponse login(Authentication auth) throws SecurityException {
-        var customer = customerRepository.findByEmailIgnoreCase(auth.getName()).orElseThrow(
+    public LoginResponse login(AuthRequest auth) throws SecurityException {
+
+        keyCloakClient.authenticate(auth);
+
+        var customer = customerRepository.findByEmailIgnoreCase(auth.getEmail()).orElseThrow(
                 () -> new SecurityException(SecurityExceptionProfile.WRONG_AUTHENTICATION_DATA));
 
         return LoginResponse.builder()

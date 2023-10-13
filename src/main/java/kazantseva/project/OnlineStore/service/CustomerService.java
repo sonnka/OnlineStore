@@ -4,6 +4,7 @@ import com.stripe.exception.StripeException;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.SecurityException;
 import kazantseva.project.OnlineStore.model.entity.Customer;
+import kazantseva.project.OnlineStore.model.request.AuthRequest;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.AdminDTO;
@@ -12,7 +13,6 @@ import kazantseva.project.OnlineStore.model.response.FullCustomerDTO;
 import kazantseva.project.OnlineStore.model.response.LoginResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +21,7 @@ public interface CustomerService {
 
     void register(CreateCustomer customer) throws CustomerException, SecurityException, StripeException;
 
-    LoginResponse login(Authentication auth) throws CustomerException, SecurityException;
+    LoginResponse login(AuthRequest auth) throws CustomerException, SecurityException;
 
     LoginResponse login(String token) throws CustomerException, SecurityException;
 

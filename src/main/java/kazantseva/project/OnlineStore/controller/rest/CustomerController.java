@@ -4,6 +4,7 @@ import com.stripe.exception.StripeException;
 import jakarta.validation.Valid;
 import kazantseva.project.OnlineStore.exceptions.CustomerException;
 import kazantseva.project.OnlineStore.exceptions.SecurityException;
+import kazantseva.project.OnlineStore.model.request.AuthRequest;
 import kazantseva.project.OnlineStore.model.request.CreateCustomer;
 import kazantseva.project.OnlineStore.model.request.RequestCustomer;
 import kazantseva.project.OnlineStore.model.response.*;
@@ -26,7 +27,7 @@ public class CustomerController implements CustomerAPI {
     private PaymentService paymentService;
 
     @PostMapping("/login")
-    public LoginResponse login(Authentication auth) throws CustomerException, SecurityException {
+    public LoginResponse login(AuthRequest auth) throws CustomerException, SecurityException {
         return customerService.login(auth);
     }
 
