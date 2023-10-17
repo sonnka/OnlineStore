@@ -12,7 +12,7 @@ $(document).ready(function () {
 
         let formData = new URLSearchParams();
 
-        formData.append('username', emailField.val());
+        formData.append('email', emailField.val());
         formData.append('password', passwordFiled.val());
 
         formData.forEach(p => console.log(p));

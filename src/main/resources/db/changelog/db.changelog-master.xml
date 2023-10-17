@@ -149,10 +149,9 @@
             <column name="name" value="Harry"/>
             <column name="surname" value="Potter"/>
             <column name="email" value="sofiia.kazantseva@faceit.com.ua"/>
-            <column name="password" value="$2a$10$1DqcI7dd8QlQq2TTpsZueOi5hzFcB1Y7ZoFdzQDoH.dJ8QLqdC.Da"/>
+            <column name="password" value="admin"/>
             <column name="role" value="ADMIN"/>
             <column name="enabled" valueBoolean="true"/>
-            <column name="email" value="sofiia.kazantseva@faceit.com.ua"/>
             <column name="granted_admin_by" value="-"/>
             <column name="granted_date" defaultOnNull="true"/>
         </insert>

@@ -27,7 +27,7 @@ import java.util.List;
 @Slf4j
 public class KeycloakConfig {
 
-    private static final String ADMIN_USERNAME = "1@gmail.com";
+    private static final String ADMIN_USERNAME = "sofiia.kazantseva@faceit.com.ua";
     private static final String ADMIN_PASSWORD = "admin";
     private static final String CRED_TYPE = "Password";
 

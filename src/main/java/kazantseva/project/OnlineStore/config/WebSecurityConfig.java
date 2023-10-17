@@ -24,9 +24,6 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.util.Locale;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig implements WebMvcConfigurer {
@@ -52,29 +49,11 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 .requestMatchers("/profile/**").authenticated()
                 .anyRequest().permitAll());
 
-        http.httpBasic(withDefaults())
-                .sessionManagement(c -> c
-                        .sessionCreationPolicy(STATELESS))
+        http
+                //.httpBasic(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors().disable()
-                .headers(c -> c
-                        .frameOptions()
-                        .disable());
-
-//        http.formLogin()
-//                .loginPage("/login")
-//                .usernameParameter("email")
-//                .passwordParameter("password")
-//                .defaultSuccessUrl("/", true)
-//                .failureUrl("/login?error")
-//                .permitAll()
-//                .and()
-//                .logout()
-//                .logoutUrl("/logout");
-
-//        http.oauth2Login(oauth2Login -> oauth2Login.loginPage("/login"))
-//                .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
-//                .csrf(AbstractHttpConfigurer::disable);
+                .cors(AbstractHttpConfigurer::disable)
+                .headers(c -> c.frameOptions().disable());
 
         return http.build();
     }
